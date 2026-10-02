@@ -1,0 +1,12 @@
+﻿# Heavy / generated / machine-specific (exceed GitHub limits or are rebuilt locally)
+CBT/piper/
+CBT/voices/
+CBT/output/
+CBT/native_host/Python310/
+CBT/native_host/packages/
+CBT/native_host/services/.venv-captions/
+CBT.exe
+__pycache__/
+*.pyc
+*.log
+*.mp4

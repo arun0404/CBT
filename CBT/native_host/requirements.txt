@@ -1,0 +1,34 @@
+blinker==1.9.0
+cffi==2.0.0
+click==8.4.2
+colorama==0.4.6
+Flask==3.1.3
+flask-cors==6.0.5
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+numpy==2.2.6
+pycparser==3.0
+soundfile==0.14.0
+typing_extensions==4.15.0
+Werkzeug==3.1.8
+
+# --------------------------------------------------------------
+# Forced-alignment subsystem (aligner/*.py)
+# --------------------------------------------------------------
+# torchaudio's forced-alignment API (torchaudio.pipelines.MMS_FA,
+# torchaudio.functional.forced_align) was deprecated starting with
+# torchaudio 2.8 and is slated for removal as decode/encode moves to
+# TorchCodec (https://github.com/pytorch/audio/issues/3902). It is
+# still present and working as of 2.11 (verified directly). Avoid
+# upgrading torchaudio past a version you've re-verified against
+# aligner/test_forced_aligner.py.
+#
+# Install CPU-only wheels unless you have a CUDA GPU available:
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+torch==2.12.1
+torchaudio==2.11.0
+
+# Spells out numbers ("25" -> "twenty five") before forced alignment,
+# since MMS_FA's tokenizer has no digit tokens.
+num2words==0.5.14

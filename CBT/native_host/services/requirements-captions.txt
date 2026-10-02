@@ -1,0 +1,11 @@
+# Optional, dev-only tool: caption_generator.py.
+#
+# NOT part of CBT/native_host/requirements.txt (the shipped app's venv,
+# built offline from CBT/native_host/packages/). Install these in a
+# separate environment to author .vtt files; the running app never
+# imports faster-whisper.
+#
+# faster-whisper pulls in ctranslate2 (native CPU/GPU inference) and
+# tokenizers; av (PyAV) is used internally to decode audio out of any
+# video container (mp4 included) without shelling out to ffmpeg.
+faster-whisper>=1.0.0

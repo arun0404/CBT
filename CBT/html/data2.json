@@ -1,0 +1,1339 @@
+{
+  "schema": "Test",
+  "module": {
+    "categories": {
+      "do": {
+        "chapters": [
+          {
+            "id": "c0010",
+            "title": "ENGINE SYSTEMS & THERMODYNAMICS",
+            "chapterNumber": "1",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0004",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0001",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>The internal combustion engine converts the chemical energy of an air&ndash;fuel mixture into mechanical work through a repeating thermodynamic cycle. Every function described in this section &mdash; fuelling, ignition timing and emissions control &mdash; exists to get as much usable work as possible out of each combustion event while keeping the exhaust within regulatory limits. Removal and installation of the Engine Control Unit (ECU) is covered by workcard MKMTM-28-10-00-400-8A.</p><h3>1.2 THE FOUR-STROKE OTTO CYCLE</h3><p>Petrol engines on this vehicle operate on the four-stroke Otto cycle: intake, compression, power and exhaust, completed over two full crankshaft revolutions per cylinder. Intake draws the air&ndash;fuel charge past the open intake valve as the piston descends; compression closes both valves and raises the charge to a pressure and temperature at which it will burn rapidly and completely once ignited; the power stroke follows spark ignition, with the expanding gas driving the piston down through the stroke that actually produces work; exhaust then expels the spent gas as the piston rises with the exhaust valve open, ready for the cycle to repeat.</p><h4>1.2.1 Compression Ratio &amp; Thermal Efficiency</h4><p>Compression ratio is the ratio of cylinder volume at bottom dead centre to volume at top dead centre. A higher ratio extracts more work from the same charge, which is why thermal efficiency rises with compression ratio &mdash; but raising it too far invites detonation (uncontrolled, spontaneous ignition of the end-gas ahead of the flame front) before the knock sensor and ignition retard strategy described in Section 2 can intervene.</p><h4>1.2.2 The Diesel Cycle, By Comparison</h4><p>Diesel variants share the same four mechanical strokes but ignite by compression alone: air is compressed to a ratio high enough to reach the fuel's auto-ignition temperature, and fuel is injected directly into that hot air rather than pre-mixed with it. There is no throttle plate and no spark event; power is instead regulated by the quantity of fuel injected, which is why a diesel's efficiency holds up far better than a petrol engine's at partial load.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0002",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 660 230' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Four-Stroke Otto Cycle</title><rect x='15' y='10' width='120' height='170' rx='6' fill='#eef1f4' stroke='#aab4bd' stroke-width='2'/><rect x='35' y='14' width='22' height='12' rx='2' fill='#3f8f5f'/><rect x='93' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='25' y='128' width='100' height='28' rx='3' fill='#aab4bd' stroke='#33424f' stroke-width='1.5'/><line x1='75' y1='156' x2='75' y2='150' stroke='#33424f' stroke-width='4'/><circle cx='75' cy='165' r='15' fill='#fff' stroke='#33424f' stroke-width='3'/><circle cx='75' cy='165' r='3' fill='#33424f'/><rect x='15' y='186' width='120' height='9' rx='2' fill='#2f8f95'/><rect x='181' y='10' width='120' height='170' rx='6' fill='#eef1f4' stroke='#aab4bd' stroke-width='2'/><rect x='201' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='259' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='191' y='46' width='100' height='28' rx='3' fill='#aab4bd' stroke='#33424f' stroke-width='1.5'/><line x1='241' y1='74' x2='241' y2='150' stroke='#33424f' stroke-width='4'/><circle cx='241' cy='165' r='15' fill='#fff' stroke='#33424f' stroke-width='3'/><circle cx='241' cy='165' r='3' fill='#33424f'/><rect x='181' y='186' width='120' height='9' rx='2' fill='#ffb400'/><rect x='347' y='10' width='120' height='170' rx='6' fill='#eef1f4' stroke='#aab4bd' stroke-width='2'/><rect x='367' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='425' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='357' y='26' width='100' height='62' fill='#ff8a3d' fill-opacity='0.38'/><rect x='357' y='88' width='100' height='28' rx='3' fill='#aab4bd' stroke='#33424f' stroke-width='1.5'/><line x1='407' y1='116' x2='407' y2='150' stroke='#33424f' stroke-width='4'/><circle cx='407' cy='165' r='15' fill='#fff' stroke='#33424f' stroke-width='3'/><circle cx='407' cy='165' r='3' fill='#33424f'/><rect x='347' y='186' width='120' height='9' rx='2' fill='#d64545'/><rect x='513' y='10' width='120' height='170' rx='6' fill='#eef1f4' stroke='#aab4bd' stroke-width='2'/><rect x='533' y='14' width='22' height='12' rx='2' fill='#aab4bd'/><rect x='591' y='14' width='22' height='12' rx='2' fill='#3f8f5f'/><rect x='523' y='46' width='100' height='28' rx='3' fill='#aab4bd' stroke='#33424f' stroke-width='1.5'/><line x1='573' y1='74' x2='573' y2='150' stroke='#33424f' stroke-width='4'/><circle cx='573' cy='165' r='15' fill='#fff' stroke='#33424f' stroke-width='3'/><circle cx='573' cy='165' r='3' fill='#33424f'/><rect x='513' y='186' width='120' height='9' rx='2' fill='#3f8f5f'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Four-Stroke Otto Cycle</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#2f8f95'></span>1. Intake &mdash; intake valve open, piston descends drawing in the air&ndash;fuel charge.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>2. Compression &mdash; both valves closed, piston rises and compresses the charge.</li><li><span class='diagram-swatch' style='background:#d64545'></span>3. Power &mdash; spark ignites the mixture; expanding gas drives the piston down.</li><li><span class='diagram-swatch' style='background:#3f8f5f'></span>4. Exhaust &mdash; exhaust valve open, piston rises and expels spent gas.</li><li><span class='diagram-swatch' style='background:#3f8f5f'></span>Valve shown open</li><li><span class='diagram-swatch' style='background:#aab4bd'></span>Valve shown closed</li></ul></figcaption></figure>"
+                    }
+                  },
+                  {
+                    "id": "b0003",
+                    "type": "text",
+                    "data": {
+                      "html": "<h4>1.2.3 Principal Components</h4><ul><li><b>Engine Control Unit (ECU)</b> &mdash; the master controller. Executes the fuelling and ignition maps and reports any Diagnostic Trouble Code (DTC) over the CAN Bus.</li><li><b>Mass Air Flow (MAF) Sensor</b> &mdash; measures the mass of intake air entering the manifold. Typical output ranges from 2 grams per second at idle to 95 grams per second at full load.</li><li><b>Manifold Absolute Pressure (MAP) Sensor</b> &mdash; measures intake manifold pressure, from approximately 30 kPa at idle to 101 kPa at wide open throttle.</li><li><b>Fuel Injectors</b> &mdash; solenoid valves delivering atomised fuel to each cylinder. Nominal coil resistance is 12 ohms.</li><li><b>High-Pressure Fuel Pump</b> &mdash; raises common-rail pressure to between 50 bar and 200 bar on direct-injection petrol engines, and to 1800 bar or more on modern common-rail diesels.</li></ul>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0006",
+                "title": "2. ECU CONTROL STRATEGY & SENSOR INPUTS",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0005",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 OPEN-LOOP AND CLOSED-LOOP FUEL CONTROL</h3><p>The ECU runs one of two fuelling strategies, selected automatically from engine temperature, load and sensor readiness.</p><ul><li><b>Open-loop</b> &mdash; used during cold start, wide open throttle, and any period in which the oxygen sensor signal is not yet valid. The ECU meters fuel from its stored base map using MAF or MAP readings, engine speed and coolant temperature, with no feedback correction applied.</li><li><b>Closed-loop</b> &mdash; used during normal warmed-up running. The upstream oxygen sensor reports the actual exhaust mixture and the ECU continuously trims injector pulse width to hold the air&ndash;fuel ratio near the stoichiometric target of 14.7 to 1.</li></ul><p>Short-term fuel trim responds within milliseconds and typically oscillates between minus 10 percent and plus 10 percent. Long-term fuel trim accumulates the running average and compensates for injector wear, air leaks and fuel quality; a long-term trim beyond plus 25 percent indicates a fault requiring investigation.</p><h3>2.2 MAF &amp; MAP SENSOR STRATEGY</h3><p>A hot-wire MAF sensor and a MAP sensor measure the same physical quantity &mdash; the mass of air entering the cylinder &mdash; by two different routes: MAF measures it directly in the intake tract, while MAP infers it from manifold pressure, engine speed and known volumetric efficiency (the speed-density method). Running both allows the ECU to cross-check one against the other; a MAF reading that drifts from the MAP-derived estimate at a given engine speed and throttle position is an early, pre-DTC indicator of a vacuum leak or a contaminated sensor element.</p><h3>2.3 IGNITION TIMING ADJUSTMENT</h3><p>Base ignition timing is taken from a three-dimensional map indexed by engine speed and load. The ECU then applies corrections in real time:</p><ul><li>Advance is increased at light load and high engine speed to improve combustion efficiency, commonly reaching 35 degrees before top dead centre at 3000 RPM under cruise.</li><li>Advance is retarded when the knock sensor detects detonation, typically in steps of 2 degrees until knock ceases.</li><li>Advance is retarded during warm-up to raise exhaust gas temperature and accelerate catalyst light-off (see Section 10).</li></ul>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0009",
+                "title": "3. DIAGNOSTIC & MAINTENANCE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0007",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 FUEL RAIL PRESSURE CHECK</h3><p>Reference workcard MKMTM-28-20-00-710-3C. Observe all fuel-handling precautions before beginning.</p><ol><li>Depressurise the fuel system and allow the engine to cool below 40 degrees Celsius.</li><li>Connect a calibrated pressure gauge to the service port on the fuel rail.</li><li>Start the engine and allow it to idle at 750 RPM. Record the indicated pressure.</li><li>Confirm the reading falls within the specified idle range of 350 kPa to 400 kPa.</li><li>Raise engine speed to 3000 RPM and confirm pressure rises without instability.</li><li>Stop the engine and confirm the rail holds at least 250 kPa after 10 minutes. A faster decay indicates a leaking injector or a failed check valve.</li></ol><h3>3.2 INJECTOR RESISTANCE TEST</h3><p>Reference workcard MKMTM-28-30-00-520-6D.</p><ol><li>Disconnect the electrical connector from each injector in turn.</li><li>Measure across the injector terminals with a digital multimeter set to the 200 ohm range.</li><li>Record the value for each cylinder. The nominal specification is 12 ohms plus or minus 0.6 ohms at 20 degrees Celsius.</li><li>Confirm resistance across all injectors is matched within 1 ohm. A mismatch produces uneven cylinder fuelling even where every injector is individually within specification.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0008",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Fastener",
+                        "Torque",
+                        "Notes"
+                      ],
+                      "rows": [
+                        [
+                          "Fuel rail mounting bolts",
+                          "22 newton metres",
+                          "Diagonal sequence"
+                        ],
+                        [
+                          "High-pressure pump retaining bolts",
+                          "28 newton metres",
+                          ""
+                        ],
+                        [
+                          "Injector clamp bolts",
+                          "10 newton metres",
+                          "Replace sealing washer"
+                        ],
+                        [
+                          "Knock sensor mounting bolt",
+                          "20 newton metres",
+                          "Torque-critical — affects sensitivity"
+                        ]
+                      ],
+                      "merges": [],
+                      "caption": "Section 1 — Engine Management Torque Values"
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0023",
+            "title": "ANTI-LOCK BRAKING SYSTEM (ABS) & HYDRAULIC SYSTEMS",
+            "chapterNumber": "2",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0013",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0011",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Every hydraulic brake circuit works from the same principle: Pascal's law, which states that pressure applied anywhere in an enclosed, incompressible fluid is transmitted equally in every direction. A small force applied by the driver's foot, multiplied first by the pedal's lever ratio and again by the master cylinder's piston area against each caliper's larger piston area, becomes the clamping force that stops the vehicle. The Anti-Lock Braking System (ABS) sits downstream of that hydraulic circuit and modulates it, wheel by wheel, whenever a wheel is about to lock.</p><p>The ABS consists of the following:</p><ul><li>Wheel Speed Sensors</li><li>Hydraulic Control Unit (HCU)</li><li>ABS Electronic Control Module (ECU)</li><li>Brake Lines &amp; Solenoid Valves</li><li>ABS Warning Indicator Lamp</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0012",
+                    "type": "text",
+                    "data": {
+                      "html": "<div class=\"yt-video-wrapper\" tabindex=\"0\" role=\"group\" aria-label=\"Video player\"><video id=\"cbt-video-mrds-intro\" preload=\"metadata\" playsinline><source src=\"assets/Test%20Video.mp4\" type=\"video/mp4\"><track kind=\"captions\" srclang=\"en\" label=\"English\" src=\"assets/Test%20Video.vtt\">Your browser does not support the video tag.</video><div class=\"yt-controls\"><input type=\"range\" class=\"yt-progress-bar\" min=\"0\" max=\"100\" step=\"0.1\" value=\"0\" aria-label=\"Seek video\"><div class=\"yt-controls-row\"><div class=\"yt-controls-left\"><button type=\"button\" class=\"video-btn yt-btn-play\" data-state=\"paused\" title=\"Play (k)\" aria-label=\"Play\"></button><div class=\"yt-volume-group\"><button type=\"button\" class=\"video-btn yt-btn-mute\" data-state=\"unmuted\" title=\"Mute (m)\" aria-label=\"Mute\"></button><input type=\"range\" class=\"yt-volume-slider\" min=\"0\" max=\"1\" step=\"0.05\" value=\"1\" aria-label=\"Volume\"></div><span class=\"yt-time-display\" data-label=\"0:00 / 0:00\"></span></div><div class=\"yt-controls-right\"><button type=\"button\" class=\"yt-btn-cc\" title=\"Subtitles/CC (c)\" aria-label=\"Toggle captions\" aria-pressed=\"false\"></button><div class=\"yt-settings-wrap\"><button type=\"button\" class=\"video-btn yt-btn-settings\" title=\"Settings\" aria-label=\"Settings\" aria-haspopup=\"true\" aria-expanded=\"false\"></button><div class=\"yt-settings-menu\" hidden><div class=\"yt-settings-panel\" data-settings-panel=\"root\"><button type=\"button\" class=\"yt-menu-item\" data-panel=\"speed\"><span>Playback speed</span><span class=\"yt-menu-value yt-current-speed\">Normal ›</span></button><button type=\"button\" class=\"yt-menu-item\" data-panel=\"quality\"><span>Quality</span><span class=\"yt-menu-value yt-current-quality\">Auto ›</span></button></div><div class=\"yt-settings-panel\" data-settings-panel=\"speed\" hidden><button type=\"button\" class=\"yt-menu-back\" data-panel=\"root\">‹ Playback speed</button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.25\"><span class=\"yt-option-label\">0.25x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.5\"><span class=\"yt-option-label\">0.5x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.75\"><span class=\"yt-option-label\">0.75x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option active\" data-speed=\"1\"><span class=\"yt-option-label\">Normal</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.25\"><span class=\"yt-option-label\">1.25x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.5\"><span class=\"yt-option-label\">1.5x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.75\"><span class=\"yt-option-label\">1.75x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"2\"><span class=\"yt-option-label\">2x</span><span class=\"yt-option-check\">✓</span></button></div><div class=\"yt-settings-panel\" data-settings-panel=\"quality\" hidden><button type=\"button\" class=\"yt-menu-back\" data-panel=\"root\">‹ Quality</button><div class=\"yt-settings-options\"></div></div></div></div><button type=\"button\" class=\"video-btn yt-btn-fullscreen\" data-state=\"standard\" title=\"Full screen (f)\" aria-label=\"Full screen\"></button></div></div></div></div>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0017",
+                "title": "2. HYDRAULIC BRAKING ASSEMBLY",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0014",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 BRAKE PEDAL &amp; LEVER RATIO</h3><p>The brake pedal is a Class 2 lever: the pivot sits above the pedal pad and the push rod picks up the load between the pivot and the pad, so the mechanical advantage is set purely by where along the pedal arm the push rod connects. A typical pedal lever ratio of 4 to 1 means 200 newtons at the pedal pad becomes 800 newtons at the push rod &mdash; before the vacuum servo adds anything.</p><h3>2.2 VACUUM SERVO (BOOSTER)</h3><p>The vacuum servo sits between the push rod and the master cylinder and adds boost force using the pressure difference between engine manifold vacuum on one side of its diaphragm and atmospheric pressure on the other. Depressing the pedal opens a valve that admits atmospheric pressure to the rear chamber only, and the resulting pressure difference across the diaphragm pushes the master cylinder's own push rod forward with several times the driver's own input force. A servo that has lost vacuum sealing &mdash; a cracked hose, a failed one-way check valve &mdash; still stops the car, but the pedal becomes noticeably harder and travels further for the same deceleration.</p><h3>2.3 MASTER CYLINDER</h3><p>The master cylinder carries two pistons in series within one bore, each feeding an independent hydraulic circuit split diagonally (one front and the opposite rear wheel per circuit) so that a single leak anywhere in the system still leaves one full circuit &mdash; and therefore meaningful braking &mdash; in service. The fluid reservoir sits above the bore and gravity-feeds both piston chambers through their compensating ports whenever the pedal is fully released.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0015",
+                    "type": "text",
+                    "data": {
+                      "html": "<div class=\"yt-video-wrapper\" tabindex=\"0\" role=\"group\" aria-label=\"Video player\"><video id=\"cbt-custom-video\" preload=\"metadata\" playsinline><source src=\"assets/Sample%20Video.mp4\" type=\"video/mp4\"><track kind=\"captions\" srclang=\"en\" label=\"English\" src=\"assets/Sample%20Video.vtt\">Your browser does not support the video tag.</video><div class=\"yt-controls\"><input type=\"range\" class=\"yt-progress-bar\" min=\"0\" max=\"100\" step=\"0.1\" value=\"0\" aria-label=\"Seek video\"><div class=\"yt-controls-row\"><div class=\"yt-controls-left\"><button type=\"button\" class=\"video-btn yt-btn-play\" data-state=\"paused\" title=\"Play (k)\" aria-label=\"Play\"></button><div class=\"yt-volume-group\"><button type=\"button\" class=\"video-btn yt-btn-mute\" data-state=\"unmuted\" title=\"Mute (m)\" aria-label=\"Mute\"></button><input type=\"range\" class=\"yt-volume-slider\" min=\"0\" max=\"1\" step=\"0.05\" value=\"1\" aria-label=\"Volume\"></div><span class=\"yt-time-display\" data-label=\"0:00 / 0:00\"></span></div><div class=\"yt-controls-right\"><button type=\"button\" class=\"yt-btn-cc\" title=\"Subtitles/CC (c)\" aria-label=\"Toggle captions\" aria-pressed=\"false\"></button><div class=\"yt-settings-wrap\"><button type=\"button\" class=\"video-btn yt-btn-settings\" title=\"Settings\" aria-label=\"Settings\" aria-haspopup=\"true\" aria-expanded=\"false\"></button><div class=\"yt-settings-menu\" hidden><div class=\"yt-settings-panel\" data-settings-panel=\"root\"><button type=\"button\" class=\"yt-menu-item\" data-panel=\"speed\"><span>Playback speed</span><span class=\"yt-menu-value yt-current-speed\">Normal ›</span></button><button type=\"button\" class=\"yt-menu-item\" data-panel=\"quality\"><span>Quality</span><span class=\"yt-menu-value yt-current-quality\">Auto ›</span></button></div><div class=\"yt-settings-panel\" data-settings-panel=\"speed\" hidden><button type=\"button\" class=\"yt-menu-back\" data-panel=\"root\">‹ Playback speed</button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.25\"><span class=\"yt-option-label\">0.25x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.5\"><span class=\"yt-option-label\">0.5x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"0.75\"><span class=\"yt-option-label\">0.75x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option active\" data-speed=\"1\"><span class=\"yt-option-label\">Normal</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.25\"><span class=\"yt-option-label\">1.25x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.5\"><span class=\"yt-option-label\">1.5x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"1.75\"><span class=\"yt-option-label\">1.75x</span><span class=\"yt-option-check\">✓</span></button><button type=\"button\" class=\"yt-option-btn yt-speed-option\" data-speed=\"2\"><span class=\"yt-option-label\">2x</span><span class=\"yt-option-check\">✓</span></button></div><div class=\"yt-settings-panel\" data-settings-panel=\"quality\" hidden><button type=\"button\" class=\"yt-menu-back\" data-panel=\"root\">‹ Quality</button><div class=\"yt-settings-options\"></div></div></div></div><button type=\"button\" class=\"video-btn yt-btn-fullscreen\" data-state=\"standard\" title=\"Full screen (f)\" aria-label=\"Full screen\"></button></div></div></div></div>"
+                    }
+                  },
+                  {
+                    "id": "b0016",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 680 260' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Master Cylinder & Vacuum Servo, Exploded</title><defs><marker id='arrow' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#33424f'/></marker></defs><circle cx='40' cy='40' r='9' fill='#33424f'/><path d='M40,40 L74,152 L100,163' fill='none' stroke='#aab4bd' stroke-width='11' stroke-linecap='round' stroke-linejoin='round'/><line x1='104' y1='150' x2='168' y2='140' stroke='#33424f' stroke-width='7' stroke-linecap='round'/><circle cx='222' cy='132' r='72' fill='#3d6690' fill-opacity='0.20' stroke='#3d6690' stroke-width='3'/><circle cx='222' cy='132' r='55' fill='none' stroke='#3d6690' stroke-width='2' stroke-dasharray='5,5'/><line x1='222' y1='60' x2='222' y2='204' stroke='#3d6690' stroke-width='2' stroke-dasharray='2,4'/><rect x='300' y='104' width='190' height='52' rx='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2.5'/><rect x='320' y='117' width='42' height='26' rx='4' fill='#ffb400' stroke='#33424f' stroke-width='1.5'/><rect x='395' y='117' width='42' height='26' rx='4' fill='#ffb400' stroke='#33424f' stroke-width='1.5'/><rect x='355' y='55' width='95' height='48' rx='7' fill='#2f8f95' fill-opacity='0.55' stroke='#2f8f95' stroke-width='2.5'/><rect x='368' y='99' width='11' height='12' fill='#2f8f95'/><rect x='420' y='99' width='11' height='12' fill='#2f8f95'/><path d='M490,120 L560,90 L610,90' fill='none' stroke='#d64545' stroke-width='4' marker-end='url(#arrow)'/><path d='M490,142 L560,172 L610,172' fill='none' stroke='#d64545' stroke-width='4' marker-end='url(#arrow)'/><circle cx='625' cy='90' r='19' fill='none' stroke='#d64545' stroke-width='3'/><circle cx='625' cy='172' r='19' fill='none' stroke='#d64545' stroke-width='3'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Master Cylinder & Vacuum Servo, Exploded</span><p class='diagram-note'>Exploded view of the hydraulic braking assembly showing the brake pedal mechanism, vacuum servo, push rod, reservoir and hydraulic circuit callouts.</p><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#aab4bd'></span>Brake pedal &amp; lever &mdash; multiplies driver effort by the pedal lever ratio.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>Vacuum servo (booster) &mdash; engine-vacuum diaphragm adds boost force to the push rod.</li><li><span class='diagram-swatch' style='background:#c7d0d8'></span>Push rod &amp; master cylinder body &mdash; houses the primary and secondary pistons.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>Primary / secondary pistons &mdash; each pressurises one independent hydraulic circuit.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Fluid reservoir &mdash; gravity-feeds both piston bores through the compensating ports.</li><li><span class='diagram-swatch' style='background:#d64545'></span>Hydraulic circuits &mdash; dual, isolated brake-line runs to the wheel calipers.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0019",
+                "title": "3. ABS HYDRAULIC CONTROL UNIT & WHEEL SPEED SENSORS",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0018",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 WHEEL SPEED SENSORS</h3><ul><li>Wheel Speed Sensors are also called &lsquo;ABS Sensors&rsquo;.</li><li>Each sensor continuously monitors the rotational speed of its own wheel, reading a toothed reluctor ring, and reports the signal to the ABS ECU.</li></ul><h3>3.2 HYDRAULIC CONTROL UNIT (HCU)</h3><ul><li>The HCU is designed to receive and modulate the brake fluid pressure delivered to each wheel circuit independently.</li><li>It also houses the return pump motor, accumulator and damper chambers, located within the HCU casting.</li><li>Pressure generated by the master cylinder is delivered to the HCU through primary brake lines rated to withstand up to 314 bar. The HCU modulates this pressure during an ABS event at a cycling rate of up to 19 pulses per second.</li><li>The HCU distributes pressure toward each wheel circuit via Inlet Valve, Outlet Valve and Return Line assemblies.</li><li>It also provides housing to the ABS ECU. HCU together with the ECU is called the Integrated Braking System (IBS), mounted to the chassis using mounting brackets and vibration-isolation bushes.</li></ul><h4>3.2.1 HCU Operation</h4><p>For easy understanding, HCU operation can be divided into two phases:</p><ul><li>Pressure Hold Phase</li><li>Pressure Release &amp; Reapply Phase</li></ul><p>Based on function, the Valve Block Assembly is further sub-categorised as follows:</p><ul><li>i. Inlet Solenoid Valves</li><li>ii. Outlet Solenoid Valves</li><li>iii. Accumulator Chambers</li><li>iv. Return Pump Motor</li><li>v. Damper Chambers</li><li>vi. Non-Return Valves</li></ul><h3>3.3 OPERATING PRINCIPLES</h3><p><b>Preventing wheel lock-up.</b> During hard or emergency braking, a locked wheel loses lateral grip almost entirely, which both extends stopping distance on most surfaces and removes the driver's ability to steer. ABS intervenes the instant a wheel's speed diverges sharply from the vehicle's road speed, briefly releasing and reapplying brake pressure at that wheel many times per second rather than allowing it to lock solid.</p><p><b>Cadence pulsing.</b> The rapid hold, release and reapply cycle commanded by the ABS ECU is known as cadence pulsing, felt by the driver as a pulsation through the brake pedal &mdash; this pedal feedback is a normal indication that ABS is active, not a fault.</p><p><b>Maintaining steering control.</b> Because ABS keeps each wheel just below the point of lock-up rather than fully locked, sufficient lateral grip is retained at all four contact patches throughout the stop, which is the primary safety benefit ABS provides over a non-modulated brake system.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0022",
+                "title": "4. DIAGNOSTIC & MAINTENANCE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0020",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 ABS SELF-TEST &amp; WARNING LAMP LOGIC</h3><ul><li>The ABS ECU continuously compares the rotational speed of all four wheels against each other and against the vehicle's overall deceleration rate.</li><li>The ECU performs a self-test sequence at every ignition cycle and continuously monitors sensor and valve circuit integrity, illuminating the ABS Warning Indicator Lamp if a fault is detected.</li><li>A back-up, non-ABS braking mode is retained at all times: on ECU or HCU failure, the conventional hydraulic circuit continues to provide full braking force, without ABS modulation.</li></ul><h3>4.2 HYDRAULIC CIRCUIT BLEEDING</h3><p>Reference workcard MKMTM-32-10-00-360-4A.</p><ol><li>Top up the reservoir and keep it above the minimum mark throughout.</li><li>Connect a clear hose to the bleed nipple farthest from the master cylinder and submerge its free end in fluid.</li><li>Have an assistant depress the pedal, open the nipple to release fluid and trapped air, then close the nipple before the pedal is released.</li><li>Repeat at each wheel in the sequence specified by the vehicle's circuit layout until the expelled fluid is free of bubbles.</li><li>With the engine running, use the diagnostic tool to command an HCU-cycle bleed sequence, which cycles each solenoid to purge air trapped inside the unit itself &mdash; a manual wheel bleed alone cannot reach this trapped air.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0021",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Primary brake line burst pressure",
+                          "314 bar"
+                        ],
+                        [
+                          "HCU solenoid cycling rate",
+                          "Up to 19 pulses per second"
+                        ],
+                        [
+                          "Recommended brake fluid",
+                          "DOT 4, replaced every 24 months"
+                        ],
+                        [
+                          "Wheel speed sensor air gap",
+                          "0.5 mm to 1.2 mm"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0037",
+            "title": "STEERING & SUSPENSION GEOMETRY",
+            "chapterNumber": "3",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0026",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0024",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>The steering and suspension systems together set how the vehicle points, how it rides, and how predictably it behaves at the limit of tyre grip. Steering converts a rotary input at the wheel into an angular change at each front road wheel; suspension isolates the cabin from road irregularities while holding each tyre's contact patch against the road under acceleration, braking and cornering loads. Neither system can be tuned in isolation &mdash; the geometry described in this section is what keeps the two working together rather than against each other.</p><h3>1.2 RACK &amp; PINION DYNAMICS</h3><p>A pinion gear, turned directly by the steering column, meshes with a linear rack that runs transversely across the vehicle. Rotating the pinion translates the rack left or right, and the rack's own ends connect through tie rods directly to each steering knuckle. The ratio between steering-wheel rotation and rack travel &mdash; and therefore road-wheel angle &mdash; is set by the pinion's pitch diameter and, on a variable-ratio rack, by teeth that are cut progressively finer toward the rack's centre for quicker response near the straight-ahead position.</p><h3>1.3 POWER ASSISTANCE: HYDRAULIC &amp; ELECTRIC</h3><p>A belt-driven power steering pump supplies hydraulic assistance on older architectures, feeding a rotary valve that directs pressurised fluid to either side of the rack's assist piston in proportion to torque sensed at the input shaft. Electric Power Steering (EPS) replaces the pump, hoses and fluid entirely with an electric motor &mdash; mounted on the column or the rack itself &mdash; driven by a dedicated control module that reads the same torque signal, removing the engine-driven parasitic load and enabling speed-variable assist and lane-keeping torque overlay.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0025",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>1.4 SYSTEM COMPONENTS</h3><ul><li>i. Steering Gear (Rack &amp; Pinion) Assembly</li><li>ii. Suspension Strut Assembly</li><li>iii. Tie Rod &amp; Drive Shaft</li><li>iv. Strut Support Bracket Assembly</li></ul>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0029",
+                "title": "2. STEERING GEOMETRY & THE ACKERMANN PRINCIPLE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0027",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 THE ACKERMANN PRINCIPLE</h3><p>When a vehicle turns, every wheel ideally rolls without scrubbing, which means each wheel's own axis must pass through a single common turn centre located on the extension of the rear axle line. Because the inner front wheel follows a smaller-radius arc than the outer front wheel, it must be steered through a larger angle for that condition to hold &mdash; equal steer angles at both front wheels would force one of them to scrub sideways through the turn. Ackermann steering geometry achieves the unequal-angle relationship mechanically, by angling the steering arms inward so their projected lines meet close to the centre of the rear axle.</p><h3>2.2 CAMBER, CASTER &amp; TOE</h3><ul><li><b>Camber</b> &mdash; the inward or outward tilt of the wheel from vertical, viewed from the front. Negative camber (top of the wheel tilted in) increases cornering grip by keeping more of the contact patch flat to the road as the body rolls, at some cost to straight-line tyre wear.</li><li><b>Caster</b> &mdash; the rearward tilt of the steering axis, viewed from the side. Positive caster is what makes the steering self-centre after a turn and adds stability at speed, in the same way a caster wheel on a trolley trails behind its own pivot.</li><li><b>Toe</b> &mdash; whether the front of each wheel points slightly inward (toe-in) or outward (toe-out) relative to the vehicle's centreline. Toe governs straight-line stability and turn-in response, and is the alignment parameter most sensitive to a kerb strike.</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0028",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 480 340' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Ackermann Steering Angle Geometry</title><rect x='260' y='60' width='120' height='260' rx='16' fill='none' stroke='#33424f' stroke-width='3'/><line x1='100' y1='280' x2='410' y2='280' stroke='#aab4bd' stroke-width='2' stroke-dasharray='6,5'/><rect x='251' y='257' width='18' height='46' rx='4' fill='#33424f'/><rect x='371' y='257' width='18' height='46' rx='4' fill='#33424f'/><line x1='260' y1='120' x2='100' y2='280' stroke='#2f8f95' stroke-width='2' stroke-dasharray='6,5'/><line x1='380' y1='120' x2='100' y2='280' stroke='#ffb400' stroke-width='2' stroke-dasharray='6,5'/><g transform='rotate(-32 260 120)'><rect x='251' y='97' width='18' height='46' rx='4' fill='#2f8f95'/></g><g transform='rotate(-20 380 120)'><rect x='371' y='97' width='18' height='46' rx='4' fill='#ffb400'/></g><circle cx='100' cy='280' r='7' fill='#d64545'/><line x1='88' y1='280' x2='112' y2='280' stroke='#d64545' stroke-width='2'/><line x1='100' y1='268' x2='100' y2='292' stroke='#d64545' stroke-width='2'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Ackermann Steering Angle Geometry</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#2f8f95'></span>Inner front wheel &mdash; steered through the larger angle.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>Outer front wheel &mdash; steered through a shallower angle.</li><li><span class='diagram-swatch' style='background:#33424f'></span>Rear axle (unsteered) &mdash; its extended centreline locates the turn centre.</li><li><span class='diagram-swatch' style='background:#d64545'></span>Turn centre &mdash; the point where every wheel's own axis intersects during a clean turn.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0033",
+                "title": "3. SUSPENSION ARCHITECTURE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0030",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 MACPHERSON STRUT</h3><p>The MacPherson strut combines the damper and the wheel's upper pivot into a single load-bearing unit: the strut tube itself serves as one of the suspension's locating members, with only a lower control arm needed to complete the linkage. This compactness is what makes MacPherson struts the dominant front-suspension layout on transverse-engine vehicles, at the cost of camber gain that is harder to control independently of ride height compared with a double-wishbone layout.</p><h3>3.2 DOUBLE WISHBONE</h3><p>A double-wishbone (double A-arm) suspension locates the wheel with two separate, roughly parallel arms, one above the other, each pivoting independently at the chassis and meeting at the upright. Because camber and scrub can be tuned largely independently of spring travel by varying the relative length and angle of the two arms, double-wishbone geometry is favoured wherever cornering performance outweighs packaging simplicity.</p><h3>3.3 WHEEL-END MASS</h3><p>Unsprung mass &mdash; everything the spring does not support, principally the wheel, tyre, brake and the outboard half of the suspension linkage &mdash; must accelerate up and down with every road irregularity independently of the body. A lighter unsprung mass lets the tyre follow the road surface more closely at a given spring and damper rate, which is why unsprung weight reduction improves both ride and grip simultaneously rather than trading one against the other.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0031",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 320 460' role='img' aria-labelledby='dg2' preserveAspectRatio='xMidYMid meet'><title id='dg2'>MacPherson Strut, Exploded View</title><ellipse cx='160' cy='34' rx='46' ry='15' fill='#aab4bd' stroke='#33424f' stroke-width='2.5'/><rect x='153' y='46' width='14' height='80' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><rect x='140' y='118' width='40' height='270' rx='10' fill='#3d6690' fill-opacity='0.85' stroke='#33424f' stroke-width='2.5'/><ellipse cx='160' cy='96.0' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='123.8' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='151.5' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='179.2' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='207.0' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='234.8' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='262.5' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='290.2' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><ellipse cx='160' cy='318.0' rx='56' ry='11' fill='none' stroke='#ffb400' stroke-width='4'/><path d='M112,330 L208,330 L228,400 L188,440 L132,440 L92,400 Z' fill='#18344f' stroke='#33424f' stroke-width='2'/><circle cx='160' cy='405' r='24' fill='#2f8f95' stroke='#33424f' stroke-width='2.5'/><circle cx='160' cy='405' r='8' fill='#33424f'/></svg><figcaption><span class='diagram-title'>Figure 2 &mdash; MacPherson Strut, Exploded View</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#aab4bd'></span>Top mount &amp; bearing &mdash; isolates body noise, lets the strut rotate with steering input.</li><li><span class='diagram-swatch' style='background:#c7d0d8'></span>Piston rod &mdash; transmits damping force from the wheel to the top mount.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>Coil spring &mdash; carries the static corner weight, wound around the damper tube.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>Damper tube &mdash; hydraulic cylinder that controls spring and body motion.</li><li><span class='diagram-swatch' style='background:#18344f'></span>Steering knuckle &mdash; common mounting point for the strut, hub and tie rod.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Wheel bearing &mdash; supports the hub and allows free wheel rotation.</li></ul></figcaption></figure>"
+                    }
+                  },
+                  {
+                    "id": "b0032",
+                    "type": "text",
+                    "data": {
+                      "html": "<h4>3.3.1 Strut Description</h4><p>The Suspension Strut Assembly consists of the following parts:</p><p>i. <b>Damper System</b>: the strut consists of a single-stage telescopic damper; piston and cylinder are independently mounted on their own bushings.<br>ii. <b>Strut Housing</b>: houses the strut spring, made from light-alloy castings.<br>iii. <b>Input Flange</b>: provided for connection of the strut to the lower control arm.<br>iv. <b>Output Shaft</b>: the wheel hub spindle.<br>v. The strut also carries a fluid filler, fluid level gauge and a mechanical magnetic chip detector/drain port.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0036",
+                "title": "4. ALIGNMENT PARAMETERS & MAINTENANCE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0034",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Parameter",
+                        "Specification",
+                        "Effect if out of tolerance"
+                      ],
+                      "rows": [
+                        [
+                          "Front camber",
+                          "-0.5° ± 0.3°",
+                          "Uneven tyre wear, pulls to one side"
+                        ],
+                        [
+                          "Front caster",
+                          "3.5° ± 0.5°",
+                          "Wandering or heavy self-centring"
+                        ],
+                        [
+                          "Front toe",
+                          "0.10° to 0.20° toe-in",
+                          "Feathered wear, unstable turn-in"
+                        ],
+                        [
+                          "Rear camber",
+                          "-0.8° ± 0.3°",
+                          "Inner-shoulder wear"
+                        ]
+                      ],
+                      "merges": [],
+                      "caption": "Section 3 — Wheel Alignment Specification"
+                    }
+                  },
+                  {
+                    "id": "b0035",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 STEERING GEAR LUBRICATION</h3><ul><li>The steering gear uses a splash-type lubrication system for the rack and pinion.</li><li>Grease in the gear housing is carried by the rotating pinion and distributed by splash to the walls, bearings and rack teeth.</li><li>Grease level is checked via a sight glass and can be verified from ground level.</li><li>The steering gear carries a temperature switch for a high-temperature warning above 115 &deg;C.</li></ul><h3>4.2 MAINTENANCE PROCEDURE</h3><p>Reference workcard MKMTM-27-10-00-330-5A for tie-rod end replacement, and MKMTM-27-20-00-440-2C for a four-wheel alignment check.</p><ol><li>Position the vehicle on a level alignment rack with tyre pressures at specification.</li><li>Attach alignment targets to each wheel and allow the system to compensate for wheel run-out.</li><li>Record camber, caster and toe at both axles against the table above.</li><li>Adjust toe first, at both axles, then camber where the strut top-mount slots allow.</li><li>Torque the tie-rod locknut to 55 newton metres and the strut top-mount nuts to 40 newton metres once adjustment is confirmed.</li></ol>"
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0047",
+            "title": "AUTOMOTIVE ELECTRICAL & POWER ELECTRONICS",
+            "chapterNumber": "4",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0040",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0038",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>The vehicle electrical system stores, generates and distributes the power required by every electrical and electronic consumer on board. It comprises the battery, the starting circuit, the charging circuit, and the distribution network of fuses, relays and earth points that feed them. All measurements in this section assume a nominal 12 V system with the engine at operating temperature. Removal and installation of the battery and its tray is covered by workcard MKMTM-24-10-00-500-3A.</p><h3>1.2 12 V AND 48 V ARCHITECTURES</h3><p>A conventional 12 V lead-acid or absorbent-glass-mat battery remains the primary supply on most trims, sized to deliver the very high momentary current a starter motor demands. Mild-hybrid variants add a second, 48 V lithium-ion battery feeding a belt-integrated starter-generator; 48 V was chosen specifically because it sits just below the 60 V threshold at which international regulations classify a circuit as high voltage, allowing meaningfully more power &mdash; roughly four times that of a 12 V circuit for the same current &mdash; without the insulation, connector and service-technician training requirements that high-voltage EV systems require (see Section 8).</p><h3>1.3 BATTERY STATE OF CHARGE</h3><p>Measure open-circuit voltage at the battery posts with all loads switched off and the vehicle rested for at least 30 minutes; a surface charge otherwise produces an optimistic reading.</p><ul><li>12.6 V or above &mdash; fully charged.</li><li>12.4 V &mdash; approximately 75 percent charged.</li><li>12.2 V &mdash; approximately 50 percent charged. Recharge before testing further.</li><li>Below 12.0 V &mdash; deeply discharged. Recharge and retest capacity before condemning the battery.</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0039",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>1.4 ALTERNATOR OUTPUT TEST</h3><p>Reference workcard MKMTM-24-20-00-610-4B.</p><ol><li>Connect a calibrated multimeter across the battery terminals and record the resting voltage.</li><li>Start the engine and hold 2000 RPM with all electrical loads switched off.</li><li>Confirm charging voltage stabilises between 13.8 V and 14.6 V.</li><li>Switch on headlamps, blower at maximum and rear demister, then confirm voltage remains above 13.0 V.</li><li>Measure AC ripple on the DC output. A reading above 0.5 V AC indicates a failed diode in the rectifier pack.</li></ol><p>An output persistently above 15.0 V indicates a faulty voltage regulator and will damage the battery and connected electronics if left in service.</p><h3>1.5 STARTER MOTOR VOLTAGE DROP</h3><p>Voltage-drop testing locates resistance that a simple continuity check will not reveal, because the fault only appears under the high current a starter draws.</p><ol><li>Disable the ignition system so the engine cranks without starting.</li><li>Connect the meter between the battery positive post and the starter main terminal. Crank for no more than 10 seconds and record the reading. The maximum permissible drop is 0.5 V.</li><li>Repeat between the battery negative post and the starter housing. The maximum permissible drop on the earth path is 0.2 V.</li></ol>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0044",
+                "title": "2. CAN-BUS NETWORKS & BODY CONTROL MODULE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0041",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>2.1 NETWORK ARCHITECTURE</h2><p>Modules on this vehicle communicate over a Controller Area Network rather than discrete wiring. Each module broadcasts its data onto a shared twisted pair, and every other module reads the messages relevant to it &mdash; this reduces harness weight substantially and lets one sensor reading serve many consumers. Two physically separate networks are fitted, bridged by a gateway.</p><h3>2.2 HIGH-SPEED AND LOW-SPEED CAN</h3><ul><li><b>High-speed CAN</b> &mdash; 500 kilobits per second, used for powertrain and chassis modules where latency matters. The ECU, Transmission Control Module (TCM) and ABS all sit on this network. It is terminated at each end by a 120 Ω resistor, giving approximately 60 Ω measured across the pair with the ignition off.</li><li><b>Low-speed CAN</b> &mdash; 125 kilobits per second, used for comfort and body functions such as door modules, seat controls and interior lighting. It is fault-tolerant and continues operating on a single wire if the other is damaged.</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0042",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 640 220' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>CAN-Bus Topology</title><line x1='40' y1='100' x2='600' y2='100' stroke='#2f8f95' stroke-width='3'/><line x1='40' y1='108' x2='600' y2='108' stroke='#2f8f95' stroke-width='3'/><rect x='18' y='96' width='18' height='16' fill='none' stroke='#33424f' stroke-width='2'/><rect x='604' y='96' width='18' height='16' fill='none' stroke='#33424f' stroke-width='2'/><line x1='84' y1='60' x2='84' y2='100' stroke='#33424f' stroke-width='2'/><rect x='36' y='20' width='96' height='40' rx='6' fill='none' stroke='#ffb400' stroke-width='3'/><line x1='202' y1='60' x2='202' y2='100' stroke='#33424f' stroke-width='2'/><rect x='154' y='20' width='96' height='40' rx='6' fill='none' stroke='#3d6690' stroke-width='3'/><line x1='320' y1='60' x2='320' y2='100' stroke='#33424f' stroke-width='2'/><rect x='272' y='20' width='96' height='40' rx='6' fill='none' stroke='#d64545' stroke-width='3'/><line x1='438' y1='60' x2='438' y2='100' stroke='#33424f' stroke-width='2'/><rect x='390' y='20' width='96' height='40' rx='6' fill='none' stroke='#3f8f5f' stroke-width='3'/><line x1='556' y1='60' x2='556' y2='100' stroke='#33424f' stroke-width='2'/><rect x='508' y='20' width='96' height='40' rx='6' fill='none' stroke='#7a5fb0' stroke-width='3'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; CAN-Bus Topology</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#ffb400'></span>ECM &mdash; engine control module.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>TCM &mdash; transmission control module.</li><li><span class='diagram-swatch' style='background:#d64545'></span>ABS / HCU &mdash; anti-lock brake hydraulic control unit.</li><li><span class='diagram-swatch' style='background:#3f8f5f'></span>BCM &mdash; body control module.</li><li><span class='diagram-swatch' style='background:#7a5fb0'></span>Gateway &mdash; bridges high-speed and low-speed CAN and exposes the diagnostic socket.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Twisted-pair bus &mdash; terminated by a 120 &Omega; resistor at each end.</li></ul></figcaption></figure>"
+                    }
+                  },
+                  {
+                    "id": "b0043",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.3 GATEWAY MODULE</h3><p>The gateway sits between the two networks and forwards only the messages each side needs. It also provides the single diagnostic access point (see Section 12), so a scan tool connected to the diagnostic socket reaches every module through the gateway rather than addressing each network directly. A failed gateway typically presents as multiple modules reported as unreachable at once, which should not be mistaken for several simultaneous module failures.</p><h3>2.4 BODY CONTROL MODULE (BCM)</h3><p>The Body Control Module manages exterior and interior lighting, central locking, wipers, and the immobiliser interface. It is the busiest node on the low-speed network. Removal and installation is covered by workcard MKMTM-24-40-00-810-6D.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0046",
+                "title": "3. PARASITIC DRAW & DIAGNOSTIC PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0045",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 PARASITIC DRAW CHECK</h3><p>Reference workcard MKMTM-24-30-00-720-5C.</p><ol><li>Close all doors, switch off all loads and allow the vehicle to enter sleep mode. This may take up to 45 minutes on this model.</li><li>Connect an ammeter in series with the battery negative cable. Use a clamp meter where available, as breaking the circuit may wake sleeping modules and restart the timer.</li><li>Record the settled current. The permissible maximum is 50 milliamps.</li><li>Where draw exceeds specification, remove fuses one at a time and observe the current after each removal to isolate the affected circuit.</li></ol><h3>3.2 FUSE PANEL DIAGNOSTICS</h3><ol><li>Test fuses in place using the exposed probe points on the fuse body. Removing a fuse to inspect it visually will not reveal a cracked element under load.</li><li>With the circuit energised, measure voltage at both probe points. Battery voltage at both points indicates a healthy fuse.</li><li>Battery voltage at one point only indicates an open fuse.</li><li>No voltage at either point indicates a fault upstream of the fuse, not in the fuse itself.</li></ol><h3>3.3 RELAY TESTING</h3><p>Reference workcard MKMTM-24-60-00-910-8F.</p><ul><li><b>Pin 85 and pin 86</b> &mdash; the coil. Expect 60 Ω to 120 Ω; an open circuit or a short indicates a failed coil.</li><li><b>Pin 30</b> &mdash; common input, usually permanently live.</li><li><b>Pin 87</b> &mdash; normally open output; continuity to pin 30 should appear only when the coil is energised.</li></ul>"
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0059",
+            "title": "DRIVETRAIN & TRANSMISSION TECHNOLOGY",
+            "chapterNumber": "5",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0050",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0048",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>The drivetrain carries engine or motor output to the road wheels at the speed and torque each driving condition demands. This section covers the automatic transmission's torque converter and planetary gear sets, the manual gearbox's fixed ratios, the limited-slip differential, and the clutch systems that connect and disconnect engine torque from the driveline.</p><h3>1.2 TORQUE CONVERTER</h3><p>The torque converter is a fluid coupling between the engine and the transmission input shaft. It consists of an impeller driven by the engine, a turbine connected to the input shaft, and a stator that redirects returning fluid to multiply torque at low speed &mdash; multiplication reaches approximately 2.2 to 1 at stall. A lock-up clutch mechanically couples impeller and turbine above roughly 60 kilometres per hour, eliminating slip and improving fuel consumption; the TCM releases lock-up during gear changes and under hard acceleration.</p><h3>1.3 MANUAL GEAR RATIOS</h3><p>A manual gearbox uses fixed pairs of meshing gears, one pair per ratio, each pair selected by sliding a synchroniser sleeve into engagement rather than by changing which teeth are in mesh. Overall reduction is the product of the selected gear pair's ratio and the final-drive ratio at the differential; a numerically higher gear ratio multiplies torque at the cost of road speed per engine revolution, which is why first gear is the numerically highest ratio and top gear the lowest.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0049",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>1.4 VALVE BODY</h3><p>The valve body is the hydraulic control centre of the automatic transmission. It routes pressurised fluid to the appropriate clutch packs through a network of spool valves and shift solenoids. Line pressure is regulated between 4 bar at idle and 18 bar under full throttle.</p><h3>1.5 TRANSMISSION CONTROL MODULE (TCM)</h3><p>The TCM monitors input and output shaft speed, fluid temperature, throttle position and selector position. It commands the shift solenoids to produce the required ratio and reports any DTC to the diagnostic system, and exchanges torque and load data with the ECU over the CAN Bus so ignition timing can be momentarily retarded during a shift, smoothing the torque transition.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0053",
+                "title": "2. PLANETARY GEARSET POWER FLOW",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0051",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 PLANETARY GEAR SETS</h3><p>An automatic transmission's forward ratios and reverse come from one or more compound planetary gear sets. Each set comprises a sun gear at the centre, a ring gear surrounding it with internal teeth, and several planet gears carried on a common carrier, each meshing with both the sun and the ring simultaneously. Because the three members &mdash; sun, ring and carrier &mdash; are geared together at all times, holding any one of them stationary while driving another produces a distinct fixed ratio at the third, without any gear ever leaving mesh &mdash; which is what lets an automatic transmission shift under load, unlike a manual gearbox's sliding-mesh synchronisers.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0052",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 420 420' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Planetary Gearset Power Flow</title><defs><marker id='arrowS5' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#d64545'/></marker></defs><circle cx='210' cy='210' r='180' fill='none' stroke='#18344f' stroke-width='4'/><line x1='390.0' y1='210.0' x2='402.0' y2='210.0' stroke='#18344f' stroke-width='3'/><line x1='385.5' y1='250.1' x2='397.2' y2='252.7' stroke='#18344f' stroke-width='3'/><line x1='372.2' y1='288.1' x2='383.0' y2='293.3' stroke='#18344f' stroke-width='3'/><line x1='350.7' y1='322.2' x2='360.1' y2='329.7' stroke='#18344f' stroke-width='3'/><line x1='322.2' y1='350.7' x2='329.7' y2='360.1' stroke='#18344f' stroke-width='3'/><line x1='288.1' y1='372.2' x2='293.3' y2='383.0' stroke='#18344f' stroke-width='3'/><line x1='250.1' y1='385.5' x2='252.7' y2='397.2' stroke='#18344f' stroke-width='3'/><line x1='210.0' y1='390.0' x2='210.0' y2='402.0' stroke='#18344f' stroke-width='3'/><line x1='169.9' y1='385.5' x2='167.3' y2='397.2' stroke='#18344f' stroke-width='3'/><line x1='131.9' y1='372.2' x2='126.7' y2='383.0' stroke='#18344f' stroke-width='3'/><line x1='97.8' y1='350.7' x2='90.3' y2='360.1' stroke='#18344f' stroke-width='3'/><line x1='69.3' y1='322.2' x2='59.9' y2='329.7' stroke='#18344f' stroke-width='3'/><line x1='47.8' y1='288.1' x2='37.0' y2='293.3' stroke='#18344f' stroke-width='3'/><line x1='34.5' y1='250.1' x2='22.8' y2='252.7' stroke='#18344f' stroke-width='3'/><line x1='30.0' y1='210.0' x2='18.0' y2='210.0' stroke='#18344f' stroke-width='3'/><line x1='34.5' y1='169.9' x2='22.8' y2='167.3' stroke='#18344f' stroke-width='3'/><line x1='47.8' y1='131.9' x2='37.0' y2='126.7' stroke='#18344f' stroke-width='3'/><line x1='69.3' y1='97.8' x2='59.9' y2='90.3' stroke='#18344f' stroke-width='3'/><line x1='97.8' y1='69.3' x2='90.3' y2='59.9' stroke='#18344f' stroke-width='3'/><line x1='131.9' y1='47.8' x2='126.7' y2='37.0' stroke='#18344f' stroke-width='3'/><line x1='169.9' y1='34.5' x2='167.3' y2='22.8' stroke='#18344f' stroke-width='3'/><line x1='210.0' y1='30.0' x2='210.0' y2='18.0' stroke='#18344f' stroke-width='3'/><line x1='250.1' y1='34.5' x2='252.7' y2='22.8' stroke='#18344f' stroke-width='3'/><line x1='288.1' y1='47.8' x2='293.3' y2='37.0' stroke='#18344f' stroke-width='3'/><line x1='322.2' y1='69.3' x2='329.7' y2='59.9' stroke='#18344f' stroke-width='3'/><line x1='350.7' y1='97.8' x2='360.1' y2='90.3' stroke='#18344f' stroke-width='3'/><line x1='372.2' y1='131.9' x2='383.0' y2='126.7' stroke='#18344f' stroke-width='3'/><line x1='385.5' y1='169.9' x2='397.2' y2='167.3' stroke='#18344f' stroke-width='3'/><line x1='210' y1='210' x2='210.0' y2='98.0' stroke='#2f8f95' stroke-width='5'/><line x1='210' y1='210' x2='307.0' y2='266.0' stroke='#2f8f95' stroke-width='5'/><line x1='210' y1='210' x2='113.0' y2='266.0' stroke='#2f8f95' stroke-width='5'/><circle cx='210.0' cy='98.0' r='30' fill='#aab4bd' stroke='#33424f' stroke-width='2'/><circle cx='307.0' cy='266.0' r='30' fill='#aab4bd' stroke='#33424f' stroke-width='2'/><circle cx='113.0' cy='266.0' r='30' fill='#aab4bd' stroke='#33424f' stroke-width='2'/><circle cx='210' cy='210' r='42' fill='#ffb400' stroke='#33424f' stroke-width='2.5'/><path d='M 210,150 A 60,60 0 0 1 265,190' fill='none' stroke='#d64545' stroke-width='4' marker-end='url(#arrowS5)'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Planetary Gearset Power Flow</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#ffb400'></span>Sun gear &mdash; smallest member, typically the input in a reduction stage.</li><li><span class='diagram-swatch' style='background:#aab4bd'></span>Planet gears &mdash; mesh with both the sun and the ring simultaneously.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Planet carrier &mdash; links the planet axles; held, driven, or free depending on the ratio selected.</li><li><span class='diagram-swatch' style='background:#18344f'></span>Ring gear &mdash; outer, internally-toothed member; commonly held for underdrive ratios.</li><li><span class='diagram-swatch' style='background:#d64545'></span>Power flow &mdash; holding or driving a different member changes the output ratio and direction.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0055",
+                "title": "3. LIMITED-SLIP DIFFERENTIALS & CLUTCH SYSTEMS",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0054",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 THE OPEN DIFFERENTIAL PROBLEM</h3><p>A differential must let the outer driven wheel turn faster than the inner one through a corner, which an open differential achieves by always splitting torque equally between both output shafts regardless of which wheel actually has grip &mdash; so the instant one wheel loses traction entirely, that wheel absorbs all the available torque and the other, gripping wheel gets none.</p><h3>3.2 LIMITED-SLIP DIFFERENTIAL (LSD) OPERATION</h3><p>A clutch-type limited-slip differential adds a stack of friction clutch plates between each output shaft and the differential case, preloaded by spring pressure and further compressed by ramps that react to input torque. The clutch pack resists relative rotation between the two output shafts, so a meaningful share of torque keeps transferring to the gripping wheel even after the other has broken traction, rather than all of it draining to the spinning wheel as an open differential would allow.</p><h3>3.3 CLUTCH PRESSURE PLATE OPERATION</h3><p>A manual clutch's diaphragm-spring pressure plate clamps the friction disc against the flywheel using the spring's own preload; depressing the clutch pedal pivots the diaphragm spring's fingers through a release bearing, collapsing the spring's clamping force and letting the disc slip free. Because clamping force falls as the diaphragm spring wears and the friction disc thins, pedal feel changes gradually over the disc's service life rather than failing suddenly.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0058",
+                "title": "4. TCM VALVE BODY & DIAGNOSTIC PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0056",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 COMMON TRANSMISSION CODES</h3><ul><li><b>P0700</b> &mdash; Transmission control system malfunction. Always read the TCM directly for the specific underlying code.</li><li><b>P0715</b> &mdash; Input shaft speed sensor circuit fault.</li><li><b>P0740</b> &mdash; Torque converter clutch circuit malfunction, frequently a failed lock-up solenoid or degraded fluid.</li><li><b>P0748</b> &mdash; Pressure control solenoid electrical fault.</li><li><b>P0753</b> &mdash; Shift solenoid A electrical fault.</li></ul><h3>4.2 VALVE BODY SOLENOID REPLACEMENT</h3><p>Reference workcard MKMTM-21-30-00-650-7B.</p><ol><li>Drain the transmission fluid into a clean container and record the quantity recovered.</li><li>Remove the transmission pan and the fluid filter; inspect the drain magnet for debris.</li><li>Disconnect the internal wiring harness connector from the affected solenoid, release its retaining clip, and withdraw it from the valve body.</li><li>Fit the replacement solenoid with a new sealing ring, lightly lubricated with clean transmission fluid.</li><li>Refit the filter and pan with a new gasket, tightening the pan bolts in a diagonal sequence to 12 newton metres.</li><li>Refill with the specified fluid, clear all stored codes, and confirm correct operation through a road test covering every forward ratio.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0057",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Transmission pan bolts",
+                          "12 newton metres"
+                        ],
+                        [
+                          "Fluid level plug",
+                          "35 newton metres"
+                        ],
+                        [
+                          "Valve body retaining bolts",
+                          "11 newton metres"
+                        ],
+                        [
+                          "Torque converter to flexplate bolts",
+                          "45 newton metres"
+                        ],
+                        [
+                          "Line pressure at idle (Drive)",
+                          "4 bar to 5 bar"
+                        ],
+                        [
+                          "Line pressure at full throttle",
+                          "18 bar"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0070",
+            "title": "HVAC & THERMAL MANAGEMENT",
+            "chapterNumber": "6",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0061",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0060",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Cabin cooling runs on the vapour-compression refrigeration cycle: a refrigerant is repeatedly compressed, condensed, expanded and evaporated in a closed loop, moving heat from inside the cabin to the outside air even though the outside air is warmer &mdash; a result made possible entirely by the work the compressor puts into the cycle. Engine cooling runs a parallel, separate loop using liquid coolant rather than refrigerant, regulated by a thermostat rather than a compressor.</p><h3>1.2 REFRIGERANT: R134a AND R1234yf</h3><p>R134a was the industry-standard automotive refrigerant for two decades, chosen because it has zero ozone-depletion potential, unlike the R12 it replaced. R1234yf has since superseded it on new vehicles because R134a's global-warming potential is roughly 1,430 times that of carbon dioxide, against roughly 4 for R1234yf &mdash; a difference regulators now mandate for new-vehicle air conditioning in most major markets. R1234yf is mildly flammable, which is why its service equipment, fittings and identification labels are deliberately incompatible with R134a equipment: the two must never be mixed in one system.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0064",
+                "title": "2. REFRIGERANT CIRCUIT OPERATION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0062",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 THE FOUR STAGES</h3><ul><li><b>Compressor</b> &mdash; draws in low-pressure refrigerant vapour and compresses it, raising both its pressure and temperature well above ambient.</li><li><b>Condenser</b> &mdash; mounted ahead of the radiator in the airflow, rejects heat to the outside air as the hot, high-pressure vapour condenses to a high-pressure liquid.</li><li><b>Expansion valve</b> &mdash; meters the high-pressure liquid through a restriction, dropping its pressure sharply and allowing a portion to flash-evaporate, which cools the remaining liquid dramatically before it ever reaches the evaporator.</li><li><b>Evaporator</b> &mdash; inside the HVAC housing, the cold low-pressure refrigerant absorbs heat from cabin air passing over its fins, boiling back to a low-pressure vapour and returning to the compressor to repeat the cycle.</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0063",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 460 400' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Vapour-Compression Refrigeration Loop</title><defs><marker id='arrowS6' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#33424f'/></marker></defs><rect x='40' y='320' width='110' height='70' rx='10' fill='#c7d0d8' stroke='#33424f' stroke-width='2.5'/><rect x='40' y='40' width='380' height='60' rx='8' fill='none' stroke='#d64545' stroke-width='3'/><line x1='58.1' y1='48' x2='58.1' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='76.2' y1='48' x2='76.2' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='94.3' y1='48' x2='94.3' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='112.4' y1='48' x2='112.4' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='130.5' y1='48' x2='130.5' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='148.6' y1='48' x2='148.6' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='166.7' y1='48' x2='166.7' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='184.8' y1='48' x2='184.8' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='202.9' y1='48' x2='202.9' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='221.0' y1='48' x2='221.0' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='239.0' y1='48' x2='239.0' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='257.1' y1='48' x2='257.1' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='275.2' y1='48' x2='275.2' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='293.3' y1='48' x2='293.3' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='311.4' y1='48' x2='311.4' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='329.5' y1='48' x2='329.5' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='347.6' y1='48' x2='347.6' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='365.7' y1='48' x2='365.7' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='383.8' y1='48' x2='383.8' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><line x1='401.9' y1='48' x2='401.9' y2='92' stroke='#d64545' stroke-width='1.5' opacity='0.6'/><path d='M420,170 L460,190 L420,210 L380,190 Z' fill='#33424f'/><rect x='170' y='320' width='280' height='70' rx='8' fill='none' stroke='#2f8f95' stroke-width='3'/><line x1='186.5' y1='328' x2='186.5' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='202.9' y1='328' x2='202.9' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='219.4' y1='328' x2='219.4' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='235.9' y1='328' x2='235.9' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='252.4' y1='328' x2='252.4' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='268.8' y1='328' x2='268.8' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='285.3' y1='328' x2='285.3' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='301.8' y1='328' x2='301.8' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='318.2' y1='328' x2='318.2' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='334.7' y1='328' x2='334.7' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='351.2' y1='328' x2='351.2' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='367.6' y1='328' x2='367.6' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='384.1' y1='328' x2='384.1' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='400.6' y1='328' x2='400.6' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='417.1' y1='328' x2='417.1' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><line x1='433.5' y1='328' x2='433.5' y2='372' stroke='#2f8f95' stroke-width='1.5' opacity='0.6'/><path d='M95,320 L95,100' fill='none' stroke='#d64545' stroke-width='4' marker-end='url(#arrowS6)'/><path d='M400,100 L420,170' fill='none' stroke='#d64545' stroke-width='4' marker-end='url(#arrowS6)'/><path d='M420,210 L420,320' fill='none' stroke='#2f8f95' stroke-width='4' marker-end='url(#arrowS6)'/><path d='M170,355 L95,355 L95,320' fill='none' stroke='#2f8f95' stroke-width='4' marker-end='url(#arrowS6)'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Vapour-Compression Refrigeration Loop</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#c7d0d8'></span>Compressor &mdash; draws in low-pressure vapour and discharges it as hot, high-pressure gas.</li><li><span class='diagram-swatch' style='background:#d64545'></span>High side &mdash; hot high-pressure refrigerant, gas then liquid, through the condenser.</li><li><span class='diagram-swatch' style='background:#33424f'></span>Expansion valve &mdash; meters refrigerant and drops its pressure into the evaporator.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Low side &mdash; cold low-pressure refrigerant absorbing cabin heat through the evaporator.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0066",
+                "title": "3. ENGINE COOLING LOOP & THERMOSTATIC CONTROL",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0065",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 COOLANT LOOP</h3><p>A water pump, driven from the engine, circulates a water and ethylene-glycol mixture through passages cast into the block and head, then through the radiator, where airflow rejects the absorbed heat before the coolant returns to the pump. A pressurised expansion tank allows the system to run above 100 °C without boiling, and accommodates the coolant's own thermal expansion.</p><h3>3.2 THERMOSTAT OPERATION</h3><p>The thermostat is a wax-pellet valve that stays closed below its rated opening temperature, forcing coolant to bypass the radiator and recirculate through the block only &mdash; which is what lets a cold engine reach operating temperature quickly. As coolant temperature rises past the rated point, typically 88 °C, the wax pellet expands and progressively opens the valve, admitting an increasing share of flow through the radiator until the system settles at a stable operating temperature.</p><h3>3.3 RADIATOR FAN CONTROL</h3><p>The ECU commands the electric radiator fan from coolant temperature and, on air-conditioned vehicles, from refrigerant high-side pressure as well &mdash; the fan runs whenever either circuit needs the airflow, independent of vehicle road speed.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0069",
+                "title": "4. SERVICE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0067",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 REFRIGERANT RECOVERY & RECHARGE</h3><p>Reference workcard MKMTM-36-10-00-480-2B. Use only a recovery machine identified for the refrigerant type fitted to the vehicle.</p><ol><li>Connect the recovery machine to the high and low service ports and recover the full system charge, recording the quantity removed.</li><li>Evacuate the system under vacuum for a minimum of 30 minutes and confirm the vacuum holds for 5 minutes with the pump isolated, to confirm there is no leak drawing air back in.</li><li>Charge with the specified refrigerant mass exactly &mdash; overcharging raises head pressure and reduces cooling performance as surely as undercharging does.</li><li>Run the system and confirm low-side pressure and high-side pressure both fall within specification for the prevailing ambient temperature.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0068",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Low-side pressure (idle, 25 °C ambient)",
+                          "180 kPa to 250 kPa"
+                        ],
+                        [
+                          "High-side pressure (idle, 25 °C ambient)",
+                          "1200 kPa to 1600 kPa"
+                        ],
+                        [
+                          "Thermostat opening temperature",
+                          "88 °C"
+                        ],
+                        [
+                          "Cooling fan on-threshold",
+                          "99 °C coolant, or 1600 kPa refrigerant high side"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0081",
+            "title": "VEHICLE DYNAMICS & BRAKING KINEMATICS",
+            "chapterNumber": "7",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0072",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0071",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>A vehicle's mass does not press on all four tyres equally the instant it accelerates, brakes or corners &mdash; it shifts, dynamically, toward whichever end or side is resisting the change in motion. Understanding that shift, and the finite grip each tyre has to give in response to it, is the foundation for why braking systems, suspension geometry and stability control are tuned the way they are throughout this manual.</p><h3>1.2 THE TRACTION CIRCLE</h3><p>A tyre's contact patch can generate only a limited total force before it breaks loose, regardless of the direction that force acts in &mdash; braking, accelerating or cornering all draw on the same finite budget of grip. Modelled as a circle whose radius is that maximum force, any combination of braking and cornering force is a single point inside the circle: heavy braking leaves little grip left over for cornering, and heavy cornering leaves little left over for braking, which is precisely why trail-braking into a corner is a skill rather than a free action.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0076",
+                "title": "2. WEIGHT TRANSFER & BRAKING FORCE DISTRIBUTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0073",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 DYNAMIC WEIGHT TRANSFER UNDER BRAKING</h3><p>Deceleration acts through the vehicle's centre of gravity, which sits above the ground rather than at road level &mdash; so braking force at the tyres and the inertial reaction at the centre of gravity form a couple that unloads the rear axle and adds that same load to the front. The higher the centre of gravity and the harder the deceleration, the more load transfers forward; a taller vehicle braking hard can, in the extreme, unload the rear axle enough to make it the first to reach lock-up despite carrying the lesser static share of the vehicle's weight.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0074",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 520 260' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Dynamic Weight Transfer Under Braking</title><defs><marker id='arrowS7' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#d64545'/></marker></defs><defs><marker id='arrowS7b' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#ffb400'/></marker></defs><line x1='40' y1='208' x2='480' y2='208' stroke='#33424f' stroke-width='3'/><rect x='90' y='90' width='300' height='70' rx='20' fill='#c7d0d8' stroke='#33424f' stroke-width='2.5'/><path d='M160,90 L165,55 A16,16 0 0 1 181,45 L275,45 A16,16 0 0 1 291,55 L296,90 Z' fill='#c7d0d8' stroke='#33424f' stroke-width='2.5'/><circle cx='150' cy='180' r='28' fill='#33424f'/><circle cx='150' cy='180' r='8' fill='#aab4bd'/><circle cx='330' cy='180' r='28' fill='#33424f'/><circle cx='330' cy='180' r='8' fill='#aab4bd'/><circle cx='240' cy='110' r='6' fill='#18344f'/><path d='M285,110 L205,110' fill='none' stroke='#d64545' stroke-width='5' marker-end='url(#arrowS7)'/><path d='M330,128 L330,196' fill='none' stroke='#ffb400' stroke-width='9' marker-end='url(#arrowS7b)'/><path d='M150,150 L150,196' fill='none' stroke='#ffb400' stroke-width='4' marker-end='url(#arrowS7b)'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Dynamic Weight Transfer Under Braking</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#18344f'></span>Centre of gravity (CG) &mdash; height above ground sets the size of the transfer.</li><li><span class='diagram-swatch' style='background:#d64545'></span>Deceleration &mdash; the braking force acting rearward through the CG.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>Dynamic load at each axle &mdash; front load grows, rear load shrinks, in proportion to CG height and deceleration.</li></ul></figcaption></figure>"
+                    }
+                  },
+                  {
+                    "id": "b0075",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.2 ELECTRONIC BRAKEFORCE DISTRIBUTION (EBD)</h3><p>Because the front axle gains load and the rear axle loses it under braking, splitting brake pressure evenly between front and rear would lock the lightly-loaded rear wheels well before the front tyres' grip is fully used. EBD, working through the same ABS hydraulic control unit described in Section 2, continuously trims rear-circuit pressure below the front circuit's own pressure in proportion to the load transfer estimated from all four wheel speed sensors, extracting more of the vehicle's total available stopping force before ABS modulation is ever needed at all.</p><h3>2.3 SLIP RATIO</h3><p>Slip ratio compares a wheel's actual rotational speed with the road speed it would have if rolling freely, expressed as a percentage. Counter-intuitively, peak longitudinal grip is not produced at zero slip but at a moderate slip ratio &mdash; typically 10 percent to 20 percent for a road tyre on dry asphalt &mdash; because a small amount of controlled slip is what lets the tyre's rubber shear and interlock with the road surface. Beyond that peak, grip falls off as slip increases toward a fully locked, 100 percent-slip wheel, which is the operating point ABS exists to avoid.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0078",
+                "title": "3. CORNERING DYNAMICS",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0077",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 LATERAL LOAD TRANSFER</h3><p>Cornering produces the same kind of weight transfer as braking, but sideways: centripetal acceleration through the centre of gravity unloads the inside wheels and loads the outside pair. Because a tyre's grip does not increase in direct proportion to the load placed on it &mdash; grip grows more slowly than load once load is high &mdash; the outside tyres gaining load and the inside tyres losing it produces a net reduction in the axle's total available grip, which is why a wider track and a stiffer anti-roll bar can measurably improve cornering grip even without changing tyre size.</p><h3>3.2 UNDERSTEER AND OVERSTEER</h3><ul><li><b>Understeer</b> &mdash; the front axle reaches its grip limit before the rear. The vehicle follows a wider arc than the steering angle commands; the standard correction is to reduce speed and unwind some steering lock to let the front tyres regain grip.</li><li><b>Oversteer</b> &mdash; the rear axle reaches its grip limit first. The rear of the vehicle begins to rotate faster than the intended line; correction is steering input in the direction of the slide, applied promptly, together with easing off whatever load is currently on the rear tyres.</li></ul><p>Most production vehicles are deliberately tuned toward mild understeer at the limit, because it is the more predictable and more easily corrected of the two failure modes for an average driver.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0080",
+                "title": "4. VERIFICATION PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0079",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 STRAIGHT-LINE DECELERATION TEST</h3><p>Reference workcard MKMTM-37-10-00-310-4A. Perform only on a closed, dry, level test surface.</p><ol><li>Accelerate to the specified test speed and apply maximum brake pressure without inducing ABS intervention.</li><li>Record deceleration using a calibrated accelerometer; confirm it meets or exceeds 7.5 metres per second squared.</li><li>Confirm the vehicle tracks straight, with no pull toward either side.</li></ol><h3>4.2 BRAKE BALANCE TEST</h3><p>Reference workcard MKMTM-37-20-00-355-1B. Performed on a roller brake tester.</p><ol><li>Run each axle in turn and record peak braking force at each wheel.</li><li>Confirm side-to-side imbalance at any one axle does not exceed 15 percent of the higher reading.</li><li>Confirm the front axle contributes 60 percent to 70 percent of total braking force, consistent with the static and dynamic load split described in this section.</li></ol>"
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0092",
+            "title": "HYBRID & ELECTRIC VEHICLE (EV) POWERTRAINS",
+            "chapterNumber": "8",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0083",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0082",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Hybrid and electric powertrains replace or supplement the internal combustion engine of Section 1 with an electric drive system: a high-voltage battery, an inverter, and one or more traction motors. Because the energy stored on board now sits at several hundred volts rather than 12 V, this section's safety procedures apply in addition to, not instead of, the electrical practices already covered in Section 4.</p><h3>1.2 HIGH-VOLTAGE BATTERY CHEMISTRY</h3><p>Most traction packs use lithium-ion cells in one of two common chemistries: Nickel Manganese Cobalt Oxide (NMC), chosen for its high energy density and therefore longer range per kilogram, and Lithium Iron Phosphate (LFP), chosen for its greater tolerance of full charging and thermal abuse at some cost in energy density. Cells are grouped into modules and modules into a pack, typically totalling 300 V to 800 V depending on architecture.</p><h3>1.3 BATTERY MANAGEMENT SYSTEM (BMS)</h3><p>The Battery Management System (BMS) continuously measures every cell group's voltage and the pack's temperature at multiple points, balancing individual cells against one another so the weakest cell does not limit the usable capacity of the whole pack, and disconnecting the pack's own main contactors immediately if any cell strays outside safe voltage or temperature limits.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0086",
+                "title": "2. INVERTER & MOTOR ARCHITECTURE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0084",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 THE INVERTER</h3><p>The inverter converts the battery's DC supply into the three-phase AC waveform a traction motor needs, and does the reverse during regenerative braking. It switches high-current power transistors &mdash; increasingly Silicon Carbide (SiC) devices rather than older IGBTs, for lower switching losses &mdash; many thousands of times per second, synthesising a smooth sine wave from a DC source by varying each switch's on-time (pulse-width modulation).</p><h3>2.2 PMSM TRACTION MOTOR</h3><p>A Permanent Magnet Synchronous Motor (PMSM) is the most common traction motor type: permanent magnets embedded in the rotor lock onto the inverter's rotating magnetic field, so the rotor turns in exact synchronism with that field rather than slipping behind it as an induction motor's rotor does. Field-oriented control &mdash; continuously resolving stator current into torque-producing and flux-producing components &mdash; is what lets the inverter command smooth torque from zero speed all the way to the motor's field-weakening region at high speed.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0085",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 700 300' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>EV High-Voltage Powertrain, Block Diagram</title><defs><marker id='arrowS8' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#ff8a00'/></marker></defs><rect x='30' y='110' width='130' height='80' rx='8' fill='none' stroke='#d64545' stroke-width='3'/><rect x='250' y='110' width='110' height='80' rx='8' fill='none' stroke='#7a5fb0' stroke-width='3'/><circle cx='470' cy='150' r='55' fill='none' stroke='#3d6690' stroke-width='3'/><rect x='545' y='130' width='50' height='40' rx='6' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='650' cy='100' r='20' fill='#33424f'/><circle cx='650' cy='200' r='20' fill='#33424f'/><line x1='595' y1='140' x2='648' y2='105' stroke='#33424f' stroke-width='3'/><line x1='595' y1='160' x2='648' y2='195' stroke='#33424f' stroke-width='3'/><path d='M160,145 L250,145' fill='none' stroke='#ff8a00' stroke-width='7' marker-end='url(#arrowS8)'/><path d='M360,150 L415,150' fill='none' stroke='#ff8a00' stroke-width='7' marker-end='url(#arrowS8)'/><rect x='250' y='230' width='90' height='50' rx='6' fill='none' stroke='#3d6690' stroke-width='2.5'/><rect x='380' y='230' width='70' height='50' rx='6' fill='none' stroke='#33424f' stroke-width='2.5'/><path d='M95,190 L95,230 L250,255' fill='none' stroke='#ff8a00' stroke-width='5'/><line x1='340' y1='255' x2='380' y2='255' stroke='#33424f' stroke-width='3'/><rect x='30' y='220' width='110' height='50' rx='6' fill='none' stroke='#7a5fb0' stroke-width='2.5'/><circle cx='24' cy='245' r='7' fill='none' stroke='#33424f' stroke-width='2'/><path d='M95,190 L85,220' fill='none' stroke='#ff8a00' stroke-width='5'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; EV High-Voltage Powertrain, Block Diagram</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#d64545'></span>HV battery pack &mdash; Li-ion module stack with the pack-level BMS.</li><li><span class='diagram-swatch' style='background:#7a5fb0'></span>Inverter &mdash; switches DC to three-phase AC (and back, during regeneration).</li><li><span class='diagram-swatch' style='background:#3d6690'></span>PMSM traction motor &mdash; drives the reduction gear and, through it, the wheels.</li><li><span class='diagram-swatch' style='background:#ff8a00'></span>High-voltage cabling &mdash; orange sheath, by convention, on every real vehicle.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>DC-DC converter &mdash; steps HV down to feed the 12 V auxiliary system.</li><li><span class='diagram-swatch' style='background:#7a5fb0'></span>On-board charger &mdash; converts external AC supply to DC for the pack.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0088",
+                "title": "3. REGENERATIVE BRAKING INTEGRATION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0087",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 BLENDING REGENERATIVE AND FRICTION BRAKING</h3><p>Lifting off the accelerator or applying the brake pedal can command the traction motor to act as a generator, converting the vehicle's kinetic energy back into electrical energy stored in the pack rather than dissipating it as heat at the friction brakes. A blending controller apportions the driver's total requested deceleration between regenerative and friction braking in real time, smoothly handing off to the friction brakes as vehicle speed falls toward zero (where a motor can no longer generate effectively) or as the pack's own charge-acceptance limit is reached.</p><h3>3.2 COORDINATION WITH ABS AND EBD</h3><p>Because regenerative braking applies its torque only at the driven axle, it must be reduced or removed within milliseconds the instant that axle approaches wheel lock, handing the remaining deceleration entirely to the friction brakes and the ABS hydraulic control unit described in Section 2. This coordination is managed by the same integrated braking system responsible for EBD, so the driver feels one continuous, blended pedal response rather than a handoff between two different braking systems.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0091",
+                "title": "4. HIGH-VOLTAGE SAFETY & SERVICE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0089",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 HIGH-VOLTAGE INTERLOCK LOOP (HVIL)</h3><p>A low-voltage sense wire is looped through every high-voltage connector, cover and service disconnect in the system. Opening any one of them breaks the loop, and the BMS opens the main pack contactors within milliseconds of detecting that break &mdash; before a technician's hands can reach the now-exposed high-voltage contacts inside a properly designed connector.</p><h3>4.2 SERVICE DISCONNECT PROCEDURE</h3><p>Reference workcard MKMTM-38-10-00-100-1A. Personal protective equipment rated for the system voltage is mandatory before beginning.</p><ol><li>Switch off the vehicle and remove the key or fob from range.</li><li>Remove the low-voltage 12 V battery's negative terminal first, isolating the contactor control circuit.</li><li>Remove the dedicated high-voltage service disconnect (service plug), which physically opens the pack's main circuit independently of the contactors.</li><li>Wait the manufacturer-specified discharge time, typically 5 to 10 minutes, for the drive system's internal capacitors to bleed down.</li><li>Confirm zero voltage directly at the high-voltage connectors using a rated meter before touching any orange-sheathed cable or connector.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0090",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Typical pack voltage",
+                          "300 V to 800 V DC"
+                        ],
+                        [
+                          "Low-voltage interlock (HVIL) sense circuit",
+                          "Under 12 V"
+                        ],
+                        [
+                          "Minimum PPE rating",
+                          "1000 V insulated gloves and tools"
+                        ],
+                        [
+                          "Capacitor discharge threshold before service",
+                          "Below 60 V DC"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0104",
+            "title": "CHASSIS & STRUCTURAL INTEGRITY",
+            "chapterNumber": "9",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0094",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0093",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>The chassis is the structure every other system in this manual bolts to, reacts against, or hangs from &mdash; the engine and drivetrain, the suspension pickup points, the crash structure and the body panels all depend on it holding its shape under load. Two fundamentally different construction philosophies remain in use: the body-on-frame ladder chassis, and the unitised monocoque.</p><h3>1.2 LADDER FRAME</h3><p>A ladder frame carries every structural load through two full-length steel rails joined by perpendicular cross-members, with the passenger body mounted on top through isolating bushes as a largely non-structural shell. This separation is what makes a ladder frame well suited to body-swap flexibility and to absorbing severe off-road twisting loads without transmitting them into the cabin, which is why the layout persists on trucks and body-on-frame SUVs.</p><h3>1.3 MONOCOQUE (UNIBODY)</h3><p>A monocoque instead forms the floor pan, pillars, roof and inner panels into one continuous welded shell that is itself the primary structure &mdash; there is no separate frame underneath. Spreading load through the whole shell rather than two rails yields a lighter structure for a given stiffness, at the cost of the off-road articulation tolerance a ladder frame provides, which is why monocoque construction dominates passenger cars and crossovers.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0096",
+                "title": "2. CRASH ENERGY MANAGEMENT",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0095",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 CRUMPLE ZONES</h3><p>The structure ahead of and behind the passenger cell is deliberately engineered to deform in a controlled, progressive sequence during a collision, converting the vehicle's kinetic energy into structural deformation work rather than passing it directly into the occupants. Front and rear longitudinal rails are shaped with deliberate crush initiators &mdash; beads or notches pressed into the rail &mdash; that set exactly where and in what sequence the rail folds, keeping the collapse force within a controlled band rather than buckling unpredictably.</p><h3>2.2 THE SAFETY CAGE</h3><p>Unlike the crumple zones ahead of and behind it, the passenger cell itself is engineered to resist deformation, using higher-strength steel sections at the A, B and C pillars, the sills and the roof rails so the occupant survival space stays intact while the structure around it absorbs the impact. The transition between a zone designed to crush and a zone designed to resist crushing is itself a deliberately engineered structural boundary, not an incidental one.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0100",
+                "title": "3. STRUCTURAL STIFFNESS & NVH DAMPING",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0097",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 TORSIONAL AND BENDING STIFFNESS</h3><p>Torsional stiffness describes how much the structure twists, front relative to rear, under an opposing vertical load at each end &mdash; the load a body experiences whenever one front and the diagonally opposite rear wheel simultaneously meet uneven ground. Bending stiffness describes resistance to sagging along the vehicle's length under its own distributed weight. Both matter well beyond crash safety: a structure that twists measurably under suspension loads lets that twist absorb some of the suspension's own geometric changes, making the actual wheel alignment under load less predictable than the static alignment set out in Section 3 &mdash; which is why stiffness, not just strength, is a handling specification as much as a safety one.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0098",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 620 260' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Monocoque vs. Ladder-Frame Construction</title><line x1='40' y1='100' x2='270' y2='100' stroke='#33424f' stroke-width='6'/><line x1='40' y1='160' x2='270' y2='160' stroke='#33424f' stroke-width='6'/><line x1='70' y1='100' x2='70' y2='160' stroke='#33424f' stroke-width='5'/><line x1='120' y1='100' x2='120' y2='160' stroke='#33424f' stroke-width='5'/><line x1='170' y1='100' x2='170' y2='160' stroke='#33424f' stroke-width='5'/><line x1='220' y1='100' x2='220' y2='160' stroke='#33424f' stroke-width='5'/><line x1='260' y1='100' x2='260' y2='160' stroke='#33424f' stroke-width='5'/><rect x='50' y='50' width='210' height='45' rx='10' fill='none' stroke='#aab4bd' stroke-width='2.5' stroke-dasharray='5,4'/><line x1='305' y1='20' x2='305' y2='240' stroke='#c7d0d8' stroke-width='2' stroke-dasharray='4,4'/><rect x='340' y='60' width='250' height='140' rx='24' fill='none' stroke='#18344f' stroke-width='5'/><line x1='390' y1='62' x2='390' y2='198' stroke='#18344f' stroke-width='3'/><line x1='465' y1='62' x2='465' y2='198' stroke='#18344f' stroke-width='3'/><line x1='540' y1='62' x2='540' y2='198' stroke='#18344f' stroke-width='3'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Monocoque vs. Ladder-Frame Construction</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#33424f'></span>Ladder frame &mdash; two full-length rails carry the loads; the body is a separate, bolted-on shell.</li><li><span class='diagram-swatch' style='background:#aab4bd'></span>Body-on-frame &mdash; the cabin adds little to overall stiffness in this layout.</li><li><span class='diagram-swatch' style='background:#18344f'></span>Monocoque &mdash; floor, pillars and roof form one continuous, load-bearing shell.</li></ul></figcaption></figure>"
+                    }
+                  },
+                  {
+                    "id": "b0099",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.2 NVH DAMPING</h3><p>Noise, Vibration and Harshness (NVH) treatment absorbs energy the structure would otherwise carry to the occupants as audible noise or felt vibration. Rubber and hydraulic engine and transmission mounts isolate powertrain vibration from the body; constrained-layer damping panels bonded to large flat body sections convert panel vibration into a small amount of heat within the damping layer itself; and sound-deadening material in the floor, dash and wheel arches attenuates airborne road and wind noise before it reaches the cabin.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0103",
+                "title": "4. INSPECTION PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0101",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 STRUCTURAL INSPECTION AFTER IMPACT</h3><p>Reference workcard MKMTM-39-10-00-210-3A.</p><ol><li>Measure body reference points against the manufacturer's dimensional data using a three-dimensional measuring bench.</li><li>Inspect crush zones for evidence of prior deformation, including creased paint or disturbed underseal, even where the panel itself has been replaced.</li><li>Inspect the passenger cell's pillars and sills specifically for any deformation; unlike the crush zones, any measurable deformation here requires the cell to be assessed against the manufacturer's repair-or-replace threshold.</li><li>Confirm all mount bushes are free of splitting or oil contamination before returning the vehicle to service.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0102",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Body reference point tolerance",
+                          "±3 mm from datum"
+                        ],
+                        [
+                          "Engine mount bolt torque",
+                          "65 newton metres"
+                        ],
+                        [
+                          "Subframe mounting bolt torque",
+                          "110 newton metres"
+                        ],
+                        [
+                          "Seat belt anchorage bolt torque",
+                          "45 newton metres"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0115",
+            "title": "EXHAUST & EMISSIONS CONTROL SYSTEMS",
+            "chapterNumber": "10",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0106",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0105",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Combustion, even when well controlled, produces pollutants the engine alone cannot avoid: carbon monoxide (CO) and unburnt hydrocarbons (HC) from incomplete combustion, oxides of nitrogen (NOx) from the high temperatures combustion itself creates, and, on diesel engines, particulate soot. The aftertreatment system described in this section removes or converts each of these before the exhaust reaches the tailpipe.</p><h3>1.2 THE THREE-WAY CATALYTIC CONVERTER</h3><p>A petrol engine's catalytic converter is described as three-way because a single device treats all three pollutants at once, using a washcoat of platinum, palladium and rhodium spread across a ceramic honeycomb to maximise the surface area available for the reaction. CO and HC are oxidised to carbon dioxide and water, while NOx is simultaneously reduced back to nitrogen &mdash; a reaction that only proceeds efficiently within a narrow window around the stoichiometric air&ndash;fuel ratio, which is exactly why closed-loop fuel control (Section 1) matters as much for emissions as it does for economy.</p><h3>1.3 CATALYST LIGHT-OFF</h3><p>The catalyst does essentially nothing until its washcoat reaches light-off temperature, typically around 300 °C, which is why the large majority of a cold start's total emissions occur in the first minute or two of running. Retarded ignition timing during warm-up, described in Section 1, is one of the principal strategies used to raise exhaust temperature and reach light-off as quickly as possible.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0108",
+                "title": "2. DIESEL AFTERTREATMENT: DPF & SCR",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0107",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 DIESEL PARTICULATE FILTER (DPF)</h3><p>A Diesel Particulate Filter (DPF) is a ceramic honeycomb with alternately plugged channels, forcing exhaust gas to pass through the porous cell walls rather than straight through, which traps soot particles the three-way catalyst reaction cannot address. Trapped soot must periodically be burned off, or regenerated, or the filter's rising backpressure will eventually choke the engine.</p><ul><li><b>Passive regeneration</b> &mdash; soot oxidises continuously at normal highway exhaust temperatures, with no driver-noticeable event at all.</li><li><b>Active regeneration</b> &mdash; when soot loading crosses a threshold the ECU cannot clear passively, it injects additional fuel late in the exhaust stroke specifically to raise exhaust temperature above 550 °C for several minutes, deliberately burning the accumulated soot.</li></ul><h3>2.2 SELECTIVE CATALYTIC REDUCTION (SCR)</h3><p>Selective Catalytic Reduction (SCR) targets NOx directly, downstream of the DPF, using a Diesel Exhaust Fluid (DEF, also sold as AdBlue) &mdash; a urea and water solution injected into the hot exhaust stream ahead of the SCR catalyst. Exhaust heat first hydrolyses the urea into ammonia; the SCR catalyst then reacts that ammonia with NOx to produce nitrogen and water vapour, reducing tailpipe NOx by up to 90 percent. Dosing is closed-loop, trimmed continuously from a NOx sensor downstream of the catalyst, and a vehicle will deliberately limit engine power, then refuse to restart, if the DEF tank is allowed to run dry.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0111",
+                "title": "3. EGR & EMISSIONS MANAGEMENT",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0109",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 EXHAUST GAS RECIRCULATION (EGR)</h3><p>Exhaust Gas Recirculation (EGR) routes a metered fraction of exhaust gas back into the intake charge. Because that recirculated gas is largely inert, it displaces some of the oxygen that would otherwise reach peak combustion temperature, and NOx formation rises sharply with combustion temperature &mdash; so lowering peak temperature is a direct, effective lever on NOx output, ahead of anything SCR later has to remove.</p><h3>3.2 COOLED EGR</h3><p>Passing recirculated gas through a dedicated EGR cooler before it re-enters the intake removes additional heat from the gas itself, which further lowers the diluted charge's temperature for a given EGR flow rate and allows a higher EGR percentage before combustion stability or power output suffers.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0110",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 700 240' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>Exhaust Aftertreatment Flow</title><defs><marker id='arrowS10' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#33424f'/></marker></defs><defs><marker id='arrowS10g' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#3f8f5f'/></marker></defs><rect x='20' y='90' width='80' height='60' rx='8' fill='#c7d0d8' stroke='#33424f' stroke-width='2.5'/><circle cx='150' cy='120' r='30' fill='none' stroke='#33424f' stroke-width='3'/><rect x='210' y='95' width='70' height='50' rx='6' fill='none' stroke='#ffb400' stroke-width='3'/><rect x='310' y='95' width='90' height='50' rx='6' fill='none' stroke='#aab4bd' stroke-width='3'/><line x1='319.0' y1='101' x2='319.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='328.0' y1='101' x2='328.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='337.0' y1='101' x2='337.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='346.0' y1='101' x2='346.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='355.0' y1='101' x2='355.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='364.0' y1='101' x2='364.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='373.0' y1='101' x2='373.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='382.0' y1='101' x2='382.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><line x1='391.0' y1='101' x2='391.0' y2='139' stroke='#aab4bd' stroke-width='1.5' opacity='0.55'/><rect x='430' y='95' width='90' height='50' rx='6' fill='none' stroke='#2f8f95' stroke-width='3'/><path d='M475,95 L475,70 L460,55' fill='none' stroke='#3d6690' stroke-width='3'/><rect x='420' y='20' width='60' height='35' rx='4' fill='none' stroke='#3d6690' stroke-width='2.5'/><path d='M520,120 L600,120 L620,112 M600,120 L620,128' fill='none' stroke='#33424f' stroke-width='3'/><path d='M105,120 L120,120' stroke='#33424f' stroke-width='3' marker-end='url(#arrowS10)'/><path d='M180,120 L210,120' stroke='#33424f' stroke-width='3' marker-end='url(#arrowS10)'/><path d='M280,120 L310,120' stroke='#33424f' stroke-width='3' marker-end='url(#arrowS10)'/><path d='M400,120 L430,120' stroke='#33424f' stroke-width='3' marker-end='url(#arrowS10)'/><path d='M95,90 Q60,50 30,90' fill='none' stroke='#3f8f5f' stroke-width='3' stroke-dasharray='5,4' marker-end='url(#arrowS10g)'/><path d='M58,68 L66,60 L74,68 L66,76 Z' fill='#3f8f5f'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; Exhaust Aftertreatment Flow</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#33424f'></span>Turbocharger &mdash; recovers exhaust energy to boost intake pressure.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>DOC &mdash; diesel oxidation catalyst; oxidises CO and unburnt hydrocarbons.</li><li><span class='diagram-swatch' style='background:#aab4bd'></span>DPF &mdash; diesel particulate filter; traps soot for periodic regeneration.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>SCR catalyst &mdash; reduces NOx to nitrogen and water using injected DEF.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>DEF / AdBlue tank &mdash; supplies the metered urea-water dosing injector.</li><li><span class='diagram-swatch' style='background:#3f8f5f'></span>EGR loop &mdash; recirculates a metered fraction of exhaust back to the intake.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0114",
+                "title": "4. INSPECTION & SERVICE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0112",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 FORCED DPF REGENERATION</h3><p>Reference workcard MKMTM-40-10-00-260-5B. Perform only with the vehicle stationary, outdoors or under an extraction hood, and with the parking brake applied.</p><ol><li>Connect the diagnostic tool and confirm soot loading and DPF differential pressure before starting.</li><li>Command a stationary forced regeneration and maintain the specified fast-idle speed throughout &mdash; typically 15 to 20 minutes.</li><li>Monitor exhaust gas temperature; abort immediately if it exceeds the specified ceiling.</li><li>Confirm soot loading has fallen below the target threshold before releasing the vehicle.</li></ol><h3>4.2 EXHAUST BACK PRESSURE TEST</h3><p>Reference workcard MKMTM-40-20-00-340-2C.</p><ol><li>Fit a pressure gauge at the specified port ahead of the DPF.</li><li>Run the engine at 2500 RPM under load and record the reading.</li><li>A reading above 20 kPa indicates a restricted filter or catalyst requiring further investigation before a forced regeneration is attempted.</li></ol>"
+                    }
+                  },
+                  {
+                    "id": "b0113",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Catalyst light-off temperature",
+                          "300 °C"
+                        ],
+                        [
+                          "Active regeneration exhaust target",
+                          "550 °C to 600 °C"
+                        ],
+                        [
+                          "DEF dosing accuracy",
+                          "±5 percent of commanded quantity"
+                        ],
+                        [
+                          "Maximum exhaust backpressure (2500 RPM)",
+                          "20 kPa"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0126",
+            "title": "VEHICLE SAFETY SYSTEMS & ADAS",
+            "chapterNumber": "11",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0117",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0116",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Vehicle safety systems split into two categories: passive systems, which reduce injury once a collision is already unavoidable, and active systems &mdash; grouped under Advanced Driver Assistance Systems (ADAS) &mdash; which work to help the driver avoid the collision in the first place. This section covers both, together with the sensor suite that makes the active systems possible.</p><h3>1.2 AIRBAG TRIGGERING</h3><p>Dedicated crash sensors &mdash; accelerometers mounted at the front structure, the B-pillars and centrally within the Restraint Control Module itself &mdash; continuously measure deceleration. The Restraint Control Module compares that signal against stored crash-severity algorithms and, within milliseconds of confirming a deployment-grade event, fires the appropriate combination of airbags and pretensioners for that specific impact's severity and direction &mdash; a frontal algorithm and a side-impact algorithm run independently and can produce very different deployment decisions from superficially similar-looking damage.</p><h3>1.3 SEAT BELT PRETENSIONERS</h3><p>A pyrotechnic pretensioner removes slack from the seat belt within milliseconds of a qualifying impact, drawing the occupant firmly into the seat before the airbag deploys so the two systems work together rather than against each other. Being pyrotechnic, single-use devices, pretensioners must always be replaced &mdash; never reused &mdash; after any deployment.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0120",
+                "title": "2. ACTIVE ADAS SENSOR SUITE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0118",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 SENSOR FUSION</h3><p>No single sensor type is well suited to every condition, so ADAS functions combine several: <b>radar</b> measures range and closing speed directly and reliably, in rain or fog, but cannot read a road sign or a lane marking; <b>camera</b> (CMOS image sensor) classifies what an object actually is &mdash; a pedestrian, a cyclist, a lane line, a speed sign &mdash; but degrades in poor visibility; and <b>LiDAR</b>, fitted to higher-end systems, builds a precise three-dimensional point cloud of the surrounding scene. A fusion controller combines all three data streams into one coherent model of the vehicle's surroundings, which is more reliable, and more redundant against a single sensor's blind spot, than any one sensor alone.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0119",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 420 640' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>ADAS Sensor Coverage (Top-Down)</title><rect x='140' y='120' width='140' height='420' rx='40' fill='#c7d0d8' stroke='#33424f' stroke-width='3'/><rect x='155' y='150' width='110' height='60' rx='10' fill='none' stroke='#aab4bd' stroke-width='2' stroke-dasharray='4,4'/><rect x='128' y='180' width='16' height='50' rx='3' fill='#33424f'/><rect x='276' y='180' width='16' height='50' rx='3' fill='#33424f'/><rect x='128' y='460' width='16' height='50' rx='3' fill='#33424f'/><rect x='276' y='460' width='16' height='50' rx='3' fill='#33424f'/><path d='M210,116 L100,20 A150,150 0 0 1 320,20 Z' fill='#2f8f95' fill-opacity='0.28' stroke='#2f8f95' stroke-width='2'/><path d='M210,150 L165,45 A100,100 0 0 1 255,45 Z' fill='#7a5fb0' fill-opacity='0.30' stroke='#7a5fb0' stroke-width='2'/><path d='M210,545 L160,615 A95,95 0 0 0 260,615 Z' fill='#3d6690' fill-opacity='0.28' stroke='#3d6690' stroke-width='2'/><path d='M150,470 L60,415 A100,100 0 0 0 60,560 Z' fill='#ffb400' fill-opacity='0.28' stroke='#ffb400' stroke-width='2'/><path d='M270,470 L360,415 A100,100 0 0 1 360,560 Z' fill='#ffb400' fill-opacity='0.28' stroke='#ffb400' stroke-width='2'/><circle cx='162' cy='122' r='4' fill='#33424f'/><circle cx='162' cy='538' r='4' fill='#33424f'/><circle cx='186' cy='122' r='4' fill='#33424f'/><circle cx='186' cy='538' r='4' fill='#33424f'/><circle cx='210' cy='122' r='4' fill='#33424f'/><circle cx='210' cy='538' r='4' fill='#33424f'/><circle cx='234' cy='122' r='4' fill='#33424f'/><circle cx='234' cy='538' r='4' fill='#33424f'/><circle cx='258' cy='122' r='4' fill='#33424f'/><circle cx='258' cy='538' r='4' fill='#33424f'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; ADAS Sensor Coverage (Top-Down)</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#2f8f95'></span>Front radar &mdash; long-range closing-speed detection for adaptive cruise and AEB.</li><li><span class='diagram-swatch' style='background:#7a5fb0'></span>Forward camera &mdash; windshield-mounted; lane markings, signs, and object classification.</li><li><span class='diagram-swatch' style='background:#ffb400'></span>Corner radars &mdash; blind-spot and cross-traffic coverage at each rear quarter.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>Rear camera &mdash; reverse manoeuvring and rear cross-traffic alert.</li><li><span class='diagram-swatch' style='background:#33424f'></span>Ultrasonic sensors &mdash; short-range parking distance at the front and rear bumpers.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0122",
+                "title": "3. AUTONOMOUS EMERGENCY BRAKING (AEB)",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0121",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 DECISION LOGIC</h3><p>Autonomous Emergency Braking (AEB) continuously computes time-to-collision from the fused sensor picture ahead of the vehicle. When that time falls below a threshold at which the driver's own reaction time makes manual braking unlikely to avoid the collision, the system first issues a visual and audible warning, then, if the driver has still not responded and the closing threat persists, commands autonomous braking through the same ABS hydraulic control unit described in Section 2 &mdash; applying full available brake pressure without waiting for the driver at all.</p><h3>3.2 INTERACTION WITH ABS AND EBD</h3><p>An AEB-commanded stop is, mechanically, just another brake application as far as the ABS and EBD systems are concerned: wheel speed sensors, the HCU's valve modulation and the electronic brakeforce distribution described in Section 7 all operate exactly as they would for a driver-applied stop. AEB's own contribution is entirely upstream of the hydraulics &mdash; deciding that a full-pressure stop is needed, and when.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0125",
+                "title": "4. CALIBRATION & SERVICE PROCEDURES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0123",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 FORWARD CAMERA & RADAR RECALIBRATION</h3><p>Reference workcard MKMTM-41-10-00-220-4A. Required after windshield replacement, front bumper removal, any front suspension or ride-height change, or any repair affecting the camera or radar mounting point.</p><ol><li>Position the vehicle precisely on a level floor, at the specified distance and alignment relative to the manufacturer's calibration target board.</li><li>Confirm tyre pressures and fuel level match the calibration procedure's stated conditions &mdash; ride height affects both camera aim and radar boresight.</li><li>Run the diagnostic tool's static calibration routine and confirm a pass result before releasing the vehicle.</li><li>Where specified, complete a dynamic calibration drive at the required speed range on a clearly-marked road to confirm the static result under real conditions.</li></ol><h3>4.2 PRETENSIONER & AIRBAG SERVICE CAUTION</h3><p>Disconnect the 12 V battery and wait the manufacturer-specified capacitor discharge time before working on any restraint system component. Never probe a pyrotechnic igniter circuit with a non-approved meter, and never reuse a deployed or removed pretensioner or airbag module under any circumstances.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0124",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Column 1",
+                        "Column 2"
+                      ],
+                      "rows": [
+                        [
+                          "Front radar detection range",
+                          "Up to 200 metres"
+                        ],
+                        [
+                          "AEB minimum functional speed",
+                          "4 kilometres per hour"
+                        ],
+                        [
+                          "Restraint system capacitor discharge wait",
+                          "1 minute minimum"
+                        ],
+                        [
+                          "Recalibration target distance tolerance",
+                          "±10 mm"
+                        ]
+                      ],
+                      "merges": []
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          },
+          {
+            "id": "c0137",
+            "title": "DIAGNOSTIC PROTOCOLS & MAINTENANCE PROCEDURES",
+            "chapterNumber": "12",
+            "trades": [],
+            "headingId": null,
+            "lockedBy": null,
+            "lockedByName": null,
+            "lockedAt": null,
+            "toc": [
+              {
+                "id": "t0128",
+                "title": "1. INTRODUCTION",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0127",
+                    "type": "text",
+                    "data": {
+                      "html": "<h2>1.1 GENERAL</h2><p>Every electronic system described in this manual reports its own health over a shared diagnostic interface, standardised across manufacturers specifically so one generic scan tool can interrogate any of them. This section explains that shared protocol, the Diagnostic Trouble Code (DTC) format every module uses to report a fault, and the oscilloscope technique for verifying a sensor circuit directly when a DTC alone is not enough to isolate a fault.</p><h3>1.2 OBD-II AND ISO 15765</h3><p>On-board diagnostics gives every module a common electrical connector, the 16-pin diagnostic link connector, and a common transport protocol over which to report. Since ISO 15765 was mandated, that transport protocol is Controller Area Network itself &mdash; the same high-speed CAN bus described in Section 4 &mdash; carrying standardised diagnostic request and response messages rather than a separate, dedicated diagnostic wire. A scan tool's request reaches every module through the gateway (Section 4), which is why a failed gateway can make an entire vehicle appear, incorrectly, to have no working modules at all.</p>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0131",
+                "title": "2. DIAGNOSTIC TROUBLE CODES (DTC) STRUCTURE",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0129",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>2.1 DTC FORMAT</h3><p>A standard DTC has five characters, each carrying specific meaning: a leading letter for the affected system &mdash; P for Powertrain, B for Body, C for Chassis, U for Network &mdash; followed by four digits. The first digit after the letter distinguishes a generic, cross-manufacturer code (0) from a manufacturer-specific code (1); the remaining three digits identify the specific circuit or condition at fault, defined in a published standard for generic codes and in the manufacturer's own reference for manufacturer-specific ones.</p><ul><li><b>P0XXX</b> &mdash; generic powertrain code, e.g. P0700 (Section 5), common to every manufacturer's implementation.</li><li><b>P1XXX</b> &mdash; manufacturer-specific powertrain code, meaningful only against this vehicle's own reference data.</li><li><b>B0XXX / C0XXX / U0XXX</b> &mdash; the same generic/specific split, applied to body, chassis and network codes respectively.</li></ul>"
+                    }
+                  },
+                  {
+                    "id": "b0130",
+                    "type": "text",
+                    "data": {
+                      "html": "<figure class='tech-diagram'><svg viewBox='0 0 380 260' role='img' aria-labelledby='dg1' preserveAspectRatio='xMidYMid meet'><title id='dg1'>OBD-II 16-Pin Diagnostic Connector (J1962)</title><path d='M60,40 L320,40 L300,190 L80,190 Z' fill='#c7d0d8' fill-opacity='0.25' stroke='#33424f' stroke-width='3'/><circle cx='95' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='125' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='155' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='185' cy='80' r='9' fill='#5a6a7a' stroke='#33424f' stroke-width='2'/><circle cx='215' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='245' cy='80' r='9' fill='#2f8f95' stroke='#33424f' stroke-width='2'/><circle cx='275' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='305' cy='80' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='95' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='125' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='155' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='185' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='215' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='245' cy='150' r='9' fill='#3d6690' stroke='#33424f' stroke-width='2'/><circle cx='275' cy='150' r='9' fill='#c7d0d8' stroke='#33424f' stroke-width='2'/><circle cx='305' cy='150' r='9' fill='#d64545' stroke='#33424f' stroke-width='2'/></svg><figcaption><span class='diagram-title'>Figure 1 &mdash; OBD-II 16-Pin Diagnostic Connector (J1962)</span><ul class='diagram-legend'><li><span class='diagram-swatch' style='background:#5a6a7a'></span>Pin 4 &mdash; chassis ground.</li><li><span class='diagram-swatch' style='background:#2f8f95'></span>Pin 6 &mdash; CAN High.</li><li><span class='diagram-swatch' style='background:#3d6690'></span>Pin 14 &mdash; CAN Low.</li><li><span class='diagram-swatch' style='background:#d64545'></span>Pin 16 &mdash; battery positive, permanently live.</li><li><span class='diagram-swatch' style='background:#c7d0d8'></span>Remaining pins &mdash; manufacturer-discretionary and legacy protocol lines.</li></ul></figcaption></figure>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0133",
+                "title": "3. SENSOR SCOPE TESTING TECHNIQUES",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0132",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>3.1 WHY SCOPE, NOT JUST A DTC READER</h3><p>A DTC confirms that a signal fell outside an expected range for long enough to set a fault; it does not show the shape of that signal, which is frequently what actually identifies the cause. An oscilloscope connected directly at the sensor or actuator connector shows the real waveform, which is often the only way to distinguish, for example, a sensor that has failed outright from one that is simply noisy, or a wiring intermittent that a static DTC snapshot cannot capture at all.</p><h3>3.2 GENERAL PROCEDURE</h3><ol><li>Identify the expected waveform shape and voltage range for the specific circuit from the manufacturer's reference data before connecting anything.</li><li>Back-probe the connector rather than piercing the wire insulation, preserving the circuit's seal and avoiding a self-inflicted intermittent fault.</li><li>Capture the waveform across the full range of the condition being tested &mdash; idle to redline for a crank sensor, full sweep for a throttle position sensor &mdash; rather than a single static reading.</li><li>Compare against the reference waveform for amplitude, frequency and shape; a signal that is correct in voltage but wrong in shape still indicates a fault a simple voltage check would miss.</li></ol><p>Example reference points, using the diagnostic socket already described in Section 4:</p><ul><li><b>Pin 6</b> &mdash; CAN High. Idles at approximately 2.5 V and rises to about 3.5 V when transmitting.</li><li><b>Pin 14</b> &mdash; CAN Low. Idles at approximately 2.5 V and falls to about 1.5 V when transmitting. The two traces should mirror one another about the 2.5 V rest level; a trace that stays flat indicates an open circuit.</li></ul>"
+                    }
+                  }
+                ],
+                "children": []
+              },
+              {
+                "id": "t0136",
+                "title": "4. WORKCARD PROCEDURES & MAINTENANCE SCHEDULING",
+                "type": "text",
+                "blocks": [
+                  {
+                    "id": "b0134",
+                    "type": "text",
+                    "data": {
+                      "html": "<h3>4.1 READING A WORKCARD NUMBER</h3><p>Every procedure referenced throughout this manual carries a workcard number in the form MKMTM-28-10-00-400-8A, for example &mdash; the same code that covers ECU removal and installation in Section 1. Reading left to right: the first pair of digits identifies the system, 28 meaning Engine Management; the second pair identifies the sub-system within it; the next pair is a fixed separator, the three-digit group is the specific task number, and the trailing digit-and-letter pair is a revision and variant suffix. Quoting the full code, rather than a shortened form, is what lets a technician retrieve the exact current-revision procedure rather than an outdated one.</p><h3>4.2 READING STORED CODES</h3><p>Connect the diagnostic tool to the vehicle interface and interrogate every module in turn. Record every stored DTC together with its freeze-frame data before clearing anything &mdash; clearing codes without recording the conditions under which they set discards the most useful evidence available for diagnosing an intermittent fault.</p>"
+                    }
+                  },
+                  {
+                    "id": "b0135",
+                    "type": "table",
+                    "data": {
+                      "headers": [
+                        "Interval",
+                        "Task",
+                        "Reference Workcard"
+                      ],
+                      "rows": [
+                        [
+                          "Every service",
+                          "Read and record all stored DTCs across every module",
+                          "MKMTM-42-10-00-100-1A"
+                        ],
+                        [
+                          "12 months / 15,000 km",
+                          "Brake fluid moisture content check",
+                          "MKMTM-32-10-00-380-2B"
+                        ],
+                        [
+                          "24 months",
+                          "Brake fluid replacement (Section 2)",
+                          "MKMTM-32-10-00-390-3B"
+                        ],
+                        [
+                          "Annually",
+                          "ADAS camera and radar calibration check (Section 11)",
+                          "MKMTM-41-10-00-225-1B"
+                        ],
+                        [
+                          "As indicated by soot model",
+                          "DPF forced regeneration (Section 10)",
+                          "MKMTM-40-10-00-260-5B"
+                        ]
+                      ],
+                      "merges": [],
+                      "caption": "Section 12 — Representative Maintenance Schedule"
+                    }
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "blocks": []
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,179 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.000
+Nowadays, an anti-lock braking system is used in almost all modern vehicles.
+
+00:00:05.000 --> 00:00:11.000
+This system prevents accidents like this, where you lose control of the steering as you apply the brakes.
+
+00:00:12.000 --> 00:00:18.000
+With ABS, you will be able to steer the vehicle properly and it also reduces the braking distance.
+
+00:00:19.000 --> 00:00:24.000
+What is ABS? How is it able to prevent accidents due to the braking?
+
+00:00:24.000 --> 00:00:27.000
+We will explore these questions in this video.
+
+00:00:28.000 --> 00:00:34.000
+To properly understand ABS, we first need to understand the principles of steering and braking.
+
+00:00:35.000 --> 00:00:40.000
+When you press the brake pedal, the brake pads on the wheel discs will be activated and press against the discs.
+
+00:00:41.000 --> 00:00:43.000
+And this will stop the rotation of the wheels.
+
+00:00:44.000 --> 00:00:50.000
+As the wheels stop, this causes slippage between the road and wheels and the vehicle stops due to this friction.
+
+00:00:53.000 --> 00:00:56.000
+Now let's understand the steering mechanism.
+
+00:00:57.000 --> 00:01:02.000
+The whole steering mechanism is dependent on the simple principle of the wheels rolling.
+
+00:01:03.000 --> 00:01:11.000
+The wheels will always try to avoid slipping on the road, so this means that the velocity of the wheel at the contact point will always be zero.
+
+00:01:12.000 --> 00:01:18.000
+The wheels have two kinds of motion. They rotate on their axis and also they move along the direction of the car.
+
+00:01:19.000 --> 00:01:25.000
+Due to these two kinds of motion, they have two kinds of velocity, translational and rotational.
+
+00:01:26.000 --> 00:01:33.000
+For non-slip rolling conditions, the sum of the translational and rotational velocities at the contact point should be zero.
+
+00:01:34.000 --> 00:01:40.000
+Just keep this simple principle in mind, and you will very easily be able to understand the steering mechanism.
+
+00:01:42.000 --> 00:01:47.000
+In an automobile, all four wheels should be rolling at all times to avoid the vehicle slipping.
+
+00:01:48.000 --> 00:01:54.000
+In fact, this simple rolling principle is the reason why your car turns when you turn the front wheels.
+
+00:01:56.000 --> 00:01:59.000
+Let's examine this.
+
+00:02:00.000 --> 00:02:06.000
+Assume a hypothetical condition in which, even after turning the wheels, the car carries straight on.
+
+00:02:07.000 --> 00:02:13.000
+In this case, the rolling velocity will be inclined as shown, and the translation velocity remains straight.
+
+00:02:14.000 --> 00:02:21.000
+Therefore, if you add up these two velocities, the resultant velocity will not be zero. This will cause the car to slip.
+
+00:02:22.000 --> 00:02:27.000
+The only way to avoid this is by making the translation velocity also incline.
+
+00:02:29.000 --> 00:02:33.000
+This is possible only when the whole car makes a turn as shown.
+
+00:02:35.000 --> 00:02:42.000
+When the car makes a turn, at the instantaneous center shown, all four wheels can satisfy the condition of rolling.
+
+00:02:43.000 --> 00:02:49.000
+From this snapshot, you can clearly see how the velocity at the contact point of all four wheels becomes zero.
+
+00:02:52.000 --> 00:02:57.000
+Now, let's analyze the steering mechanism at the time of braking.
+
+00:02:58.000 --> 00:03:02.000
+Due to the brake pads being activated, the wheels stop spinning.
+
+00:03:03.000 --> 00:03:08.000
+Even though the wheels are turned, since they are not rotating, there will be no rotational velocity at all.
+
+00:03:09.000 --> 00:03:15.000
+In this case, the vehicle does not need to turn, as this has become like a normal case of braking.
+
+00:03:16.000 --> 00:03:23.000
+The vehicle will no longer react to the driver's changes to the steering, and will slide in the straight line, which can cause an accident.
+
+00:03:25.000 --> 00:03:33.000
+Apart from losing control of the steering, cars without ABS face another big issue, breaking on surfaces with different levels of traction.
+
+00:03:34.000 --> 00:03:41.000
+When the left and right wheels are on different traction surfaces, applying the brakes will generate different frictional forces on the wheels.
+
+00:03:44.000 --> 00:03:48.000
+This will produce torque, and the car will go into an uncontrollable spin.
+
+00:03:51.000 --> 00:03:54.000
+Let's see how ABS solves these issues.
+
+00:03:55.000 --> 00:03:58.000
+An anti-lock braking system is very simple.
+
+00:03:59.000 --> 00:04:02.000
+What ABS does is to prevent the wheels from completely locking up.
+
+00:04:03.000 --> 00:04:07.000
+The ABS system includes speed sensors attached to all of the wheels.
+
+00:04:08.000 --> 00:04:14.000
+When the sensors detect that a wheel is about to lock up, a modulator unit partially releases the brake pad on that wheel.
+
+00:04:15.000 --> 00:04:18.000
+This way, the wheels will be allowed to spin intermittently during braking.
+
+00:04:20.000 --> 00:04:23.000
+You can immediately see the effect of this intermittent wheel rotation on steering.
+
+00:04:24.000 --> 00:04:27.000
+Here, the wheels will have a rotational velocity component.
+
+00:04:28.000 --> 00:04:34.000
+This will definitely allow the steering to function, and driver will be able to steer the vehicle even during the braking.
+
+00:04:37.000 --> 00:04:43.000
+But the big question here is, how does the action of intermittently releasing the brakes reduce the braking distance?
+
+00:04:44.000 --> 00:04:54.000
+To get an answer to this question, we first need to understand how the coefficient of friction between a tire and the road varies with respect to slip.
+
+00:04:58.000 --> 00:05:03.000
+In perfect rolling conditions, the value of the frictional coefficient is nearly zero.
+
+00:05:04.000 --> 00:05:08.000
+However, when the wheel is 100% slipping, sliding friction comes into play.
+
+00:05:08.000 --> 00:05:15.000
+You can expect the frictional values for other levels of slippage to vary like this.
+
+00:05:16.000 --> 00:05:28.000
+But since rubber is a complex material, which has strange behaviors during braking, the frictional coefficient between the tire and the road varies as shown with respect to slippage.
+
+00:05:29.000 --> 00:05:35.000
+It has a peak value at around 12% of slip ratio, and below and above this, the frictional coefficient reduces.
+
+00:05:39.000 --> 00:05:46.000
+During braking without ABS, the frictional coefficient, which comes into effect, is predominantly sliding friction.
+
+00:05:47.000 --> 00:05:56.000
+However, in ABS braking, the clever algorithm adjusts the brake pressure to keep the slip ratio near to 12%, where the frictional value is at the maximum.
+
+00:05:57.000 --> 00:06:00.000
+This significantly reduces the braking distance.
+
+00:06:02.000 --> 00:06:05.000
+Now, back to the huge instability issue of the cars.
+
+00:06:06.000 --> 00:06:14.000
+By intelligent electronic braking distribution, which is a subsystem of modern ABS, one can overcome this issue very easily.
+
+00:06:16.000 --> 00:06:22.000
+An EBD, Yaw rate of the car and the relative slip of each wheel is measured.
+
+00:06:23.000 --> 00:06:30.000
+Just by reducing the brake pressure on the wheels with higher grip, we will be able to reduce the frictional force produced by these wheels.
+
+00:06:31.000 --> 00:06:35.000
+This will keep the Yaw torque and the whole car under control.
+
+00:06:36.000 --> 00:06:47.000
+We hope this video gave you a clear conceptual overview of the workings of ABS, and please don't forget to support our educational activities on Patreon. Thank you.
+
