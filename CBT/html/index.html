@@ -3451,6 +3451,114 @@ body.cbt-locked #appRoot{
     }
 }
 
+/* Compact footer (phone / small tablet). Last in the sheet so it wins over
+   the 1100/480 rules above. One short row — Prev, Play/Pause, Stop, Next,
+   More — with Speed/Voice/Zoom/Quiz moved into #footer-more-panel by JS.
+   .footer-nav-controls and .controls-row become display:contents so their
+   children join #tts-footer's flex row and `order` can interleave them. */
+
+#moreBtn,
+#footer-more-panel{
+    display:none;
+}
+
+@media (max-width:768px){
+
+    #tts-footer{
+        flex-wrap:nowrap;
+        justify-content:center;
+        gap:8px;
+        padding:8px 10px;
+    }
+
+    .footer-nav-controls,
+    .controls-row{
+        display:contents;
+    }
+
+    #prevPageBtn{ order:1; }
+    #btn-play-pause{ order:2; }
+    #stopBtn{ order:3; }
+    #nextPageBtn{ order:4; }
+    #moreBtn{ order:5; }
+
+    /* Own line beneath the compact row, as before. */
+    .status-note{ order:10; }
+
+    #prevPageBtn::before,
+    #nextPageBtn::before{
+        font-size:20px;
+        line-height:1;
+    }
+    #prevPageBtn::before{ content:"\2039"; }   /* single left angle */
+    #nextPageBtn::before{ content:"\203A"; }   /* single right angle */
+
+    /* Touch targets >= 40px. */
+    #prevPageBtn,
+    #nextPageBtn,
+    #moreBtn,
+    #stopBtn,
+    #btn-play-pause{
+        min-height:40px;
+    }
+    #prevPageBtn,
+    #nextPageBtn,
+    #moreBtn{
+        min-width:44px;
+        padding:6px 10px;
+    }
+
+    #btn-play-pause{
+        flex:1 1 auto;
+        max-width:150px;
+    }
+
+    #moreBtn{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+    #moreBtn::before{
+        content:"\22EF";                       /* midline ellipsis */
+        font-size:22px;
+        line-height:1;
+    }
+    #moreBtn[aria-expanded="true"]{
+        background:#ffb400;
+        color:#18344f;
+    }
+
+    #footer-more-panel{
+        position:absolute;
+        left:8px;
+        right:8px;
+        bottom:calc(100% + 8px);
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+        align-items:center;
+        gap:10px 12px;
+        padding:12px;
+        background:#18344f;
+        border:1px solid rgba(255,255,255,.18);
+        border-radius:12px;
+        box-shadow:0 8px 24px rgba(0,0,0,.45);
+        z-index:1150;
+    }
+
+    #footer-more-panel .zoom-control{
+        flex:0 0 auto;
+    }
+
+    #footer-more-panel .dropdown-menu{
+        max-width:min(240px, calc(100vw - 40px));
+    }
+
+    #footer-more-panel #quizBtn{
+        flex:0 0 auto;
+    }
+}
+
 </style>
 
 </head>
@@ -3949,6 +4057,18 @@ body.cbt-locked #appRoot{
               aria-live="polite" hidden></span>
 
     </div>
+
+    <!-- Compact-footer ("More") menu — only visible at <=768px. The
+         secondary controls (Speed, Voice, Zoom, Quiz) are MOVED (not
+         cloned, so every existing listener and id stays live) into this
+         panel by the script at the bottom of this file, and moved back
+         above 768px. Labels are CSS-generated content, as elsewhere in
+         the footer. -->
+    <button type="button" id="moreBtn" aria-label="More controls"
+            aria-expanded="false" aria-controls="footer-more-panel"></button>
+
+    <div id="footer-more-panel" class="tts-ignore" data-tts-skip="true"
+         role="group" aria-label="More controls" hidden></div>
 
 </footer>
 
@@ -6201,6 +6321,92 @@ zoomInBtn?.addEventListener("click", () => setContentZoom(contentZoom + CONTENT_
 zoomLabel?.addEventListener("click", () => setContentZoom(CONTENT_ZOOM_DEFAULT));
 
 applyContentZoom();
+
+// ----------------------------------------------------
+// Compact footer "More" menu (<=768px)
+//
+// Speed, Voice, Zoom and Quiz are physically MOVED into
+// #footer-more-panel on a narrow viewport (so their ids and listeners
+// stay live) and moved back to a comment-marker at their original spot
+// when the viewport widens. The panel is position:absolute above the
+// footer, so opening it never changes the footer's height or
+// --footer-height.
+// ----------------------------------------------------
+
+(function setupFooterMoreMenu() {
+
+    const footer = document.getElementById("tts-footer");
+    const moreBtn = document.getElementById("moreBtn");
+    const panel = document.getElementById("footer-more-panel");
+
+    if (!footer || !moreBtn || !panel || typeof window.matchMedia !== "function") {
+        return;
+    }
+
+    const secondary = [
+        ...footer.querySelectorAll(".controls-row > .footer-dropdown"),
+        footer.querySelector(".zoom-control"),
+        document.getElementById("quizBtn")
+    ].filter(Boolean);
+
+    // One marker per element, left where it came from.
+    const markers = new Map();
+
+    secondary.forEach((el) => {
+        const marker = document.createComment("more-menu-home");
+        el.parentNode.insertBefore(marker, el);
+        markers.set(el, marker);
+    });
+
+    const setOpen = (open) => {
+        panel.hidden = !open;
+        moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    const mq = window.matchMedia("(max-width: 768px)");
+
+    const apply = () => {
+
+        setOpen(false);
+
+        secondary.forEach((el) => {
+            if (mq.matches) {
+                panel.appendChild(el);
+            } else {
+                const marker = markers.get(el);
+                marker.parentNode.insertBefore(el, marker.nextSibling);
+            }
+        });
+    };
+
+    moreBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setOpen(panel.hidden);
+    });
+
+    // Taps outside the panel (but not on the More button) close it.
+    document.addEventListener("click", (event) => {
+        if (!panel.hidden && !panel.contains(event.target) && event.target !== moreBtn) {
+            setOpen(false);
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !panel.hidden) {
+            setOpen(false);
+            moreBtn.focus();
+        }
+    });
+
+    if (typeof mq.addEventListener === "function") {
+        mq.addEventListener("change", apply);
+    } else if (typeof mq.addListener === "function") {
+        mq.addListener(apply);
+    }
+
+    apply();
+
+})();
 
 // ----------------------------------------------------
 // Live footer height -> --footer-height
