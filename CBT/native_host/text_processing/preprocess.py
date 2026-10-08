@@ -497,6 +497,9 @@ class TextPreprocessor:
     def __init__(self):
 
         self.client_dictionary = self.load_client_dictionary()
+        self._client_dictionary_re = self._compile_case_sensitive(
+            self.client_dictionary
+        )
 
         # A short, stable fingerprint of every dictionary this pipeline
         # depends on. Changing ANY abbreviation/unit/symbol entry
@@ -521,6 +524,66 @@ class TextPreprocessor:
 
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
+
+    # -------------------------------------------------------
+    # Case-sensitive dictionary matching (client_dictionary.json)
+    #
+    # The client dictionary is matched EXACTLY as written: no
+    # re.IGNORECASE, and no lower-casing of either side. Case is part of
+    # an entry's identity -- "CBS" (Chip Burning System) and "CBs"
+    # (Circuit Breakers), "MFDS" (Main Flexible Drive Shaft) and "MFDs"
+    # (Multi Function Displays) are different terms that differ only in
+    # case, and a case-folded lookup cannot keep them apart. It also
+    # stops a key from firing on an ordinary word: "RAM" no longer
+    # rewrites the "ram" in "ram air".
+    #
+    # ENGINEERING_TERMS and ABBREVIATIONS are deliberately NOT affected;
+    # they are documented as case-insensitive and still go through
+    # replace_dictionary(). A term listed in both places (e.g. "CAM") is
+    # therefore still caught, in any case, by the engineering pass.
+    #
+    # One alternation, compiled once, rather than a pattern per key:
+    #   * longest key first, so a short key can never take the front of
+    #     a longer one ("SUB ASSY" before "SUB");
+    #   * a single left-to-right pass, so an expansion is never
+    #     re-scanned and re-expanded by a later key;
+    #   * (?<!\w)/(?!\w) rather than \b -- identical for keys made of
+    #     word characters (all of them today) but still correct for a
+    #     key that starts or ends in punctuation ("No.").
+    # Plurals and substrings therefore never match: "CBs" does not fire
+    # inside "CBss" or "xCBs".
+    # -------------------------------------------------------
+
+    @staticmethod
+    def _compile_case_sensitive(dictionary: dict):
+
+        if not dictionary:
+            # An empty alternation would match the empty string at every
+            # position, so "no entries" must mean "no pattern".
+            return None
+
+        keys = sorted(dictionary, key=lambda key: (-len(key), key))
+
+        return re.compile(
+            r"(?<!\w)(?:"
+            + "|".join(re.escape(key) for key in keys)
+            + r")(?!\w)"
+        )
+
+    def replace_client_dictionary(self, tracker: AlignmentTracker) -> None:
+
+        pattern = self._client_dictionary_re
+
+        if pattern is None:
+            return
+
+        # Applied against the AlignmentTracker (not a bare pattern.sub())
+        # so each substitution keeps its record of which original word(s)
+        # it came from -- the browser highlight and the forced-alignment
+        # timings are built from that mapping.
+        dictionary = self.client_dictionary
+
+        tracker.apply(pattern, lambda m: dictionary[m.group(0)])
 
     # -------------------------------------------------------
     # Dictionary Fingerprint
@@ -1201,13 +1264,11 @@ class TextPreprocessor:
         self.replace_units(tracker)
 
         #
-        # Client Dictionary
+        # Client Dictionary -- case-SENSITIVE (see
+        # replace_client_dictionary), unlike the two passes below.
         #
 
-        self.replace_dictionary(
-            tracker,
-            self.client_dictionary
-        )
+        self.replace_client_dictionary(tracker)
 
         #
         # Engineering Terms

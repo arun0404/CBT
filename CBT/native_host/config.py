@@ -354,7 +354,23 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               SENTENCE_SILENCE_SECONDS. Changes the audio for any text
 #               containing a code with a repeated digit, so v20 entries
 #               for it are no longer correct.
-ALIGNMENT_CACHE_VERSION = "v21"
+#   v21 -> v22: client_dictionary.json is now matched CASE-SENSITIVELY
+#               (TextPreprocessor.replace_client_dictionary: one compiled
+#               pattern, longest key first, no re.IGNORECASE) so entries
+#               that differ only in case stay distinct -- "CBS" Chip
+#               Burning System vs "CBs" Circuit Breakers, "MFDS" Main
+#               Flexible Drive Shaft vs "MFDs" Multi Function Displays,
+#               all four newly added. The dictionary_fingerprint busts on
+#               the new entries; this bump covers the matching change
+#               itself, which no fingerprint sees: a key no longer fires
+#               on a different-case spelling, so e.g. the ordinary word
+#               "ram" is no longer rewritten to "Random Access Memory".
+#               Changes the audio and processed-word count for any text
+#               containing a client-dictionary key in a different case, so
+#               v21 entries for it are no longer correct.
+#               ENGINEERING_TERMS and ABBREVIATIONS are still
+#               case-insensitive (so "cam" is still caught by "CAM" there).
+ALIGNMENT_CACHE_VERSION = "v22"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

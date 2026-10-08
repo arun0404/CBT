@@ -38,5 +38,9 @@
     "XML": "Extensible Markup Language",
     "PCB": "Printed Circuit Board",
     "PLC": "Programmable Logic Controller",
-    "SCADA": "Supervisory Control And Data Acquisition"
+    "SCADA": "Supervisory Control And Data Acquisition",
+    "CBS": "Chip Burning System",
+    "CBs": "Circuit Breakers",
+    "MFDs": "Multi Function Displays",
+    "MFDS": "Main Flexible Drive Shaft"
 }
