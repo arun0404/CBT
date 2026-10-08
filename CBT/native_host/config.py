@@ -370,7 +370,23 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               v21 entries for it are no longer correct.
 #               ENGINEERING_TERMS and ABBREVIATIONS are still
 #               case-insensitive (so "cam" is still caught by "CAM" there).
-ALIGNMENT_CACHE_VERSION = "v22"
+#   v22 -> v23: the ambiguous letter "L"/"l" is now resolved by context
+#               (TextPreprocessor.expand_litres / expand_bracketed_litres /
+#               expand_length_symbols / the L-assignment rule in
+#               expand_dimension_abbreviations). Litres: "1 L" is now
+#               singular ("1 litre", was "1 litres"), "2.0 L engine" is a
+#               singular modifier, "(50L)" is expanded instead of being
+#               shielded as a part code, and "L/100km" is "litres per
+#               hundred kilometres" (was "litres or 100 kilometres").
+#               Length: "l x w x h" in lower case, "L = 250" ("length
+#               equals 250") and "wheelbase (L)" / "overall length (L)"
+#               are expanded instead of reading the bare letter. No
+#               dictionary changed, so dictionary_fingerprint does NOT
+#               move; this bump is what invalidates v22 entries for any
+#               text containing one of those shapes. Changes the audio and
+#               the processed-word count for them, so those entries are no
+#               longer correct.
+ALIGNMENT_CACHE_VERSION = "v23"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

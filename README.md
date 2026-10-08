@@ -100,6 +100,9 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   so `CBS` (Chip Burning System) and `CBs` (Circuit Breakers), or `MFDS` and `MFDs`, are separate entries; write
   each key exactly as it appears in the manual. The in-app glossary search is case-sensitive on acronyms too.
 - `engineering.py` and `abbreviations.py` hold general terms and are matched case-insensitively.
+- The letter `L` is ambiguous (litres or length), so it is resolved by context in `preprocess.py` rather than by a
+  dictionary: `2.0L`, `1 L` (singular), `(50L)` and `L/100km` are litres; `L x W x H`, `L = 250` and
+  `wheelbase (L)` are length. A bare `L` anywhere else is left as the letter.
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

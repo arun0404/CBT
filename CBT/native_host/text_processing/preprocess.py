@@ -242,6 +242,61 @@ _DIMENSION_TRIPLE_RE = re.compile(
 # The digit lookahead keeps it off prose like "Section L: overview".
 _DIMENSION_LABEL_RE = re.compile(r"\b([LWH])\s*:(?=\s*\d)")
 
+# The full "L x W x H" triple in ANY letter case ("l x w x h", "l × W × h").
+# _DIMENSION_TRIPLE_RE above stays upper-case-only for the two-letter
+# forms ("H x W"); a lower-case run is only accepted when it is the
+# complete length-width-height sequence, which is unambiguous.
+_DIMENSION_LWH_ANYCASE_RE = re.compile(
+    r"\b([Ll])\s*[xX×]\s*([Ww])\s*[xX×]\s*([Hh])\b"
+)
+
+# --------------------------------------------------------------------
+# "L" / "l" is ambiguous: LITRES (volume) or LENGTH (a dimension). A flat
+# dictionary can't tell them apart, so each reading is only recognised in
+# an explicit context and a bare "L" is otherwise left alone.
+# --------------------------------------------------------------------
+
+# LITRES -- a number followed by L. Thousands groups ("1,200") are taken
+# whole so ",001" is not mistaken for the value 1 (singular).
+_LITRE_NUMBER = r"((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)"
+
+# "2.0L", "50 L", "1 l". The lookbehind refuses to start mid-token or
+# mid-number ("M10L", "v1.5L", the tail of "1,5"), so a part number is
+# never read as a volume. The optional named group is an empty lookahead
+# that is set only when an engine noun follows ("2.0 L engine"): there the
+# unit is a compound modifier and is singular, like "a two litre engine".
+_LITRE_AMOUNT_RE = re.compile(
+    r"(?<![\w.,])" + _LITRE_NUMBER + r"\s*([Ll])(?!\w)"
+    r"(?P<engine>(?=\s+(?:engine|motor|petrol|diesel|turbo(?:charged)?)\b))?",
+    re.IGNORECASE,
+)
+
+# The same, but only directly inside brackets: "(50L)", "(1.6 L)". A
+# one-token bracket such as "(50L)" otherwise looks like a part code to
+# the parenthetical pass, which shields it from every later unit rule and
+# lets Piper read the bare letter. Run BEFORE that pass.
+_LITRE_BRACKETED_RE = re.compile(
+    r"(?<=\()\s*" + _LITRE_NUMBER + r"\s*([Ll])(?=\s*\))"
+)
+
+# Fuel consumption "L/100km", "l/100 km". Must run before replace_units
+# and normalize_slashes, which would otherwise turn the slash into "or".
+_LITRES_PER_100KM_RE = re.compile(r"(?<!\w)[Ll]\s*/\s*100\s*km(?!\w)", re.IGNORECASE)
+
+# LENGTH -- "L = 250 mm" (a variable being assigned). "==", "<=", ">=" are
+# not assignments: the lookahead insists on a single "=" directly after
+# the letter.
+_LENGTH_ASSIGN_RE = re.compile(r"(?<!\w)[Ll](?=\s*=(?!=))")
+
+# "Length L = ..." -- "length" is already spoken, so don't say it twice.
+_ENDS_WITH_LENGTH_RE = re.compile(r"\blength\s+\Z", re.IGNORECASE)
+
+# LENGTH -- the symbol L given in brackets after the thing it measures.
+_LENGTH_SYMBOL_RE = re.compile(
+    r"\b(wheelbase|overall\s+length|crack\s+length)(\s*)(\(\s*[Ll]\s*\))",
+    re.IGNORECASE,
+)
+
 # A run of 4+ consecutive uppercase letters that is a candidate
 # initialism or code prefix (e.g. "ALHMKMTM"). The \b anchors ensure
 # we never split a token that has trailing digits or lowercase characters
@@ -975,6 +1030,7 @@ class TextPreprocessor:
             return segments
 
         tracker.apply_segments(_DIMENSION_TRIPLE_RE, _triple)
+        tracker.apply_segments(_DIMENSION_LWH_ANYCASE_RE, _triple)
 
         def _label(match):
             origin = tracker.origin[match.start(1)]
@@ -985,6 +1041,103 @@ class TextPreprocessor:
             ]
 
         tracker.apply_segments(_DIMENSION_LABEL_RE, _label)
+
+        # "L = 250 mm" -> "length equals 250 millimetres". Only the
+        # letter is replaced; the "=" is still literal here and is spoken
+        # by the symbol pass, each keeping its own original word. Left as
+        # the bare letter after the word "length" ("Length L = 250"),
+        # which would otherwise be said twice.
+        def _length_variable(match):
+            if _ENDS_WITH_LENGTH_RE.search(tracker.text, 0, match.start()):
+                return match.group(0)
+            return "length"
+
+        tracker.apply(_LENGTH_ASSIGN_RE, _length_variable)
+
+    # -------------------------------------------------------
+    # "L" as LITRES
+    #
+    # "2.0L" / "50 L"  -> "2.0 litres" / "50 litres"
+    # "1 L", "1.0 L"   -> "1 litre"          (exactly one is singular)
+    # "2.0 L engine"   -> "2.0 litre engine" (compound modifier)
+    # "8.5 L/100km"    -> "8.5 litres per hundred kilometres"
+    #
+    # Runs BEFORE replace_units, which would read the "100km" of
+    # "L/100km" first and leave normalize_slashes to say "litres or 100
+    # kilometres". replace_units still knows "L"/"l" as a fallback for the
+    # odd shape this does not recognise (always plural, as before).
+    #
+    # The number keeps its own original-word origin and only the unit is
+    # replaced, so "50 L" highlights "50" and "L" separately instead of
+    # smearing both over one timing window.
+    # -------------------------------------------------------
+
+    def _litre_segments(self, tracker: AlignmentTracker, match) -> List:
+
+        value = float(match.group(1).replace(",", ""))
+
+        singular = (
+            value == 1
+            or match.groupdict().get("engine") is not None
+        )
+
+        word = "litre" if singular else "litres"
+        origin = tracker.origin[match.start(2)]
+
+        return [
+            (match.start(1), match.end(1)),
+            " ",
+            Verbatim(text=word, origins=(origin,) * len(word)),
+        ]
+
+    def expand_litres(self, tracker: AlignmentTracker) -> None:
+
+        tracker.apply(
+            _LITRES_PER_100KM_RE,
+            lambda m: "litres per hundred kilometres"
+        )
+
+        tracker.apply_segments(
+            _LITRE_AMOUNT_RE,
+            lambda m: self._litre_segments(tracker, m)
+        )
+
+    def expand_bracketed_litres(self, tracker: AlignmentTracker) -> None:
+
+        tracker.apply_segments(
+            _LITRE_BRACKETED_RE,
+            lambda m: self._litre_segments(tracker, m)
+        )
+
+    # -------------------------------------------------------
+    # The symbol "L" in brackets after what it measures
+    #
+    # "wheelbase (L)"      -> "wheelbase length"
+    # "overall length (L)" -> "overall length"   (already says length)
+    #
+    # Runs BEFORE replace_parentheticals, which would otherwise turn
+    # "(L)" into ", L," and have Piper read the letter. The leading
+    # words are carried through untouched (with their own origin); only
+    # the bracketed symbol is rewritten, so it stays its own word.
+    # -------------------------------------------------------
+
+    def expand_length_symbols(self, tracker: AlignmentTracker) -> None:
+
+        def _repl(match):
+
+            phrase = (match.start(1), match.end(1))
+
+            if match.group(1).lower().endswith("length"):
+                return [phrase]
+
+            origin = tracker.origin[match.start(3)]
+
+            return [
+                phrase,
+                Verbatim(text=" length", origins=(origin,) * len(" length")),
+            ]
+
+        tracker.apply_segments(_LENGTH_SYMBOL_RE, _repl)
 
     # -------------------------------------------------------
     # Normalize slash-joined words -> "word or word"
@@ -1235,6 +1388,16 @@ class TextPreprocessor:
         self.strip_tts_only_characters(tracker)
 
         #
+        # "wheelbase (L)" and "(50L)" -- a bracketed L that must be
+        # resolved before the parenthetical pass sees it: "(L)" would be
+        # read as the bare letter, and a one-token "(50L)" would be
+        # shielded as a part code and never reach the unit rules.
+        #
+
+        self.expand_length_symbols(tracker)
+        self.expand_bracketed_litres(tracker)
+
+        #
         # Parentheticals (acronym/code output placeholder-protected)
         #
 
@@ -1260,6 +1423,10 @@ class TextPreprocessor:
         # fragment of one. (This is also why the bare "L"/"W"/"H"
         # dimension keys were removed from ENGINEERING_TERMS.)
         #
+
+        # "L" as litres (singular/plural, "L/100km"). Before replace_units
+        # for the reason given at expand_litres().
+        self.expand_litres(tracker)
 
         self.replace_units(tracker)
 
