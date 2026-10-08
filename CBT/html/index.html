@@ -143,6 +143,22 @@ header{
        and pushed the search/Home/Logout buttons off the right edge
        instead of truncating. */
     min-width:0;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.header-title > span{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.header-logo{
+    flex:0 0 auto;
+    height:28px;
+    width:auto;
+    display:block;
 }
 
 .header-nav-actions{
@@ -3244,6 +3260,776 @@ body.cbt-locked #appRoot{
     }
 }
 
+/* ---------------------------------------- */
+/* Quiz dialog                               */
+/*                                           */
+/* A modal, so it sits above the calculators */
+/* and glossary drawers (1300/1400) and the  */
+/* footer dropdowns, and below the login     */
+/* overlay (9999), which must always win.    */
+/* Everything here lives OUTSIDE #content, so */
+/* none of its text can reach Piper.         */
+/*                                           */
+/* Option / chip / tab buttons carry          */
+/* .no-lift: the global button:hover lift    */
+/* would make a row inside a dialog float    */
+/* off the surface it belongs to.            */
+/* ---------------------------------------- */
+
+#quiz-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(9,20,32,.62);
+    z-index:1500;
+    opacity:0;
+    transition:opacity .22s ease;
+}
+
+#quiz-backdrop.visible{
+    opacity:1;
+}
+
+.quiz-dialog{
+    position:fixed;
+    top:50%;
+    left:50%;
+    z-index:1510;
+    width:min(760px, calc(100vw - 32px));
+    max-height:min(800px, calc(100vh - 32px));
+    display:flex;
+    flex-direction:column;
+    background:#132b41;
+    color:#dbe4ee;
+    border:1px solid rgba(255,255,255,.14);
+    border-top:3px solid #ffb400;
+    border-radius:14px;
+    box-shadow:0 24px 60px rgba(0,0,0,.55);
+    overflow:hidden;
+    opacity:0;
+    transform:translate(-50%, -47%) scale(.98);
+    transition:transform .22s ease, opacity .22s ease;
+}
+
+.quiz-dialog.visible{
+    opacity:1;
+    transform:translate(-50%, -50%) scale(1);
+}
+
+.quiz-body{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:18px 22px 24px;
+}
+
+.quiz-body:focus{
+    outline:none;
+}
+
+.quiz-body :where(h3, h4){
+    margin:0;
+}
+
+.quiz-body [tabindex="-1"]:focus{
+    outline:none;
+}
+
+.quiz-sr{
+    position:absolute;
+    width:1px;
+    height:1px;
+    margin:-1px;
+    padding:0;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+    border:0;
+}
+
+/* --- shared pieces ------------------------------------------------ */
+
+.quiz-muted{
+    color:#9fb3c8;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.quiz-view-title{
+    font-size:18px;
+    color:#fff;
+    margin-bottom:4px;
+}
+
+.quiz-tabs{
+    display:flex;
+    gap:6px;
+    margin:-6px 0 16px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.quiz-tab{
+    background:none;
+    border:none;
+    border-bottom:3px solid transparent;
+    border-radius:0;
+    color:#9fb3c8;
+    padding:10px 14px;
+    font-size:14px;
+    margin-bottom:-1px;
+}
+
+.quiz-tab:hover{
+    color:#fff;
+}
+
+.quiz-tab[aria-current="page"]{
+    color:#fff;
+    border-bottom-color:#ffb400;
+}
+
+.quiz-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.quiz-stat{
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:10px;
+    padding:10px 12px;
+}
+
+.quiz-stat b{
+    display:block;
+    font-size:22px;
+    line-height:1.2;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+}
+
+.quiz-stat span{
+    font-size:12px;
+    color:#9fb3c8;
+}
+
+.quiz-section-label{
+    display:block;
+    margin:16px 0 8px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:#ffb400;
+}
+
+.quiz-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+}
+
+.quiz-btn{
+    font-size:14px;
+    padding:10px 20px;
+    color:#18344f;
+}
+
+.quiz-btn.secondary{
+    background:transparent;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.3);
+}
+
+.quiz-btn.secondary:hover:not(:disabled){
+    border-color:#ffb400;
+    color:#ffb400;
+}
+
+.quiz-btn.danger{
+    background:#c0392b;
+    color:#fff;
+}
+
+.quiz-link{
+    background:none;
+    border:none;
+    padding:4px 0;
+    color:#ffb400;
+    font-size:13px;
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+
+.quiz-note{
+    margin-top:12px;
+    padding:10px 12px;
+    border-radius:8px;
+    background:rgba(255,180,0,.1);
+    border:1px solid rgba(255,180,0,.35);
+    color:#ffe2a3;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.quiz-empty{
+    text-align:center;
+    padding:28px 8px;
+}
+
+/* --- start screen ------------------------------------------------- */
+
+.quiz-scope{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.quiz-scope-btn{
+    width:100%;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    border:1.5px solid rgba(255,255,255,.16);
+    border-radius:10px;
+    padding:12px 14px;
+    font-weight:500;
+}
+
+.quiz-scope-btn::before{
+    content:"";
+    flex:0 0 auto;
+    width:16px;
+    height:16px;
+    margin-top:2px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.5);
+    box-sizing:border-box;
+}
+
+.quiz-scope-btn:hover:not([aria-disabled="true"]){
+    border-color:rgba(255,180,0,.7);
+}
+
+.quiz-scope-btn[aria-checked="true"]{
+    border-color:#ffb400;
+    background:rgba(255,180,0,.1);
+}
+
+.quiz-scope-btn[aria-checked="true"]::before{
+    border-color:#ffb400;
+    background:radial-gradient(circle, #ffb400 0 38%, transparent 42%);
+}
+
+.quiz-scope-btn[aria-disabled="true"]{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.quiz-scope-main{
+    flex:1 1 auto;
+    min-width:0;
+}
+
+.quiz-scope-title{
+    display:block;
+    font-size:15px;
+    font-weight:700;
+}
+
+.quiz-scope-detail{
+    display:block;
+    margin-top:2px;
+    font-size:13px;
+    font-weight:400;
+    color:#9fb3c8;
+    overflow-wrap:anywhere;
+}
+
+.quiz-scope-count{
+    flex:0 0 auto;
+    font-size:12px;
+    color:#9fb3c8;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+}
+
+.quiz-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.quiz-chip{
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    border:1.5px solid rgba(255,255,255,.2);
+    border-radius:999px;
+    padding:7px 16px;
+    font-size:13px;
+    min-width:52px;
+}
+
+.quiz-chip:hover{
+    border-color:rgba(255,180,0,.7);
+}
+
+.quiz-chip[aria-pressed="true"]{
+    background:#ffb400;
+    border-color:#ffb400;
+    color:#18344f;
+}
+
+/* --- question screen ---------------------------------------------- */
+
+.quiz-hint{
+    margin:0 0 10px;
+}
+
+/* A keyboard shortcut hint is noise on a touch screen. */
+@media (hover:none){
+    .quiz-hint{
+        display:none;
+    }
+}
+
+.quiz-qhead{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:4px 12px;
+    margin-bottom:8px;
+    font-size:13px;
+    color:#9fb3c8;
+}
+
+.quiz-qhead b{
+    color:#fff;
+}
+
+.quiz-progress{
+    height:6px;
+    margin-bottom:18px;
+    border-radius:999px;
+    background:rgba(255,255,255,.12);
+    overflow:hidden;
+}
+
+.quiz-progress > i{
+    display:block;
+    height:100%;
+    width:calc(var(--p, 0) * 1%);
+    background:#ffb400;
+    transition:width .3s ease;
+}
+
+.quiz-topic{
+    margin-bottom:6px;
+    font-size:12px;
+    letter-spacing:.04em;
+    color:#ffb400;
+    overflow-wrap:anywhere;
+}
+
+.quiz-question{
+    margin-bottom:16px;
+    font-size:19px;
+    line-height:1.45;
+    font-weight:600;
+    color:#fff;
+}
+
+.quiz-options{
+    list-style:none;
+    margin:0 0 16px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.quiz-opt{
+    width:100%;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    border:1.5px solid rgba(255,255,255,.2);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:15px;
+    font-weight:500;
+    line-height:1.4;
+}
+
+.quiz-key{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.4);
+    font-size:12px;
+    font-weight:700;
+}
+
+.quiz-opt-text{
+    flex:1 1 auto;
+    min-width:0;
+    overflow-wrap:anywhere;
+    padding-top:2px;
+}
+
+.quiz-flag{
+    flex:0 0 auto;
+    padding-top:3px;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.quiz-opt:hover:not([aria-disabled="true"]){
+    border-color:#ffb400;
+    background:rgba(255,180,0,.08);
+}
+
+.quiz-opt[aria-disabled="true"]{
+    cursor:default;
+}
+
+.quiz-opt.is-correct{
+    border-color:#4ade80;
+    background:rgba(74,222,128,.12);
+}
+
+.quiz-opt.is-correct .quiz-key{
+    background:#4ade80;
+    border-color:#4ade80;
+    color:#08301a;
+}
+
+.quiz-opt.is-correct .quiz-flag{
+    color:#4ade80;
+}
+
+.quiz-opt.is-wrong{
+    border-color:#ff8a8a;
+    background:rgba(255,138,138,.12);
+}
+
+.quiz-opt.is-wrong .quiz-key{
+    background:#ff8a8a;
+    border-color:#ff8a8a;
+    color:#3b0d0d;
+}
+
+.quiz-opt.is-wrong .quiz-flag{
+    color:#ff8a8a;
+}
+
+.quiz-feedback{
+    margin-bottom:14px;
+    padding:12px 14px;
+    border:1px solid;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.55;
+}
+
+.quiz-feedback strong{
+    display:block;
+    margin-bottom:4px;
+    font-size:15px;
+    color:#fff;
+}
+
+.quiz-feedback.ok{
+    border-color:rgba(74,222,128,.55);
+    background:rgba(74,222,128,.08);
+}
+
+.quiz-feedback.bad{
+    border-color:rgba(255,138,138,.55);
+    background:rgba(255,138,138,.08);
+}
+
+.quiz-quit{
+    margin-left:auto;
+}
+
+.quiz-quit-confirm{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin:0 0 14px;
+    padding:10px 12px;
+    border-radius:8px;
+    background:rgba(255,138,138,.1);
+    border:1px solid rgba(255,138,138,.45);
+    font-size:13px;
+    color:#ffd0d0;
+}
+
+/* --- results ------------------------------------------------------ */
+
+.quiz-score{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+    margin:10px 0 6px;
+}
+
+.quiz-ring{
+    --p:0;
+    --ring:#ffb400;
+    flex:0 0 auto;
+    width:116px;
+    height:116px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:conic-gradient(var(--ring) calc(var(--p) * 1%), rgba(255,255,255,.14) 0);
+}
+
+.quiz-ring-in{
+    width:90px;
+    height:90px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:#132b41;
+    font-size:26px;
+    font-weight:700;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+}
+
+.quiz-ring.good{ --ring:#4ade80; }
+.quiz-ring.fair{ --ring:#ffb400; }
+.quiz-ring.low { --ring:#ff8a8a; }
+
+.quiz-score-text b{
+    display:block;
+    font-size:20px;
+    color:#fff;
+}
+
+.quiz-score-text p{
+    margin:4px 0 0;
+}
+
+.quiz-delta-up   { color:#4ade80; font-weight:700; }
+.quiz-delta-down { color:#ff8a8a; font-weight:700; }
+
+/* --- review ------------------------------------------------------- */
+
+.quiz-review-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:12px;
+}
+
+.quiz-review-item{
+    padding:14px;
+    border:1px solid rgba(255,255,255,.12);
+    border-left:4px solid rgba(255,255,255,.3);
+    border-radius:10px;
+    background:rgba(255,255,255,.04);
+}
+
+.quiz-review-item.is-wrong{ border-left-color:#ff8a8a; }
+.quiz-review-item.is-ok   { border-left-color:#4ade80; }
+
+.quiz-review-item h4{
+    margin:2px 0 10px;
+    font-size:15.5px;
+    line-height:1.45;
+    color:#fff;
+}
+
+.quiz-ans{
+    display:flex;
+    gap:8px;
+    margin:0 0 6px;
+    font-size:14px;
+    line-height:1.45;
+    color:#fff;
+}
+
+.quiz-tag{
+    flex:0 0 auto;
+    min-width:118px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding-top:2px;
+}
+
+.quiz-ans-wrong .quiz-tag{ color:#ff8a8a; }
+.quiz-ans-right .quiz-tag{ color:#4ade80; }
+
+.quiz-explain{
+    margin:8px 0 6px;
+    font-size:13.5px;
+    line-height:1.55;
+    color:#c3d0de;
+}
+
+.quiz-filter{
+    margin-top:10px;
+}
+
+/* --- history ------------------------------------------------------ */
+
+.quiz-attempts{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.quiz-attempt{
+    width:100%;
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:2px 14px;
+    align-items:center;
+    text-align:left;
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:500;
+}
+
+.quiz-attempt:hover{
+    border-color:rgba(255,180,0,.7);
+}
+
+.quiz-attempt-label{
+    font-size:14px;
+    overflow-wrap:anywhere;
+}
+
+.quiz-attempt-date{
+    grid-column:1;
+    font-size:12px;
+    color:#9fb3c8;
+}
+
+.quiz-attempt-score{
+    grid-column:2;
+    grid-row:1 / span 2;
+    text-align:right;
+    font-size:15px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+.quiz-attempt-score small{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+}
+
+.quiz-pill-good{ color:#4ade80; }
+.quiz-pill-fair{ color:#ffb400; }
+.quiz-pill-low { color:#ff8a8a; }
+
+.quiz-weak{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    padding:10px 14px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    background:rgba(255,255,255,.04);
+    margin-bottom:8px;
+}
+
+.quiz-weak-main{
+    flex:1 1 220px;
+    min-width:0;
+    font-size:14px;
+    overflow-wrap:anywhere;
+}
+
+.quiz-weak-main small{
+    display:block;
+    margin-top:2px;
+    color:#9fb3c8;
+}
+
+@media (max-width:768px){
+
+    .quiz-dialog{
+        inset:0;
+        width:auto;
+        max-height:none;
+        border-radius:0;
+        border-left:none;
+        border-right:none;
+        transform:translateY(16px);
+    }
+
+    .quiz-dialog.visible{
+        transform:none;
+    }
+
+    .quiz-body{
+        padding:16px 14px 22px;
+    }
+
+    .quiz-question{
+        font-size:17.5px;
+    }
+
+    .quiz-opt{
+        padding:12px;
+        font-size:15px;
+    }
+
+    .quiz-tag{
+        min-width:0;
+        flex-basis:100%;
+    }
+
+    .quiz-ans{
+        flex-wrap:wrap;
+        gap:2px;
+    }
+
+    .quiz-btn{
+        flex:1 1 140px;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    #quiz-backdrop,
+    .quiz-dialog,
+    .quiz-progress > i{
+        transition:none;
+    }
+}
+
 /* ========================================== */
 /* RESPONSIVE                                  */
 /*                                             */
@@ -3523,9 +4309,13 @@ body.cbt-locked #appRoot{
         font-size:22px;
         line-height:1;
     }
+    /* Visibly "pressed" while its panel is open -- the closed state is the
+       same amber as every other footer button, so a colour swap alone
+       would not read as a state change. */
     #moreBtn[aria-expanded="true"]{
-        background:#ffb400;
-        color:#18344f;
+        background:#0d1f30;
+        color:#ffb400;
+        box-shadow:inset 0 0 0 2px #ffb400;
     }
 
     #footer-more-panel{
@@ -3726,7 +4516,7 @@ body.cbt-locked #appRoot{
 
 <header>
 
-<span class="header-title">🚗 Automobile Technical Manual</span>
+<span class="header-title"><img class="header-logo" src="assets/cbt-logo.svg" alt="CBT" width="49" height="28"><span>Automobile Technical Manual</span></span>
 
 <div class="header-nav-actions">
 
@@ -3963,11 +4753,10 @@ body.cbt-locked #appRoot{
 
     </div>
 
-    <!-- Placeholder: no quiz feature/content exists anywhere in this repo
-         yet (data2.json included). Wired to a simple "coming soon" alert
-         for now — see the script at the bottom of this file — pending a
-         real quiz UI/content in a later change. -->
-    <button type="button" id="quizBtn" data-tooltip="Quiz" data-tooltip-pos="above-right" aria-label="Quiz"></button>
+    <!-- Opens the quiz dialog (#quiz-dialog, near the end of #appRoot).
+         Questions live in quiz.json, keyed by data2.json section id; see
+         the "Quiz" script block at the bottom of this file. -->
+    <button type="button" id="quizBtn" data-tooltip="Quiz" data-tooltip-pos="above-right" aria-label="Quiz" aria-haspopup="dialog"></button>
 
     <!-- Seek / progress row -->
     <div id="audio-seekbar-overlay" class="seek-row tts-ignore" data-tts-skip="true">
@@ -4233,6 +5022,37 @@ body.cbt-locked #appRoot{
 
 </aside>
 
+<!-- ---------------------------------------- -->
+<!-- Quiz                                     -->
+<!--                                          -->
+<!-- A direct child of #appRoot, OUTSIDE      -->
+<!-- #content, so none of its questions,      -->
+<!-- scores or buttons can reach app.js's     -->
+<!-- currentChapterText() or be wrapped into  -->
+<!-- .tts-word spans. The body is filled by   -->
+<!-- JS (one view at a time: start, question, -->
+<!-- results, review, history).               -->
+<!-- ---------------------------------------- -->
+
+<div id="quiz-backdrop" hidden></div>
+
+<section id="quiz-dialog" class="quiz-dialog tts-ignore" data-tts-skip="true"
+         role="dialog" aria-modal="true" aria-labelledby="quiz-title" hidden>
+
+    <div class="toolbox-head">
+        <h2 id="quiz-title">Quiz</h2>
+        <button type="button" id="quiz-close" class="toolbox-close" data-tooltip="Close" data-tooltip-pos="below-right" aria-label="Close quiz">&times;</button>
+    </div>
+
+    <div id="quiz-body" class="quiz-body" tabindex="-1"></div>
+
+    <!-- Announces answer feedback. Lives outside #quiz-body because the
+         body is re-rendered on every step, and a live region that is
+         itself replaced is not reliably announced. -->
+    <div id="quiz-live" class="quiz-sr" role="status" aria-live="polite"></div>
+
+</section>
+
 </div><!-- #appRoot -->
 
 
@@ -4351,6 +5171,12 @@ function showError(err) {
 
 let flatNavList = [];
 let currentNavIndex = -1;
+
+// True while the sidebar's synthetic "All" view is on screen. That view
+// never touches currentNavIndex (it isn't a flatNavList entry), so without
+// this flag anything asking "which topic is the reader on?" -- the quiz --
+// would be handed whichever single topic was selected before.
+let contentIsCombined = false;
 
 // node -> {row, toggle, submenu} for the CURRENTLY BUILT sidebar only —
 // rebuilt every buildSidebar() call. Lets focusNavNode() below find and
@@ -5731,6 +6557,8 @@ function showSubtopic(node, depth) {
     // function for a Prev/Next press.
     currentNavIndex = flatNavList.findIndex(entry => entry.node === node);
 
+    contentIsCombined = false;
+
     updateNavButtons();
 
 }
@@ -5765,6 +6593,8 @@ function showCombined(parentNode, nodes, depth) {
     });
 
     renderContent(parts.join(""));
+
+    contentIsCombined = true;
 
 }
 
@@ -6173,12 +7003,6 @@ document.addEventListener("keydown", (event) => {
 
 });
 
-// Placeholder — no quiz content/feature exists anywhere in this repo
-// yet. Replace with the real quiz UI/logic when that's specified.
-document.getElementById("quizBtn")?.addEventListener("click", () => {
-    alert("Quiz feature coming soon!");
-});
-
 // ----------------------------------------------------
 // Unified footer Play/Pause toggle
 //
@@ -6382,6 +7206,14 @@ applyContentZoom();
     moreBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         setOpen(panel.hidden);
+    });
+
+    // Quiz opens a modal rather than adjusting a setting, so the panel it
+    // was launched from should not be left open behind it.
+    panel.addEventListener("click", (event) => {
+        if (event.target.closest("#quizBtn")) {
+            setOpen(false);
+        }
     });
 
     // Taps outside the panel (but not on the More button) close it.
@@ -6860,6 +7692,13 @@ initToolboxConverters();
 // They are appended into #abbr-list, which lives OUTSIDE #content (see
 // the drawer's markup comment), so none of this text is reachable by
 // currentChapterText() or by highlighter.js's word wrapping.
+//
+// A term's CASE IS PART OF ITS IDENTITY. "CBS" (Chip Burning System)
+// and "CBs" (Circuit Breakers), like "MFDS" and "MFDs", are different
+// entries and must stay different: write each exactly as it appears in
+// the manual, never normalise the case here, and keep both spellings
+// as separate objects. See filterAbbreviations() for how the search
+// treats them.
 // ----------------------------------------------------
 
 const ABBREVIATION_TERMS = [
@@ -6867,6 +7706,8 @@ const ABBREVIATION_TERMS = [
     { term: "AVMS", def: "Anti-Vibration Mount System &mdash; isolates drivetrain vibration from the chassis." },
     { term: "BCM",  def: "Body Control Module &mdash; manages lighting, central locking, wipers and the immobiliser interface." },
     { term: "CAN",  def: "Controller Area Network (CAN-Bus) &mdash; the shared twisted-pair data bus linking control modules." },
+    { term: "CBS",  def: "Chip Burning System" },
+    { term: "CBs",  def: "Circuit Breakers" },
     { term: "CV",   def: "Constant Velocity &mdash; a joint type allowing a driveshaft to transmit torque through a varying angle." },
     { term: "DTC",  def: "Diagnostic Trouble Code &mdash; the fault code a module stores when it detects an out-of-range condition." },
     { term: "ECM",  def: "Engine Control Module &mdash; see ECU; the terms are used interchangeably." },
@@ -6876,6 +7717,8 @@ const ABBREVIATION_TERMS = [
     { term: "kPa",  def: "Kilopascals &mdash; SI pressure unit. 100 kPa equals 1 bar; 6.895 kPa equals 1 PSI." },
     { term: "MAF",  def: "Mass Air Flow &mdash; sensor measuring the mass of intake air entering the manifold." },
     { term: "MAP",  def: "Manifold Absolute Pressure &mdash; sensor measuring absolute pressure inside the intake manifold." },
+    { term: "MFDS", def: "Main Flexible Drive Shaft" },
+    { term: "MFDs", def: "Multi-Function Displays" },
     { term: "N&middot;m", def: "Newton metres &mdash; SI unit of torque. 1 N&middot;m equals approximately 0.738 pound-feet." },
     { term: "OBD",  def: "On-Board Diagnostics &mdash; the standardised interface and code set used to interrogate vehicle modules." },
     { term: "PSI",  def: "Pounds per Square Inch &mdash; imperial pressure unit. 1 PSI equals approximately 6.895 kPa." },
@@ -6899,8 +7742,12 @@ function buildAbbreviationList() {
     // adding a term anywhere in the array still lands it correctly.
     // localeCompare with sensitivity:"base" keeps "kPa" beside the
     // upper-case terms instead of sorting all lower-case names last.
+    // That comparison calls "CBS" and "CBs" equal, so ties fall back to
+    // code-unit order: the pair then always lists upper-case first,
+    // whatever order the array was written in.
     const sorted = ABBREVIATION_TERMS.slice().sort((a, b) =>
-        a.term.localeCompare(b.term, undefined, { sensitivity: "base" })
+        a.term.localeCompare(b.term, undefined, { sensitivity: "base" }) ||
+        (a.term < b.term ? -1 : a.term > b.term ? 1 : 0)
     );
 
     sorted.forEach(entry => {
@@ -6917,8 +7764,11 @@ function buildAbbreviationList() {
         def.innerHTML = entry.def;
 
         // Pre-computed once so filtering never re-reads the DOM per
-        // keystroke.
-        row.dataset.search = (term.textContent + " " + def.textContent).toLowerCase();
+        // keystroke. The term keeps its exact case (the search compares
+        // it case-sensitively); only the definition is lower-cased, for
+        // the case-insensitive free-text fallback.
+        row.dataset.term = term.textContent;
+        row.dataset.def = def.textContent.toLowerCase();
 
         row.appendChild(term);
         row.appendChild(def);
@@ -6929,7 +7779,7 @@ function buildAbbreviationList() {
     const empty = document.createElement("div");
     empty.className = "abbr-empty";
     empty.id = "abbr-empty";
-    empty.textContent = "No matching terms.";
+    empty.textContent = "No matching terms. Acronyms are case-sensitive (CBS and CBs are different).";
     empty.hidden = true;
     list.appendChild(empty);
 
@@ -6944,23 +7794,39 @@ function filterAbbreviations(query) {
         return;
     }
 
-    const needle = query.trim().toLowerCase();
-    let shown = 0;
+    // Trimming only drops stray spaces; the query's case is left alone.
+    const needle = query.trim();
+    const rows = Array.from(list.querySelectorAll(".abbr-row"));
 
-    list.querySelectorAll(".abbr-row").forEach(row => {
+    // Matching is CASE-SENSITIVE on the acronym itself, so "CBs" finds
+    // Circuit Breakers and "CBS" finds Chip Burning System, never both.
+    //   1. Terms whose exact text contains the query win outright.
+    //   2. Only if no term matches does the query fall back to a
+    //      case-insensitive search of the definitions, so ordinary
+    //      words ("pressure", "Pressure") still find their entries.
+    // The fallback never looks at the term itself, so a wrong-case
+    // acronym ("cbs", "mfds") finds nothing rather than the other entry.
+    let hits = rows;
 
-        const match = !needle || row.dataset.search.includes(needle);
+    if (needle) {
 
-        row.hidden = !match;
+        hits = rows.filter(row => row.dataset.term.includes(needle));
 
-        if (match) {
-            shown += 1;
+        if (hits.length === 0) {
+            const lowered = needle.toLowerCase();
+            hits = rows.filter(row => row.dataset.def.includes(lowered));
         }
 
+    }
+
+    const shownRows = new Set(hits);
+
+    rows.forEach(row => {
+        row.hidden = !shownRows.has(row);
     });
 
     if (empty) {
-        empty.hidden = shown > 0;
+        empty.hidden = shownRows.size > 0;
     }
 
 }
@@ -7174,12 +8040,14 @@ function isTypingTarget(el) {
 function isOverlayOpen() {
 
     const login = document.getElementById("login-overlay");
+    const quiz = document.getElementById("quiz-dialog");
 
     return Boolean(
         (login && !login.hidden) ||
         document.body.classList.contains("cbt-locked") ||
         (toolboxDrawer && !toolboxDrawer.hidden) ||
         (abbrModal && !abbrModal.hidden) ||
+        (quiz && !quiz.hidden) ||
         headerSearchEl?.classList.contains("is-open") ||
         document.querySelector(".dropdown-menu:not([hidden])") ||
         document.fullscreenElement
@@ -7363,6 +8231,1491 @@ try {
 catch (err) {
     applyHomeView("grid", { persist: false });
 }
+
+// ----------------------------------------------------
+// Quiz
+//
+// Questions live in quiz.json, keyed by data2.json section id, so the
+// manual itself stays untouched and a section can be re-worded without
+// disturbing its quiz. This block owns: loading and validating that file,
+// the dialog (start / question / results / review / history views), and
+// the persistence of scores, history and the missed-question list.
+//
+// Persistence is localStorage ("cbt_quiz_v1"), wrapped in try/catch like
+// the other per-viewer conveniences: where storage is blocked the quiz
+// still works for the page session and the start/history screens say that
+// results can't be kept. localStorage is per browser profile AND per
+// origin, so running on another --port starts with an empty history.
+//
+// What is stored per attempt is the question ids and the TEXT of the option
+// chosen -- not the option index -- so editing or re-ordering the options
+// in quiz.json can never make an old review show the wrong "your answer".
+// Question ids are append-only for the same reason: never renumber them.
+//
+// Everything rendered here lives in #quiz-dialog, outside #content, so
+// none of it can reach currentChapterText() or highlighter.js.
+// ----------------------------------------------------
+
+(function initQuiz() {
+
+const QUIZ_URL = "quiz.json";
+const QUIZ_STORE_KEY = "cbt_quiz_v1";
+const QUIZ_MAX_ATTEMPTS = 50;
+const QUIZ_LENGTHS = [5, 10, 20, "all"];
+const QUIZ_DEFAULT_LENGTH = 10;
+const QUIZ_CLOSE_MS = 220;          // matches the CSS transition
+const QUIZ_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+const quizBtn = document.getElementById("quizBtn");
+const dialog = document.getElementById("quiz-dialog");
+const backdrop = document.getElementById("quiz-backdrop");
+const body = document.getElementById("quiz-body");
+const closeBtn = document.getElementById("quiz-close");
+const live = document.getElementById("quiz-live");
+
+if (!quizBtn || !dialog || !backdrop || !body) {
+    return;
+}
+
+const state = {
+    bank: null,             // { byTopic: Map(topicId -> questions[]), byId: Map(id -> question) }
+    loading: null,          // in-flight fetch
+    store: null,            // { v, attempts[], missed{}, prefs{} }
+    saveFailed: false,
+    view: "home",           // home | history | question | results | review
+    scopeKey: null,
+    length: QUIZ_DEFAULT_LENGTH,
+    run: null,              // the quiz in progress (survives closing the dialog)
+    result: null,           // { attempt, previous } shown on the results view
+    review: null,           // see openReview()
+    confirmQuit: false,
+    confirmClear: false,
+    opener: null,
+    closeToken: 0
+};
+
+// --- small helpers --------------------------------------------------
+
+const esc = (value) => String(value).replace(/[&<>"']/g, (ch) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+));
+
+function shuffle(list) {
+
+    const out = list.slice();
+
+    for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+
+    return out;
+}
+
+const percent = (attempt) => attempt.total ? Math.round(100 * attempt.correct / attempt.total) : 0;
+
+const gradeOf = (pct) => pct >= 80 ? "good" : pct >= 50 ? "fair" : "low";
+
+function verdictFor(pct) {
+
+    if (pct >= 90) { return "Excellent work"; }
+    if (pct >= 70) { return "Good work"; }
+    if (pct >= 50) { return "Getting there"; }
+
+    return "Worth another look";
+}
+
+function plural(n, one, many) {
+    return `${n} ${n === 1 ? one : (many || one + "s")}`;
+}
+
+function fmtDate(ts) {
+
+    try {
+        return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(ts));
+    }
+    catch (err) {
+        return new Date(ts).toLocaleString();
+    }
+}
+
+function announce(text) {
+
+    if (!live) {
+        return;
+    }
+
+    live.textContent = "";
+
+    setTimeout(() => { live.textContent = text; }, 30);
+}
+
+// --- persistence ----------------------------------------------------
+
+function emptyStore() {
+    return { v: 1, attempts: [], missed: {}, prefs: {} };
+}
+
+function loadStore() {
+
+    try {
+
+        const raw = localStorage.getItem(QUIZ_STORE_KEY);
+
+        if (!raw) {
+            return emptyStore();
+        }
+
+        const data = JSON.parse(raw);
+
+        if (!data || data.v !== 1 || !Array.isArray(data.attempts)) {
+            return emptyStore();
+        }
+
+        return {
+            v: 1,
+            attempts: data.attempts.filter(a => a && typeof a.id === "string" && Array.isArray(a.answers)),
+            missed: data.missed && typeof data.missed === "object" ? data.missed : {},
+            prefs: data.prefs && typeof data.prefs === "object" ? data.prefs : {}
+        };
+    }
+    catch (err) {
+        return emptyStore();
+    }
+}
+
+function saveStore() {
+
+    try {
+        localStorage.setItem(QUIZ_STORE_KEY, JSON.stringify(state.store));
+        state.saveFailed = false;
+    }
+    catch (err) {
+        state.saveFailed = true;
+    }
+}
+
+// --- question bank --------------------------------------------------
+
+function ensureBank() {
+
+    if (state.bank) {
+        return Promise.resolve(state.bank);
+    }
+
+    if (state.loading) {
+        return state.loading;
+    }
+
+    state.loading = fetch(QUIZ_URL, { cache: "no-cache" })
+        .then((response) => {
+
+            if (!response.ok) {
+                throw new Error(`${QUIZ_URL} returned HTTP ${response.status}`);
+            }
+
+            return response.json();
+        })
+        .then((json) => {
+
+            const topics = json && json.topics;
+
+            if (!topics || typeof topics !== "object") {
+                throw new Error(`${QUIZ_URL} has no "topics" object`);
+            }
+
+            const byTopic = new Map();
+            const byId = new Map();
+
+            Object.entries(topics).forEach(([topicId, topic]) => {
+
+                const list = [];
+
+                ((topic && topic.questions) || []).forEach((raw) => {
+
+                    // A malformed entry is skipped rather than allowed to
+                    // break the whole quiz.
+                    const valid = raw
+                        && typeof raw.id === "string"
+                        && typeof raw.q === "string"
+                        && Array.isArray(raw.options)
+                        && raw.options.length >= 2
+                        && raw.options.length <= QUIZ_LETTERS.length
+                        && Number.isInteger(raw.answer)
+                        && raw.answer >= 0
+                        && raw.answer < raw.options.length
+                        && !byId.has(raw.id);
+
+                    if (!valid) {
+                        return;
+                    }
+
+                    const question = {
+                        id: raw.id,
+                        topic: topicId,
+                        q: raw.q,
+                        options: raw.options.map(String),
+                        answer: raw.answer,
+                        explain: String(raw.explain || "")
+                    };
+
+                    list.push(question);
+                    byId.set(question.id, question);
+                });
+
+                if (list.length) {
+                    byTopic.set(topicId, list);
+                }
+            });
+
+            if (!byId.size) {
+                throw new Error(`${QUIZ_URL} contains no usable questions`);
+            }
+
+            state.bank = { byTopic, byId };
+
+            return state.bank;
+        })
+        .finally(() => {
+            state.loading = null;
+        });
+
+    return state.loading;
+}
+
+// --- manual lookups -------------------------------------------------
+
+function entryForTopic(topicId) {
+    return flatNavList.find(entry => entry.node && entry.node.id === topicId) || null;
+}
+
+function chapterNumberOf(entry) {
+
+    const chapter = manualData && manualData.chapters && manualData.chapters[entry.chapterIndex];
+
+    return chapter ? chapter.chapterNumber : null;
+}
+
+function topicLabel(topicId) {
+
+    const entry = entryForTopic(topicId);
+
+    if (!entry) {
+        return "";
+    }
+
+    const number = chapterNumberOf(entry);
+
+    return `${number !== null ? `Ch ${number} · ` : ""}${entry.node.title}`;
+}
+
+/** The section, and the chapter, the reader is looking at right now. */
+function currentContext() {
+
+    let entry = currentNavIndex >= 0 ? (flatNavList[currentNavIndex] || null) : null;
+
+    const chapterIndex = typeof currentChapterIndex === "number"
+        ? currentChapterIndex
+        : (entry ? entry.chapterIndex : null);
+
+    // currentNavIndex is stale while the "All" view is showing (it still
+    // names the last single topic), and can belong to another chapter.
+    // Either way there is no single "this topic" to offer.
+    if (contentIsCombined || (entry && chapterIndex !== null && entry.chapterIndex !== chapterIndex)) {
+        entry = null;
+    }
+
+    const chapter = chapterIndex !== null && manualData && manualData.chapters
+        ? (manualData.chapters[chapterIndex] || null)
+        : null;
+
+    return { entry, chapterIndex, chapter };
+}
+
+// --- scopes (what a quiz is drawn from) -----------------------------
+
+function topicOption(entry) {
+
+    return {
+        key: `topic:${entry.node.id}`,
+        kind: "topic",
+        topicId: entry.node.id,
+        title: "This topic",
+        detail: entry.node.title,
+        label: `Topic · ${entry.node.title}`
+    };
+}
+
+function chapterOption(chapterIndex) {
+
+    const chapter = manualData.chapters[chapterIndex];
+
+    return {
+        key: `chapter:${chapter.id}`,
+        kind: "chapter",
+        chapterIndex,
+        title: "This chapter",
+        detail: `Chapter ${chapter.chapterNumber} · ${chapter.title}`,
+        label: `Chapter ${chapter.chapterNumber} · ${chapter.title}`
+    };
+}
+
+function manualOption() {
+    return { key: "manual", kind: "manual", title: "Whole manual", detail: "Random questions from every chapter", label: "Whole manual" };
+}
+
+function missedOption() {
+    return { key: "missed", kind: "missed", title: "Missed questions", detail: "Questions you got wrong and haven't answered correctly since", label: "Missed questions" };
+}
+
+function optionFromKey(key) {
+
+    if (key === "manual") { return manualOption(); }
+    if (key === "missed") { return missedOption(); }
+
+    if (key && key.startsWith("topic:")) {
+        const entry = entryForTopic(key.slice(6));
+        return entry ? topicOption(entry) : null;
+    }
+
+    if (key && key.startsWith("chapter:")) {
+        const index = (manualData && manualData.chapters || []).findIndex(c => c.id === key.slice(8));
+        return index >= 0 ? chapterOption(index) : null;
+    }
+
+    return null;
+}
+
+function missedQuestionIds() {
+
+    // Most recently missed first; ids no longer in the bank are ignored.
+    return Object.entries(state.store.missed)
+        .filter(([id]) => state.bank.byId.has(id))
+        .sort((a, b) => ((b[1] && b[1].ts) || 0) - ((a[1] && a[1].ts) || 0))
+        .map(([id]) => id);
+}
+
+function poolFor(option) {
+
+    const bank = state.bank;
+
+    switch (option.kind) {
+
+        case "topic":
+            return (bank.byTopic.get(option.topicId) || []).slice();
+
+        case "chapter": {
+            const out = [];
+            flatNavList.forEach((entry) => {
+                if (entry.chapterIndex === option.chapterIndex) {
+                    out.push(...(bank.byTopic.get(entry.node.id) || []));
+                }
+            });
+            return out;
+        }
+
+        case "manual":
+            return Array.from(bank.byId.values());
+
+        case "missed":
+            return missedQuestionIds().map(id => bank.byId.get(id));
+
+        default:
+            return [];
+    }
+}
+
+/** The options offered on the start screen, with live question counts. */
+function startOptions() {
+
+    const { entry, chapterIndex, chapter } = currentContext();
+    const options = [];
+
+    if (entry) { options.push(topicOption(entry)); }
+    if (chapter) { options.push(chapterOption(chapterIndex)); }
+
+    options.push(manualOption());
+    options.push(missedOption());
+
+    options.forEach((option) => {
+        option.count = poolFor(option).length;
+    });
+
+    return options;
+}
+
+// --- running a quiz -------------------------------------------------
+
+function startRun(option, length, exactIds) {
+
+    const pool = exactIds
+        ? exactIds.map(id => state.bank.byId.get(id)).filter(Boolean)
+        : poolFor(option);
+
+    if (!pool.length) {
+        return false;
+    }
+
+    const count = length === "all" ? pool.length : Math.min(length, pool.length);
+
+    state.run = {
+        scopeKey: option.key,
+        scopeLabel: option.label,
+        items: shuffle(pool).slice(0, count).map((question) => {
+
+            const natural = question.options.map((_, i) => i);
+
+            return {
+                q: question,
+                // True/False keeps its natural order; everything else is
+                // shuffled per attempt so the position can't be memorised.
+                order: question.options.length > 2 ? shuffle(natural) : natural,
+                chosen: null,
+                ok: null
+            };
+        }),
+        index: 0,
+        answered: false
+    };
+
+    state.confirmQuit = false;
+    state.view = "question";
+
+    return true;
+}
+
+function answerQuestion(displayIndex) {
+
+    const run = state.run;
+
+    if (!run || run.answered) {
+        return;
+    }
+
+    const item = run.items[run.index];
+
+    if (displayIndex < 0 || displayIndex >= item.order.length) {
+        return;
+    }
+
+    item.chosen = item.order[displayIndex];
+    item.ok = item.chosen === item.q.answer;
+    run.answered = true;
+
+    announce(item.ok
+        ? `Correct. ${item.q.explain}`
+        : `Incorrect. The correct answer is ${item.q.options[item.q.answer]}. ${item.q.explain}`);
+
+    render({ focus: "next", keepScroll: true });
+}
+
+function nextQuestion() {
+
+    const run = state.run;
+
+    if (!run || !run.answered) {
+        return;
+    }
+
+    if (run.index < run.items.length - 1) {
+        run.index += 1;
+        run.answered = false;
+        render({ focus: "question" });
+        return;
+    }
+
+    finishRun();
+    render({ focus: "title" });
+}
+
+function finishRun() {
+
+    const run = state.run;
+    const now = Date.now();
+
+    const answers = run.items.map(item => ({
+        q: item.q.id,
+        a: String(item.q.options[item.chosen] || "").slice(0, 200),
+        ok: Boolean(item.ok)
+    }));
+
+    const attempt = {
+        id: now.toString(36) + Math.random().toString(36).slice(2, 6),
+        ts: now,
+        scopeKey: run.scopeKey,
+        scopeLabel: run.scopeLabel,
+        total: answers.length,
+        correct: answers.filter(a => a.ok).length,
+        answers
+    };
+
+    // Looked up BEFORE this attempt is added, so "vs last time" compares
+    // with the previous run of the same scope, not with itself.
+    const previous = state.store.attempts.find(a => a.scopeKey === attempt.scopeKey) || null;
+
+    state.store.attempts.unshift(attempt);
+    state.store.attempts.length = Math.min(state.store.attempts.length, QUIZ_MAX_ATTEMPTS);
+
+    // A question leaves the missed pool the next time it is answered
+    // correctly, and (re-)enters it whenever it is answered wrongly.
+    answers.forEach((answer) => {
+
+        if (answer.ok) {
+            delete state.store.missed[answer.q];
+            return;
+        }
+
+        const prior = state.store.missed[answer.q];
+
+        state.store.missed[answer.q] = { n: ((prior && prior.n) || 0) + 1, ts: now };
+    });
+
+    saveStore();
+
+    state.run = null;
+    state.result = { attempt, previous };
+    state.view = "results";
+}
+
+// --- review ---------------------------------------------------------
+
+function lastWrongAnswerText(questionId) {
+
+    for (const attempt of state.store.attempts) {
+
+        const hit = attempt.answers.find(a => a.q === questionId && !a.ok);
+
+        if (hit) {
+            return hit.a;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * mode "attempt": every answer of one finished attempt, filterable.
+ * mode "pool":    every question currently in the missed list.
+ */
+function openReview(mode, attempt, back) {
+
+    let items;
+    let unavailable = 0;
+    let title;
+    let subtitle;
+
+    if (mode === "attempt") {
+
+        items = [];
+
+        attempt.answers.forEach((answer) => {
+
+            const question = state.bank.byId.get(answer.q);
+
+            if (!question) {
+                unavailable += 1;
+                return;
+            }
+
+            items.push({ q: question, chosenText: answer.a, ok: answer.ok });
+        });
+
+        title = "Review";
+        subtitle = `${attempt.scopeLabel} · ${fmtDate(attempt.ts)} · ${attempt.correct} of ${attempt.total} correct`;
+    }
+    else {
+
+        items = missedQuestionIds().map(id => ({
+            q: state.bank.byId.get(id),
+            chosenText: lastWrongAnswerText(id),
+            ok: false
+        }));
+
+        title = "Missed questions";
+        subtitle = "Everything you've got wrong and not yet answered correctly";
+    }
+
+    const anyMissed = items.some(item => !item.ok);
+
+    state.review = {
+        mode,
+        title,
+        subtitle,
+        items,
+        unavailable,
+        back,
+        filter: anyMissed ? "missed" : "all"
+    };
+
+    state.view = "review";
+}
+
+function navigateToTopic(topicId) {
+
+    const entry = entryForTopic(topicId);
+
+    if (!entry) {
+        return;
+    }
+
+    closeQuiz({ restoreFocus: false });
+
+    focusNavNode(entry);
+}
+
+// --- views ----------------------------------------------------------
+
+function overallStats() {
+
+    const attempts = state.store.attempts;
+
+    if (!attempts.length) {
+        return null;
+    }
+
+    const pcts = attempts.map(percent);
+    const totalQuestions = attempts.reduce((sum, a) => sum + a.total, 0);
+    const totalCorrect = attempts.reduce((sum, a) => sum + a.correct, 0);
+
+    return {
+        attempts: attempts.length,
+        average: Math.round(pcts.reduce((sum, p) => sum + p, 0) / pcts.length),
+        best: Math.max(...pcts),
+        accuracy: totalQuestions ? Math.round(100 * totalCorrect / totalQuestions) : 0
+    };
+}
+
+function weakTopics() {
+
+    const tally = new Map();
+
+    state.store.attempts.forEach((attempt) => {
+
+        attempt.answers.forEach((answer) => {
+
+            const question = state.bank.byId.get(answer.q);
+            const topicId = question ? question.topic : String(answer.q).split("-")[0];
+            const record = tally.get(topicId) || { correct: 0, total: 0 };
+
+            record.total += 1;
+
+            if (answer.ok) {
+                record.correct += 1;
+            }
+
+            tally.set(topicId, record);
+        });
+    });
+
+    return Array.from(tally, ([id, r]) => ({ id, correct: r.correct, total: r.total, pct: r.correct / r.total }))
+        .filter(r => r.total >= 2 && r.pct < 1 && entryForTopic(r.id))
+        .sort((a, b) => a.pct - b.pct || b.total - a.total)
+        .slice(0, 3);
+}
+
+function tabsHtml(active) {
+
+    const tab = (name, label) => `
+        <button type="button" class="quiz-tab no-lift" data-action="tab" data-tab="${name}" data-fkey="tab:${name}"${active === name ? ' aria-current="page"' : ""}>${label}</button>`;
+
+    return `<nav class="quiz-tabs" aria-label="Quiz sections">${tab("home", "Start a quiz")}${tab("history", "Scores &amp; history")}</nav>`;
+}
+
+function statTiles(stats, missedCount) {
+
+    const tile = (value, label) => `<div class="quiz-stat"><b>${value}</b><span>${label}</span></div>`;
+
+    return `<div class="quiz-stats">
+        ${tile(stats.attempts, "Quizzes taken")}
+        ${tile(`${stats.average}%`, "Average score")}
+        ${tile(`${stats.best}%`, "Best score")}
+        ${tile(missedCount, "To revisit")}
+    </div>`;
+}
+
+function saveWarning() {
+
+    return state.saveFailed
+        ? `<p class="quiz-note" role="note">This browser isn't letting the quiz save your results, so they will be lost when the page is closed.</p>`
+        : "";
+}
+
+function homeView() {
+
+    const options = startOptions();
+
+    let selected = options.find(o => o.key === state.scopeKey && o.count > 0);
+
+    if (!selected) {
+        selected = options.find(o => o.count > 0 && o.kind !== "missed") || options[0];
+        state.scopeKey = selected.key;
+    }
+
+    const stats = overallStats();
+    const missedCount = options.find(o => o.kind === "missed").count;
+
+    const scopeButtons = options.map((option) => {
+
+        const disabled = option.count === 0;
+        const checked = option.key === selected.key;
+        const detail = option.kind === "missed" && disabled
+            ? "Nothing to revisit yet - questions you get wrong will appear here"
+            : option.detail;
+
+        return `<button type="button" role="radio" class="quiz-scope-btn no-lift"
+                    data-action="scope" data-key="${esc(option.key)}" data-fkey="scope:${esc(option.key)}"
+                    aria-checked="${checked}" tabindex="${checked ? 0 : -1}"${disabled ? ' aria-disabled="true"' : ""}>
+                <span class="quiz-scope-main">
+                    <span class="quiz-scope-title">${esc(option.title)}</span>
+                    <span class="quiz-scope-detail">${esc(detail)}</span>
+                </span>
+                <span class="quiz-scope-count">${plural(option.count, "question")}</span>
+            </button>`;
+    }).join("");
+
+    const chips = QUIZ_LENGTHS.map((length) => `
+        <button type="button" class="quiz-chip no-lift" data-action="length" data-length="${length}" data-fkey="len:${length}"
+                aria-pressed="${state.length === length}">${length === "all" ? "All" : length}</button>`).join("");
+
+    const available = selected.count;
+    const planned = state.length === "all" ? available : Math.min(state.length, available);
+
+    return `
+        ${tabsHtml("home")}
+        <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1">Test what you've read</h3>
+        <p class="quiz-muted">Each question gives instant feedback and a short explanation. Anything you get wrong is saved so you can come back to it.</p>
+        ${stats ? statTiles(stats, missedCount) : ""}
+        <span class="quiz-section-label" id="quiz-scope-label">What to practise</span>
+        <div class="quiz-scope" role="radiogroup" aria-labelledby="quiz-scope-label">${scopeButtons}</div>
+        <span class="quiz-section-label" id="quiz-length-label">How many questions</span>
+        <div class="quiz-chips" role="group" aria-labelledby="quiz-length-label">${chips}</div>
+        ${saveWarning()}
+        <div class="quiz-actions">
+            <button type="button" class="quiz-btn" data-action="start" data-fkey="start"${available ? "" : " disabled"}>
+                Start quiz${available ? ` (${plural(planned, "question")})` : ""}
+            </button>
+        </div>`;
+}
+
+function questionView() {
+
+    const run = state.run;
+    const item = run.items[run.index];
+    const question = item.q;
+    const total = run.items.length;
+    const position = run.index + 1;
+    const correctSoFar = run.items.filter(i => i.ok).length;
+    const progress = Math.round(100 * (run.index + (run.answered ? 1 : 0)) / total);
+    const isLast = run.index === total - 1;
+
+    const optionsHtml = item.order.map((original, displayIndex) => {
+
+        let cls = "quiz-opt no-lift";
+        let flag = "";
+
+        if (run.answered) {
+
+            if (original === question.answer) {
+                cls += " is-correct";
+                flag = '<span class="quiz-flag">✓ Correct answer</span>';
+            }
+            else if (original === item.chosen) {
+                cls += " is-wrong";
+                flag = '<span class="quiz-flag">✗ Your answer</span>';
+            }
+        }
+
+        return `<li><button type="button" class="${cls}" data-action="answer" data-i="${displayIndex}"${run.answered ? ' aria-disabled="true"' : ""}>
+                <span class="quiz-key" aria-hidden="true">${QUIZ_LETTERS[displayIndex]}</span>
+                <span class="quiz-opt-text">${esc(question.options[original])}</span>${flag}
+            </button></li>`;
+    }).join("");
+
+    const feedback = run.answered ? `
+        <div class="quiz-feedback ${item.ok ? "ok" : "bad"}">
+            <strong>${item.ok ? "Correct!" : "Not quite."}</strong>
+            ${item.ok ? "" : `<p class="quiz-explain" style="margin-top:0">The correct answer is: <b>${esc(question.options[question.answer])}</b></p>`}
+            ${question.explain ? `<p class="quiz-explain">${esc(question.explain)}</p>` : ""}
+            <button type="button" class="quiz-link no-lift" data-action="open-topic" data-topic="${esc(question.topic)}">Open this topic in the manual</button>
+        </div>` : "";
+
+    const quitBar = state.confirmQuit ? `
+        <div class="quiz-quit-confirm" role="alert">
+            <span>Quit this quiz? Your answers so far won't be saved.</span>
+            <button type="button" class="quiz-btn danger" data-action="quit-yes" data-fkey="quit-yes">Quit quiz</button>
+            <button type="button" class="quiz-btn secondary" data-action="quit-no" data-fkey="quit-no">Keep going</button>
+        </div>` : "";
+
+    return `
+        <div class="quiz-qhead">
+            <span>Question <b>${position}</b> of ${total}</span>
+            <span>${correctSoFar} correct so far</span>
+            <button type="button" class="quiz-link quiz-quit no-lift" data-action="quit" data-fkey="quit">Quit</button>
+        </div>
+        <div class="quiz-progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${run.index + (run.answered ? 1 : 0)}"><i style="--p:${progress}"></i></div>
+        ${quitBar}
+        <div class="quiz-topic">${esc(topicLabel(question.topic))}</div>
+        <h3 class="quiz-question" id="quiz-q" tabindex="-1">${esc(question.q)}</h3>
+        <ul class="quiz-options" aria-labelledby="quiz-q">${optionsHtml}</ul>
+        ${run.answered ? "" : '<p class="quiz-muted quiz-hint">Tip: press 1-4 or A-D to choose an answer.</p>'}
+        ${feedback}
+        ${run.answered ? `<div class="quiz-actions"><button type="button" class="quiz-btn" data-action="next" data-fkey="next">${isLast ? "See results" : "Next question"}</button></div>` : ""}`;
+}
+
+function resultsView() {
+
+    const { attempt, previous } = state.result;
+    const pct = percent(attempt);
+    const wrong = attempt.total - attempt.correct;
+
+    let compare = "";
+
+    if (previous) {
+
+        const diff = pct - percent(previous);
+
+        compare = diff > 0
+            ? `<span class="quiz-delta-up">▲ ${plural(diff, "point")} up</span> on your last attempt at this (${percent(previous)}%).`
+            : diff < 0
+                ? `<span class="quiz-delta-down">▼ ${plural(-diff, "point")} down</span> on your last attempt at this (${percent(previous)}%).`
+                : `Same as your last attempt at this (${percent(previous)}%).`;
+    }
+    else {
+        compare = "This is your first attempt at this.";
+    }
+
+    const best = Math.max(...state.store.attempts.map(percent));
+
+    return `
+        <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1">Quiz complete</h3>
+        <p class="quiz-muted">${esc(attempt.scopeLabel)}</p>
+        <div class="quiz-score">
+            <div class="quiz-ring ${gradeOf(pct)}" style="--p:${pct}"><div class="quiz-ring-in">${pct}%</div></div>
+            <div class="quiz-score-text">
+                <b>${esc(verdictFor(pct))}</b>
+                <p>${attempt.correct} of ${attempt.total} correct${wrong ? ` · ${plural(wrong, "question")} to review` : " · nothing missed"}</p>
+                <p class="quiz-muted">${compare} Your best overall is ${best}%.</p>
+            </div>
+        </div>
+        ${saveWarning()}
+        <div class="quiz-actions">
+            ${wrong ? `<button type="button" class="quiz-btn" data-action="review-result" data-fkey="review">Review missed (${wrong})</button>` : ""}
+            <button type="button" class="quiz-btn${wrong ? " secondary" : ""}" data-action="again" data-fkey="again">Try again</button>
+            <button type="button" class="quiz-btn secondary" data-action="history" data-fkey="history">Scores &amp; history</button>
+            <button type="button" class="quiz-btn secondary" data-action="done" data-fkey="done">Done</button>
+        </div>`;
+}
+
+function reviewView() {
+
+    const review = state.review;
+    const missedCount = review.items.filter(i => !i.ok).length;
+    const shown = review.filter === "missed" ? review.items.filter(i => !i.ok) : review.items;
+
+    const filterChips = review.mode === "attempt" ? `
+        <div class="quiz-chips quiz-filter" role="group" aria-label="Which answers to show">
+            <button type="button" class="quiz-chip no-lift" data-action="filter" data-filter="missed" data-fkey="f:missed" aria-pressed="${review.filter === "missed"}">Missed (${missedCount})</button>
+            <button type="button" class="quiz-chip no-lift" data-action="filter" data-filter="all" data-fkey="f:all" aria-pressed="${review.filter === "all"}">All (${review.items.length})</button>
+        </div>` : "";
+
+    const itemsHtml = shown.map((item) => {
+
+        const question = item.q;
+        const correctText = question.options[question.answer];
+
+        const yourAnswer = item.ok
+            ? `<p class="quiz-ans quiz-ans-right"><span class="quiz-tag">Your answer ✓</span><span>${esc(correctText)}</span></p>`
+            : `${item.chosenText ? `<p class="quiz-ans quiz-ans-wrong"><span class="quiz-tag">Your answer ✗</span><span>${esc(item.chosenText)}</span></p>` : ""}
+               <p class="quiz-ans quiz-ans-right"><span class="quiz-tag">Correct answer</span><span>${esc(correctText)}</span></p>`;
+
+        return `<article class="quiz-review-item ${item.ok ? "is-ok" : "is-wrong"}">
+                <div class="quiz-topic">${esc(topicLabel(question.topic))}</div>
+                <h4>${esc(question.q)}</h4>
+                ${yourAnswer}
+                ${question.explain ? `<p class="quiz-explain">${esc(question.explain)}</p>` : ""}
+                <button type="button" class="quiz-link no-lift" data-action="open-topic" data-topic="${esc(question.topic)}">Open this topic in the manual</button>
+            </article>`;
+    }).join("");
+
+    const empty = shown.length ? "" : `<p class="quiz-muted quiz-empty">${review.mode === "pool"
+        ? "Nothing to revisit - you have answered every question you missed correctly since."
+        : "No answers to show here."}</p>`;
+
+    const practiseIds = review.items.filter(i => !i.ok).map(i => i.q.id);
+
+    return `
+        <button type="button" class="quiz-link no-lift" data-action="back" data-fkey="back">← Back</button>
+        <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1" style="margin-top:8px">${esc(review.title)}</h3>
+        <p class="quiz-muted">${esc(review.subtitle)}</p>
+        ${review.unavailable ? `<p class="quiz-note" role="note">${plural(review.unavailable, "question")} from this attempt ${review.unavailable === 1 ? "is" : "are"} no longer in the question bank.</p>` : ""}
+        ${filterChips}
+        <div class="quiz-review-list">${itemsHtml}</div>
+        ${empty}
+        ${practiseIds.length ? `<div class="quiz-actions"><button type="button" class="quiz-btn" data-action="practise-ids" data-fkey="practise">Practise these ${practiseIds.length} again</button></div>` : ""}`;
+}
+
+function historyView() {
+
+    const attempts = state.store.attempts;
+    const stats = overallStats();
+    const missed = missedQuestionIds();
+
+    if (!attempts.length) {
+
+        return `
+            ${tabsHtml("history")}
+            <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1">Scores &amp; history</h3>
+            <div class="quiz-empty">
+                <p class="quiz-muted">You haven't taken a quiz yet. Your scores, history and any questions you miss will show up here.</p>
+                <div class="quiz-actions" style="justify-content:center">
+                    <button type="button" class="quiz-btn" data-action="tab" data-tab="home" data-fkey="go-start">Start a quiz</button>
+                </div>
+            </div>
+            ${saveWarning()}`;
+    }
+
+    const missedBlock = missed.length ? `
+        <span class="quiz-section-label">Missed questions</span>
+        <div class="quiz-weak">
+            <div class="quiz-weak-main"><b>${plural(missed.length, "question")} to revisit</b><small>Answer each one correctly in a later quiz and it drops off this list.</small></div>
+            <div class="quiz-actions" style="margin:0">
+                <button type="button" class="quiz-btn secondary" data-action="review-pool" data-fkey="review-pool">Review</button>
+                <button type="button" class="quiz-btn" data-action="practise-missed" data-fkey="practise-missed">Practise</button>
+            </div>
+        </div>` : "";
+
+    const weak = weakTopics();
+
+    const weakBlock = weak.length ? `
+        <span class="quiz-section-label">Topics to revisit</span>
+        ${weak.map(w => `
+            <div class="quiz-weak">
+                <div class="quiz-weak-main">${esc(topicLabel(w.id))}<small>${w.correct} of ${w.total} answers correct (${Math.round(w.pct * 100)}%)</small></div>
+                <div class="quiz-actions" style="margin:0">
+                    <button type="button" class="quiz-btn secondary" data-action="open-topic" data-topic="${esc(w.id)}">Open</button>
+                    <button type="button" class="quiz-btn" data-action="practise-topic" data-topic="${esc(w.id)}">Practise</button>
+                </div>
+            </div>`).join("")}` : "";
+
+    const rows = attempts.map((attempt) => {
+
+        const pct = percent(attempt);
+
+        return `<li><button type="button" class="quiz-attempt no-lift" data-action="review-attempt" data-id="${esc(attempt.id)}" data-fkey="a:${esc(attempt.id)}"
+                    aria-label="${esc(`${attempt.scopeLabel}, ${fmtDate(attempt.ts)}, ${attempt.correct} of ${attempt.total}, ${pct} percent. Review answers.`)}">
+                <span class="quiz-attempt-label">${esc(attempt.scopeLabel)}</span>
+                <span class="quiz-attempt-date">${esc(fmtDate(attempt.ts))}</span>
+                <span class="quiz-attempt-score quiz-pill-${gradeOf(pct)}">${pct}%<small>${attempt.correct} / ${attempt.total}</small></span>
+            </button></li>`;
+    }).join("");
+
+    const clearBlock = state.confirmClear ? `
+        <div class="quiz-quit-confirm" role="alert">
+            <span>Clear all scores, history and missed questions? This can't be undone.</span>
+            <button type="button" class="quiz-btn danger" data-action="clear-yes" data-fkey="clear-yes">Clear everything</button>
+            <button type="button" class="quiz-btn secondary" data-action="clear-no" data-fkey="clear-no">Cancel</button>
+        </div>` : `
+        <button type="button" class="quiz-link no-lift" data-action="clear" data-fkey="clear">Clear history…</button>`;
+
+    return `
+        ${tabsHtml("history")}
+        <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1">Scores &amp; history</h3>
+        <p class="quiz-muted">Overall accuracy ${stats.accuracy}% across every question you've answered.</p>
+        ${statTiles(stats, missed.length)}
+        ${saveWarning()}
+        ${missedBlock}
+        ${weakBlock}
+        <span class="quiz-section-label">Recent quizzes</span>
+        <ul class="quiz-attempts">${rows}</ul>
+        <div class="quiz-actions">${clearBlock}</div>`;
+}
+
+function loadingView() {
+    return `<p class="quiz-muted quiz-empty" role="status">Loading questions…</p>`;
+}
+
+function errorView(err) {
+
+    return `
+        <div class="quiz-empty">
+            <h3 class="quiz-view-title" id="quiz-view-title" tabindex="-1">Couldn't load the quiz</h3>
+            <p class="quiz-muted">Check that <code>${esc(QUIZ_URL)}</code> is being served and is valid JSON.</p>
+            <p class="quiz-muted"><code>${esc((err && err.message) || err)}</code></p>
+            <div class="quiz-actions" style="justify-content:center">
+                <button type="button" class="quiz-btn" data-action="retry-load" data-fkey="retry">Try again</button>
+            </div>
+        </div>`;
+}
+
+// --- rendering ------------------------------------------------------
+
+function render({ focus = "title", keepScroll = false } = {}) {
+
+    const active = document.activeElement;
+    const focusKey = active && dialog.contains(active) && active.dataset ? active.dataset.fkey : null;
+    const scrollTop = body.scrollTop;
+
+    let html;
+
+    switch (state.view) {
+        case "question": html = questionView(); break;
+        case "results":  html = resultsView();  break;
+        case "review":   html = reviewView();   break;
+        case "history":  html = historyView();  break;
+        default:         html = homeView();     break;
+    }
+
+    body.innerHTML = html;
+    body.scrollTop = keepScroll ? scrollTop : 0;
+
+    let target = null;
+
+    if (focus === "keep" && focusKey) {
+        target = body.querySelector(`[data-fkey="${CSS.escape(focusKey)}"]`);
+    }
+    else if (focus === "next") {
+        target = body.querySelector('[data-action="next"]');
+    }
+    else if (focus === "question") {
+        target = body.querySelector("#quiz-q");
+    }
+
+    target = target || body.querySelector("#quiz-view-title") || body.querySelector("#quiz-q") || body;
+
+    // Don't make the browser scroll for a keep-focus restore.
+    target.focus({ preventScroll: focus === "keep" || keepScroll && focus !== "next" });
+}
+
+// --- opening / closing ----------------------------------------------
+
+function pauseNarration() {
+
+    // Narration keeps playing behind a modal whose controls the reader
+    // can't reach, so pause it. Goes through the real Pause button, so
+    // app.js's own state machine stays the single source of truth. Never
+    // auto-resumed: starting audio on close would be a surprise.
+    try {
+
+        const pauseButton = document.getElementById("pauseBtn");
+
+        if (pauseButton && !pauseButton.disabled
+            && typeof uiState !== "undefined" && uiState === UI_STATE.PLAYING) {
+            pauseButton.click();
+        }
+    }
+    catch (err) {
+        // Narration state unavailable - leave it alone.
+    }
+}
+
+function openQuiz() {
+
+    if (!dialog.hidden && dialog.classList.contains("visible")) {
+        return;
+    }
+
+    // Exclusive with the other overlays: they share a z-index band.
+    try { closeToolbox(); closeAbbreviations(); } catch (err) { /* not built yet */ }
+
+    pauseNarration();
+
+    const active = document.activeElement;
+    state.opener = active && active !== document.body ? active : quizBtn;
+
+    if (!state.store) {
+
+        state.store = loadStore();
+
+        if (QUIZ_LENGTHS.includes(state.store.prefs.length)) {
+            state.length = state.store.prefs.length;
+        }
+    }
+
+    state.closeToken += 1;
+    state.confirmQuit = false;
+    state.confirmClear = false;
+
+    dialog.hidden = false;
+    backdrop.hidden = false;
+
+    void dialog.offsetWidth;    // same two-step as the drawers: present, reflow, THEN animate in
+
+    dialog.classList.add("visible");
+    backdrop.classList.add("visible");
+
+    loadAndShow();
+}
+
+function loadAndShow() {
+
+    if (!state.bank) {
+        body.innerHTML = loadingView();
+        body.setAttribute("aria-busy", "true");
+    }
+
+    ensureBank()
+        .then(() => {
+
+            body.removeAttribute("aria-busy");
+
+            // A quiz that was left open resumes where it was.
+            state.view = state.run ? "question" : "home";
+
+            render({ focus: state.run ? "question" : "title" });
+        })
+        .catch((err) => {
+
+            console.error("Failed to load quiz:", err);
+
+            body.removeAttribute("aria-busy");
+            body.innerHTML = errorView(err);
+
+            const title = body.querySelector("#quiz-view-title");
+
+            if (title) {
+                title.focus();
+            }
+        });
+}
+
+function restoreFocus(element) {
+
+    const usable = (el) => el && document.contains(el) && el.getClientRects().length > 0;
+
+    // The Quiz button may have been moved into the footer's "More" panel
+    // (and the panel closed) since it was clicked.
+    const fallback = document.getElementById("moreBtn");
+
+    const target = usable(element) ? element : (usable(fallback) ? fallback : null);
+
+    if (target) {
+        try { target.focus(); } catch (err) { /* nothing to do */ }
+    }
+}
+
+function closeQuiz({ restoreFocus: restore = true } = {}) {
+
+    if (dialog.hidden) {
+        return;
+    }
+
+    const token = ++state.closeToken;
+
+    dialog.classList.remove("visible");
+    backdrop.classList.remove("visible");
+
+    state.confirmQuit = false;
+    state.confirmClear = false;
+
+    // The token stops a close that is still animating from hiding a
+    // dialog that was reopened in the meantime.
+    setTimeout(() => {
+        if (token === state.closeToken) {
+            dialog.hidden = true;
+            backdrop.hidden = true;
+        }
+    }, QUIZ_CLOSE_MS);
+
+    if (restore) {
+        restoreFocus(state.opener);
+    }
+}
+
+// --- events ---------------------------------------------------------
+
+function setView(view, options) {
+    state.view = view;
+    state.confirmQuit = false;
+    state.confirmClear = false;
+    render(options);
+}
+
+function startFromOption(option, length, exactIds) {
+
+    if (startRun(option, length, exactIds)) {
+        render({ focus: "question" });
+    }
+}
+
+function handleAction(action, el) {
+
+    switch (action) {
+
+        case "tab":
+            setView(el.dataset.tab === "history" ? "history" : "home", { focus: "keep" });
+            break;
+
+        case "home":
+            setView("home");
+            break;
+
+        case "history":
+            setView("history");
+            break;
+
+        case "scope":
+            state.scopeKey = el.dataset.key;
+            render({ focus: "keep", keepScroll: true });
+            break;
+
+        case "length": {
+            const value = el.dataset.length === "all" ? "all" : Number(el.dataset.length);
+            state.length = value;
+            state.store.prefs.length = value;
+            saveStore();
+            render({ focus: "keep", keepScroll: true });
+            break;
+        }
+
+        case "start": {
+            const option = optionFromKey(state.scopeKey);
+            if (option) { startFromOption(option, state.length); }
+            break;
+        }
+
+        case "answer":
+            answerQuestion(Number(el.dataset.i));
+            break;
+
+        case "next":
+            nextQuestion();
+            break;
+
+        case "quit": {
+            state.confirmQuit = true;
+            render({ focus: "keep", keepScroll: true });
+            // Land on the prompt's safe choice, not on the Quit link.
+            const safe = body.querySelector('[data-action="quit-no"]');
+            if (safe) { safe.focus(); }
+            break;
+        }
+
+        case "quit-no":
+            state.confirmQuit = false;
+            render({ focus: "question", keepScroll: true });
+            break;
+
+        case "quit-yes":
+            state.run = null;
+            setView("home");
+            break;
+
+        case "again": {
+            const option = optionFromKey(state.result.attempt.scopeKey);
+            if (option) { startFromOption(option, state.result.attempt.total); }
+            else { setView("home"); }
+            break;
+        }
+
+        case "review-result":
+            openReview("attempt", state.result.attempt, "results");
+            render();
+            break;
+
+        case "review-attempt": {
+            const attempt = state.store.attempts.find(a => a.id === el.dataset.id);
+            if (attempt) { openReview("attempt", attempt, "history"); render(); }
+            break;
+        }
+
+        case "review-pool":
+            openReview("pool", null, "history");
+            render();
+            break;
+
+        case "filter":
+            state.review.filter = el.dataset.filter === "all" ? "all" : "missed";
+            render({ focus: "keep", keepScroll: true });
+            break;
+
+        case "back":
+            if (state.review && state.review.back === "results" && state.result) {
+                setView("results");
+            }
+            else {
+                setView("history");
+            }
+            break;
+
+        case "practise-ids": {
+            const ids = state.review.items.filter(i => !i.ok).map(i => i.q.id);
+            startFromOption({ key: "missed", kind: "missed", label: "Missed questions" }, "all", ids);
+            break;
+        }
+
+        case "practise-missed":
+            startFromOption(missedOption(), "all");
+            break;
+
+        case "practise-topic": {
+            const entry = entryForTopic(el.dataset.topic);
+            if (entry) { startFromOption(topicOption(entry), "all"); }
+            break;
+        }
+
+        case "open-topic":
+            navigateToTopic(el.dataset.topic);
+            break;
+
+        case "clear": {
+            state.confirmClear = true;
+            render({ focus: "keep", keepScroll: true });
+            // Land on the prompt's safe choice, not on a destructive one.
+            const safe = body.querySelector('[data-action="clear-no"]');
+            if (safe) { safe.focus(); }
+            break;
+        }
+
+        case "clear-no":
+            state.confirmClear = false;
+            render({ focus: "title", keepScroll: true });
+            break;
+
+        case "clear-yes":
+            state.store.attempts = [];
+            state.store.missed = {};
+            saveStore();
+            state.confirmClear = false;
+            state.result = null;
+            render();
+            break;
+
+        case "retry-load":
+            loadAndShow();
+            break;
+
+        case "done":
+            closeQuiz();
+            break;
+
+        default:
+            break;
+    }
+}
+
+body.addEventListener("click", (event) => {
+
+    const el = event.target.closest("[data-action]");
+
+    if (!el || !body.contains(el)) {
+        return;
+    }
+
+    if (el.getAttribute("aria-disabled") === "true" || el.disabled) {
+        return;
+    }
+
+    handleAction(el.dataset.action, el);
+});
+
+function focusableInDialog() {
+
+    return Array.from(dialog.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'))
+        .filter(el => el.getClientRects().length > 0);
+}
+
+dialog.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+        event.preventDefault();
+        closeQuiz();
+        return;
+    }
+
+    if (event.key === "Tab") {
+
+        const items = focusableInDialog();
+
+        if (!items.length) {
+            return;
+        }
+
+        const first = items[0];
+        const last = items[items.length - 1];
+        const current = document.activeElement;
+
+        if (!dialog.contains(current)) {
+            event.preventDefault();
+            first.focus();
+        }
+        else if (event.shiftKey && (current === first || current === body)) {
+            event.preventDefault();
+            last.focus();
+        }
+        else if (!event.shiftKey && current === last) {
+            event.preventDefault();
+            first.focus();
+        }
+
+        return;
+    }
+
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+    }
+
+    // Answer shortcuts: 1-4 or A-D.
+    if (state.view === "question" && state.run && !state.run.answered) {
+
+        const key = event.key.toLowerCase();
+        let index = -1;
+
+        if (/^[1-6]$/.test(key)) { index = Number(key) - 1; }
+        else if (/^[a-f]$/.test(key)) { index = key.charCodeAt(0) - 97; }
+
+        if (index >= 0 && index < state.run.items[state.run.index].order.length) {
+            event.preventDefault();
+            answerQuestion(index);
+            return;
+        }
+    }
+
+    // Arrow keys: step through the answer options, and move the selection
+    // within the start screen's radio group.
+    if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+
+        const current = document.activeElement;
+        const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
+
+        if (current && current.classList.contains("quiz-opt")) {
+
+            const list = Array.from(body.querySelectorAll(".quiz-opt"));
+            const next = list[(list.indexOf(current) + (forward ? 1 : -1) + list.length) % list.length];
+
+            event.preventDefault();
+            next.focus();
+        }
+        else if (current && current.getAttribute("role") === "radio") {
+
+            const list = Array.from(body.querySelectorAll('[role="radio"]:not([aria-disabled="true"])'));
+            const at = list.indexOf(current);
+
+            if (at >= 0 && list.length > 1) {
+                event.preventDefault();
+                const next = list[(at + (forward ? 1 : -1) + list.length) % list.length];
+                next.click();
+                // the click re-rendered; focus the newly checked radio
+                const checked = body.querySelector('[role="radio"][aria-checked="true"]');
+                if (checked) { checked.focus(); }
+            }
+        }
+    }
+});
+
+quizBtn.addEventListener("click", () => {
+
+    if (dialog.hidden) {
+        openQuiz();
+    }
+    else {
+        closeQuiz();
+    }
+});
+
+closeBtn?.addEventListener("click", () => closeQuiz());
+backdrop.addEventListener("click", () => closeQuiz());
+
+})();
 
 loadManual();
 

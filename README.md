@@ -14,6 +14,8 @@ currently being spoken.
 - Content-addressed alignment cache and background prefetch of the other voice
 - Request cancellation so navigating away frees the CPU instead of finishing abandoned jobs
 - Global search, Previous/Next navigation, content zoom, calculators drawer, and a custom video player with captions
+- Compact, touch-friendly footer on phones and small tablets (transport bar plus a "More" menu)
+- Built-in quiz: questions for every section, instant feedback with explanations, scores, history, and a review list of missed questions (see [Quiz](#quiz))
 - Windows-first desktop launcher that builds its own virtual environment from a local wheelhouse
 
 ## Repository layout
@@ -21,9 +23,9 @@ currently being spoken.
 | Path | Purpose |
 |------|---------|
 | `CBT/native_host/` | Flask app (`host.py`), TTS pipeline, text processing, forced aligner, launcher |
-| `CBT/html/` | Frontend (plain HTML/CSS/JS, no bundler) and the manual content in `data2.json` |
+| `CBT/html/` | Frontend (plain HTML/CSS/JS, no bundler), the manual content in `data2.json` and the quiz questions in `quiz.json` |
 | `CBT/native_host/launcher/` | Launcher package: venv bootstrap, process supervision, readiness polling |
-| `tools/` | PyInstaller build and shortcut-creation scripts |
+| `tools/` | PyInstaller build, shortcut-creation scripts, and `validate_quiz.py` |
 | `run.bat`, `launch.vbs`, `CBT.exe` | Entry points that forward into `native_host/bootstrap.py` |
 
 See `README-LAUNCHER.md` for launcher behavior, exit codes and runtime state layout.
@@ -57,6 +59,50 @@ For backend development, run `python host.py` inside `CBT/native_host` with an i
 Environment overrides: `CBT_HOME`, `CBT_VENV`, `CBT_HOST`, `CBT_PORT`, `CBT_DEBUG`.
 
 Runtime state (venv, pid file, logs) lives under `%LOCALAPPDATA%\CBT_venv\`, never in the application directory.
+
+## Quiz
+
+The footer's **Quiz** button opens a quiz on what you have just read. There are 326 questions, covering all
+46 sections of the 12 chapters. Choose what to practise — this topic, this chapter, the whole manual, or your
+missed questions — and how many questions (5, 10, 20 or all).
+
+- **Instant feedback.** Every answer shows right or wrong plus a short explanation, with a link to open that
+  topic in the manual. Keyboard: press `1`–`4` or `A`–`D` to answer, `Enter` for the next question, `Esc` to
+  close (a quiz in progress is kept and resumes when you reopen it). Narration is paused while the quiz is open.
+- **Scores and history.** The results screen shows your score and how it compares with your last attempt at
+  the same thing. *Scores & history* lists recent quizzes (tap one to review its answers), your average and
+  best scores, and the topics you do worst on.
+- **Missed questions.** Anything answered wrongly goes on a list; answer it correctly in a later quiz and it
+  drops off. Review the list, or practise it as a quiz.
+
+Results are kept in the browser (`localStorage`, key `cbt_quiz_v1`), so they belong to one browser profile and
+one address: running on another `--port`, or in another browser, starts with an empty history. If the
+browser refuses to store data, the quiz still works for the session and says so. *Clear history…* resets
+scores and the missed list.
+
+### Editing the questions
+
+`CBT/html/quiz.json` holds the questions, grouped by the section ids used in `data2.json` (`t0004`, …). Each
+question has an `id`, the question text `q`, its `options`, the index of the correct one in `answer`, an
+`explain` text shown after answering, and `src` — the wording in the manual the answer was written from.
+Two-option questions are true/false. Option order is shuffled each time a quiz is taken.
+
+- Never renumber or reuse an `id`: saved history refers to it. Reword freely.
+- After editing `quiz.json` **or** `data2.json`, run `python tools/validate_quiz.py`. It checks the structure,
+  that every section still has questions, and that each `src` phrase is still in its section — so a question
+  made stale by a change to the manual is flagged. `--strict` makes warnings fail too.
+
+## Pronunciation dictionaries
+
+Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/text_processing/`:
+
+- `client_dictionary.json` holds the project's acronyms. It is matched **case-sensitively** and as whole words,
+  so `CBS` (Chip Burning System) and `CBs` (Circuit Breakers), or `MFDS` and `MFDs`, are separate entries; write
+  each key exactly as it appears in the manual. The in-app glossary search is case-sensitive on acronyms too.
+- `engineering.py` and `abbreviations.py` hold general terms and are matched case-insensitively.
+
+Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
+*works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.
 
 ## Captions (optional, dev-only)
 
