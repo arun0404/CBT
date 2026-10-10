@@ -39,6 +39,50 @@
  * 90 ms of real sound is 180 ms of media at 2x — so `_lookupTime` scales
  * the (wall-clock) latency offset by the current rate before subtracting.
  */
+// --------------------------------------------------------------------
+// Words that are never spoken
+//
+// A DOM word made ONLY of dashes, quotation marks, invisible/zero-width
+// characters, NBSP or emoji ("–", '"', "“”", "📄", a lone space ...) is
+// structural decoration: the backend strips it before Piper (see
+// text_sanitizer.py, whose lists this mirrors EXACTLY) and flags its timing
+// entry silent. It must never take the highlight.
+//
+// Deliberately NOT matched, because the backend SPEAKS them: "°", arrows
+// ("→", "↔"), "©", "®", "™", "&", "%" ... so no broad emoji class such as
+// \p{Extended_Pictographic} is used here.
+// --------------------------------------------------------------------
+const NON_SPOKEN_ONLY_RE = new RegExp(
+    "^[" +
+    "\\s" +                                                  // incl. NBSP
+    "\\u00AD\\u180E\\u200B-\\u200F\\u2060\\uFEFF" +          // invisible / zero-width
+    "\\-\\u2010-\\u2015\\u2212" +                            // hyphen-minus, hyphens, dashes, minus
+    "\"'\\u2018-\\u201F\\u00AB\\u00BB\\u2039\\u203A" +       // straight, curly and angle quotes
+    "\\u2600-\\u27BF\\u2B00-\\u2BFF\\uFE0F" +                // misc symbols, dingbats
+    "\\u{1F1E6}-\\u{1F1FF}\\u{1F300}-\\u{1F64F}" +           // flags, pictographs, emoticons
+    "\\u{1F680}-\\u{1F8FF}\\u{1F900}-\\u{1FAFF}" +           // transport .. extended pictographs
+    "]*$",
+    "u"
+);
+
+/**
+ * Is this word element something that is actually spoken?
+ *
+ * False for an empty element and for one containing only the non-spoken
+ * characters above. Used to keep such an element from ever being the
+ * active word, including when it is one piece of a word split across
+ * several elements ("📄" + "Replace").
+ *
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function isSpokenWord(element) {
+
+    const text = (element && element.textContent) || "";
+
+    return text.length > 0 && !NON_SPOKEN_ONLY_RE.test(text);
+}
+
 class WordHighlighter {
 
     constructor(containerId) {
@@ -49,7 +93,23 @@ class WordHighlighter {
             throw new Error(`WordHighlighter: no element with id "${containerId}".`);
         }
 
+        // One entry per word the TIMINGS know about, in order. The element
+        // that takes the highlight (and the scroll) for that word.
         this.wordElements = [];
+
+        // wordGroups[i] = every DOM piece of word i. Almost always one
+        // span; several when the word is split across elements with no
+        // whitespace between them ("📄" glued to "Replace").
+        this.wordGroups = [];
+
+        // Every span prepare() created, aligned or not, in document order.
+        this._allSpans = [];
+
+        // True once wordElements/wordGroups were derived from the text the
+        // backend receives (see _alignToPostedText); _alignFailed when that
+        // was tried on a rendered container and could not be done.
+        this._aligned = false;
+        this._alignFailed = false;
 
         this.timeline = Timeline.empty();
 
@@ -145,6 +205,10 @@ class WordHighlighter {
         }
 
         this.wordElements = [];
+        this.wordGroups = [];
+        this._allSpans = [];
+        this._aligned = false;
+        this._alignFailed = false;
 
         this.currentIndex = -1;
 
@@ -190,9 +254,147 @@ class WordHighlighter {
             this.wrapTextNode(node);
         });
 
+        // Every span just created. wordElements starts out as that same
+        // list (one span per word, the long-standing behaviour) and is
+        // replaced by the aligned list below when that is possible.
+        this._allSpans = this.wordElements.slice();
+        this.wordGroups = this._allSpans.map((span) => [span]);
+
+        this._alignToPostedText();
+
         this.prepared = true;
 
-        console.log("Prepared Words:", this.wordElements.length);
+        console.log(
+            "Prepared Words:", this.wordElements.length,
+            this._aligned ? "(aligned to the posted text)" : "(not aligned)"
+        );
+    }
+
+    // --------------------------------------------------
+    // Keep the DOM's words in step with the words the backend is given
+    //
+    // The timings hold exactly one entry per WORD OF THE TEXT POSTED TO
+    // /speak, and that text is the container's innerText. The highlighter
+    // pairs the two by position, so its word list must be that same list.
+    // Wrapping every \S+ run of every text node does not guarantee it:
+    //
+    //   * pieces glued together in innerText but separate in the DOM:
+    //     <span>📄</span><a>Replace</a> is ONE word "📄Replace" to the
+    //     backend and TWO spans here; so is "H<sub>2</sub>O", or a comma
+    //     in its own element after "LiDAR";
+    //   * text in the DOM that innerText leaves out: the labels inside an
+    //     SVG figure, the fallback text of a <video>, anything hidden.
+    //
+    // Either way the DOM ends up with extra words and every later highlight
+    // is shifted by that many. Dashes, quotes, NBSP and emoji are not the
+    // cause (as their own whitespace-separated words they pair up exactly,
+    // and are flagged silent); it is when they sit in their own element
+    // with no space beside them.
+    //
+    // So: take the posted text's words as the truth and give each one its
+    // DOM span(s), skipping spans that are not in the posted text at all.
+    // If that cannot be done cleanly the old one-span-per-word list is kept
+    // (and the reason logged), so this can never be worse than before.
+    // --------------------------------------------------
+
+    /**
+     * @returns {boolean} true if wordElements/wordGroups now follow the
+     *          posted text word for word.
+     */
+    _alignToPostedText() {
+
+        const spans = this._allSpans;
+
+        this._aligned = false;
+
+        if (!spans.length) {
+            return false;
+        }
+
+        // innerText of a container that is not being rendered is just its
+        // textContent (blocks run together), NOT what is posted when the
+        // user presses play. Align later, once it is on screen.
+        if (this.container.getClientRects().length === 0) {
+            return false;
+        }
+
+        const tokens = (this.container.innerText.match(/\S+/g) || [])
+            .map((token) => token.toLowerCase());     // innerText applies text-transform
+
+        // Laid out but with invisible text (visibility:hidden, e.g. the
+        // locked app) has an EMPTY innerText while the spans exist. There is
+        // nothing to align to yet; aligning to zero words would throw every
+        // span away. Try again when the timeline arrives.
+        if (!tokens.length) {
+            return false;
+        }
+
+        const texts = spans.map((span) => span.textContent.toLowerCase());
+
+        // How many unrelated spans may sit between two posted words.
+        // Generous (a diagram can carry dozens of labels) but bounded, so
+        // a hopeless mismatch fails fast instead of scanning the chapter
+        // once per word.
+        const MAX_SKIP = 600;
+
+        const groups = [];
+
+        let next = 0;               // first span not yet used
+
+        for (let i = 0; i < tokens.length; i++) {
+
+            const token = tokens[i];
+
+            let matched = false;
+
+            for (let start = next; start < spans.length && start - next <= MAX_SKIP; start++) {
+
+                let built = "";
+                let end = start;
+
+                while (end < spans.length && built.length < token.length) {
+
+                    built += texts[end];
+                    end++;
+
+                    if (!token.startsWith(built)) {
+                        break;
+                    }
+                }
+
+                if (built === token) {
+
+                    groups.push(spans.slice(start, end));
+
+                    next = end;
+
+                    matched = true;
+
+                    break;
+                }
+            }
+
+            if (!matched) {
+
+                console.warn(
+                    `[highlighter] word ${i} "${tokens[i]}" of the posted text was not found in the DOM; ` +
+                    `keeping one span per word (highlighting may drift).`
+                );
+
+                this._alignFailed = true;
+
+                return false;
+            }
+        }
+
+        // Each word's highlight target is its first SPOKEN piece, so the
+        // emoji of "📄Replace" never carries the highlight (and the scroll).
+        this.wordGroups = groups;
+        this.wordElements = groups.map((pieces) => pieces.find(isSpokenWord) || pieces[0]);
+
+        this._aligned = true;
+
+        return true;
     }
 
     // --------------------------------------------------
@@ -254,6 +456,10 @@ class WordHighlighter {
         this.prepared = false;
 
         this.wordElements = [];
+        this.wordGroups = [];
+        this._allSpans = [];
+        this._aligned = false;
+        this._alignFailed = false;
 
         this.timeline = Timeline.empty();
 
@@ -284,6 +490,14 @@ class WordHighlighter {
 
         this.timeline = timeline;
 
+        // The chapter may have been prepared while it was not on screen
+        // (alignment needs the container rendered); by the time audio
+        // arrives it is. Nothing is highlighted yet, so swapping the word
+        // list now is safe.
+        if (!this._aligned && !this._alignFailed && this.currentIndex === -1) {
+            this._alignToPostedText();
+        }
+
         if (timeline.wordCount !== this.wordElements.length) {
 
             console.warn(
@@ -313,7 +527,11 @@ class WordHighlighter {
 
         if (this.currentIndex >= 0 && this.currentIndex < this.wordElements.length) {
 
-            this.wordElements[this.currentIndex].classList.remove("active-word");
+            // Every piece, not just the target: a word split across
+            // elements is highlighted as a whole.
+            for (const piece of this.wordGroups[this.currentIndex] || [this.wordElements[this.currentIndex]]) {
+                piece.classList.remove("active-word");
+            }
         }
 
         this.currentIndex = -1;
@@ -347,7 +565,17 @@ class WordHighlighter {
 
         const element = this.wordElements[index];
 
-        element.classList.add("active-word");
+        // Highlight the SPOKEN pieces of the word. A piece that is only
+        // dashes, quotes, NBSP or an emoji ("📄" glued to "Replace") is
+        // skipped; and a word with no spoken piece at all highlights
+        // nothing. (The Timeline already keeps such words, flagged silent
+        // by the backend, from being chosen; this is the second guard.)
+        for (const piece of this.wordGroups[index] || [element]) {
+
+            if (isSpokenWord(piece)) {
+                piece.classList.add("active-word");
+            }
+        }
 
         if (suppressScroll) {
             return;
@@ -368,6 +596,10 @@ class WordHighlighter {
         this.timeline = Timeline.empty();
 
         this.wordElements = [];
+        this.wordGroups = [];
+        this._allSpans = [];
+        this._aligned = false;
+        this._alignFailed = false;
 
         this.prepared = false;
     }
@@ -442,5 +674,5 @@ class WordHighlighter {
 WordHighlighter.DEFAULT_AUDIO_LATENCY = 0.11;
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { WordHighlighter };
+    module.exports = { WordHighlighter, isSpokenWord };
 }
