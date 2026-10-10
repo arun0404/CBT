@@ -76,8 +76,15 @@ SYMBOLS = {
     "®": " registered trademark ",
     "™": " trademark ",
 
-    # Quotes
+    # Quotes. Double quotation marks are never spoken, so they are removed
+    # (straight, then the typographic ones: left/right, low-9, high-reversed-9).
+    # A lone one -- an isolated '"' or '“' word -- leaves nothing behind, so it
+    # stays a silent, zero-width word for the highlighter.
     "\"": "",
+    "“": "",
+    "”": "",
+    "„": "",
+    "‟": "",
     "'": "'",
 
     # Brackets

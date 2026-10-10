@@ -21,8 +21,11 @@ from .text_sanitizer import TTS_STRIP_PATTERN
 from .parentheticals import (
     PARENTHETICAL_RE,
     PARENTHETICAL_CONFIG_VERSION,
+    SPEAK_AS_WORD,
+    SPELL_MAX_LETTERS,
     ParentheticalKind,
     classify as classify_parenthetical,
+    spell_spans,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,6 +54,11 @@ _PLACEHOLDER_RE = re.compile(r"\x02PH(\d+)\x02")
 # so the two protection mechanisms can never collide or be restored out
 # of order.
 _REFERENCE_CODE_PLACEHOLDER_RE = re.compile(r"\x02RC(\d+)\x02")
+
+# And a third, for client_dictionary.json expansions (see
+# replace_client_dictionary): an expansion is final text, so it is parked
+# behind this placeholder while every later pass runs, then restored.
+_CLIENT_PLACEHOLDER_RE = re.compile(r"\x02CD(\d+)\x02")
 
 # Sentinel inserted by the FRONTEND (currentChapterText() in app.js)
 # immediately after each heading (<h1>-<h4>) element's own text, before
@@ -213,6 +221,45 @@ _ABS_ACRONYM_RE = re.compile(r"\bABS\b")
 # together into one breathless phrase.
 _STANDALONE_DASH_RE = re.compile(r"\s+[-–—]+\s+")
 
+# A dash standing alone at the very START or END of the text has whitespace
+# on only one side, so the rule above (which needs both) misses it. It is
+# simply dropped: with nothing on the other side there is nothing to pause
+# between. (Piper ignores such a dash anyway; this just keeps the text it
+# receives clean.) The captured whitespace is kept, so no word fuses.
+_EDGE_DASH_RE = re.compile(r"\A(\s*)[-–—]+(?=\s)|(?<=\s)[-–—]+(\s*)\Z")
+
+# Unicode spaces other than the plain one. All of them are whitespace to
+# both the browser's \s and Python's, so they never change where one word
+# ends and the next begins; they are only normalised so the text handed to
+# Piper contains ordinary spaces ("clean text").
+_UNICODE_SPACE_RE = re.compile("[   -   　]")
+
+# Where the browser and Python disagree about what is whitespace. The
+# highlighter finds words with JavaScript's /\S+/, the backend with Python's
+# \S+, and every word index after a disagreement is off by one. Across all
+# 1.1 million code points exactly six differ:
+#   U+FEFF            whitespace to JavaScript, an ordinary character to Python
+#   U+001C-U+001E, U+0085   whitespace to Python, ordinary characters to JavaScript
+# (U+001F is the heading-pause marker; being whitespace to Python is intended.)
+_FEFF = "﻿"
+_PYTHON_ONLY_WHITESPACE_RE = re.compile("[\x1c\x1d\x1e\x85]")
+
+
+def normalize_dom_whitespace(text: str) -> str:
+    """Make Python's word boundaries match the browser's for the six code
+    points above, so original_words is index-for-index what the DOM wraps.
+
+    U+FEFF becomes a space (the browser splits there); the control
+    characters become a zero-width space, which keeps the word whole as the
+    browser does and is stripped before Piper (see text_sanitizer.py).
+    Lengths are unchanged for the controls; U+FEFF is one-for-one too.
+    """
+
+    if _FEFF in text:
+        text = text.replace(_FEFF, " ")
+
+    return _PYTHON_ONLY_WHITESPACE_RE.sub("​", text)
+
 # A run of two or more unspaced alphanumeric words joined by forward
 # slashes -- "task/document", "inspection/check", "L/W/H". Each slash is
 # spoken as "or" ("task or document", "L or W or H"). The \b anchors and
@@ -282,6 +329,18 @@ _LITRE_BRACKETED_RE = re.compile(
 # Fuel consumption "L/100km", "l/100 km". Must run before replace_units
 # and normalize_slashes, which would otherwise turn the slash into "or".
 _LITRES_PER_100KM_RE = re.compile(r"(?<!\w)[Ll]\s*/\s*100\s*km(?!\w)", re.IGNORECASE)
+
+# Litres per minute / hour: "L/min", "l/h", "L/hr". Same reason as above (it
+# has to run before replace_units and normalize_slashes, which would say
+# "litres or h"). The unit part is CASE-SENSITIVE and lower-case only, so
+# "L/H" (Left Hand) and "L/S" are never touched.
+_LITRES_RATE_RE = re.compile(r"(?<!\w)[Ll]\s*/\s*(min|hrs|hr|h)(?!\w)")
+_RATE_PERIOD = {"min": "minute", "hrs": "hour", "hr": "hour", "h": "hour"}
+
+# A bearing: a number, a degree sign, then a compass letter ("12°N", "77.5 °E").
+# Upper-case letter only, so "°C"/"°F" and ordinary text never match.
+_DEGREE_COMPASS_RE = re.compile(r"(?<![\w.,])(\d+(?:\.\d+)?)\s*°\s*([NSEW])(?!\w)")
+_COMPASS_WORDS = {"N": "North", "S": "South", "E": "East", "W": "West"}
 
 # LENGTH -- "L = 250 mm" (a variable being assigned). "==", "<=", ">=" are
 # not assignments: the lookahead insists on a single "=" directly after
@@ -547,14 +606,89 @@ def _speak_reference_code(code: str) -> str:
     return " ".join(_speak_reference_segment(seg) for seg in code.split("-"))
 
 
+def _spell_in_place(body: str, body_origin, spans):
+    """`body` with each (start, end) span read letter by letter
+    ("IADS" -> "I A D S"), plus a matching per-character origin tuple.
+
+    Every letter keeps the origin of the character it came from, and each
+    inserted space takes the origin of the letter before it, so the spelled
+    word still maps back to the one original word it was written as -- the
+    browser's highlight and the forced-alignment timings depend on that.
+    Text outside the spans is carried through untouched.
+    """
+
+    text: List[str] = []
+    origins: list = []
+    cursor = 0
+
+    for start, end in spans:
+
+        text.append(body[cursor:start])
+        origins.extend(body_origin[cursor:start])
+
+        for i in range(start, end):
+            if i > start:
+                text.append(" ")
+                origins.append(body_origin[i - 1])
+            text.append(body[i])
+            origins.append(body_origin[i])
+
+        cursor = end
+
+    text.append(body[cursor:])
+    origins.extend(body_origin[cursor:])
+
+    return "".join(text), tuple(origins)
+
+
 class TextPreprocessor:
 
     def __init__(self):
 
         self.client_dictionary = self.load_client_dictionary()
-        self._client_dictionary_re = self._compile_case_sensitive(
-            self.client_dictionary
+
+        # Two patterns, applied at two points of the pipeline (see
+        # replace_client_dictionary): COMPOUND keys -- those containing "/"
+        # or "." ("kg/hr", "g/kW.h", "L/L", "N.m") -- run FIRST, before any
+        # unit or single-letter rule can take a piece of them; every other
+        # key runs after the unit pass, as it always has.
+        self._client_compound_re = self._compile_case_sensitive({
+            k: v for k, v in self.client_dictionary.items() if self._is_compound_key(k)
+        })
+        self._client_dictionary_re = self._compile_case_sensitive({
+            k: v for k, v in self.client_dictionary.items() if not self._is_compound_key(k)
+        })
+
+        # Every abbreviation the case-insensitive unit and engineering tables
+        # expand, keyed by its lower-cased form -- used to tell a known
+        # abbreviation ("FIG", "KG") from an unknown bracketed acronym
+        # ("IADS") when deciding what to spell letter by letter. Later table
+        # wins; only the expansion matters.
+        #
+        # ABBREVIATIONS is deliberately NOT in here: its keys are Title-case
+        # ("Dr", "Co", "Inc") and only match an ALL-CAPS word because that
+        # pass ignores case. "(CO)" in brackets is carbon monoxide, not
+        # "Company", so it must still be spelled.
+        self._known_expansions = {}
+        for table in (UNITS, ENGINEERING_TERMS):
+            for key, value in table.items():
+                self._known_expansions[key.casefold()] = value
+
+        # Multi-word dictionary keys ("AIR COND", "TGT / T45", "SUB ASSY"). A
+        # bracketed word that belongs to one is never spelled: that would
+        # break the key, which is matched as a whole phrase.
+        engineering_phrases = sorted(
+            (k for k in ENGINEERING_TERMS if re.search(r"\s", k)), key=len, reverse=True
         )
+        self._phrase_patterns = [
+            self._compile_case_sensitive({
+                k: v for k, v in self.client_dictionary.items() if re.search(r"\s", k)
+            }),
+            re.compile(
+                r"(?<!\w)(?:" + "|".join(re.escape(k) for k in engineering_phrases) + r")(?!\w)",
+                re.IGNORECASE,
+            ) if engineering_phrases else None,
+        ]
 
         # A short, stable fingerprint of every dictionary this pipeline
         # depends on. Changing ANY abbreviation/unit/symbol entry
@@ -607,6 +741,19 @@ class TextPreprocessor:
     #     key that starts or ends in punctuation ("No.").
     # Plurals and substrings therefore never match: "CBs" does not fire
     # inside "CBss" or "xCBs".
+    #
+    # An expansion is FINAL text. It is swapped for a \x02CD<n>\x02
+    # placeholder while the later passes run and restored after them, so
+    # nothing downstream can rewrite it. Without that, the later
+    # case-insensitive dictionaries corrupted the entry's own words
+    # ("Turn Co-ordination" -> "Turn Company-ordination", "No Picture In
+    # Picture" -> "Number Picture In Picture", "Aircraft ID ..." -> "Aircraft
+    # Inner Diameter ...") and the slash pass split "Latitude/Longitude"
+    # into "Latitude or Longitude". The expansion is therefore spoken
+    # exactly as written, with two exceptions applied here: "&" and "+" are
+    # voiced as "and" / "plus" (the symbol table's own words), because
+    # nearly every "Health & Usage ..." style entry relies on it. Anything
+    # else (a slash, "RPM") must be written out in the entry itself.
     # -------------------------------------------------------
 
     @staticmethod
@@ -625,20 +772,79 @@ class TextPreprocessor:
             + r")(?!\w)"
         )
 
-    def replace_client_dictionary(self, tracker: AlignmentTracker) -> None:
+    @staticmethod
+    def _is_compound_key(key: str) -> bool:
+        """A key with an internal "/" or "." ("kg/hr", "g/kW.h", "L/L", "N.m").
 
-        pattern = self._client_dictionary_re
+        These are matched as whole tokens BEFORE the unit and single-letter
+        rules: the unit pass would otherwise read the "kg" of "45 kg/hr" and
+        the "g" of "210 g/kW.h" on its own, and the slash step would then turn
+        what is left into "or"/"slash". Keys without such punctuation ("MW",
+        "ms", "hr") deliberately stay AFTER the unit pass, so "5 MW" is still
+        megawatts and not the dictionary's "Master Warning".
+        """
+        return "/" in key or "." in key
+
+    @staticmethod
+    def _speakable_expansion(expansion: str) -> str:
+
+        for symbol in ("&", "+"):
+            expansion = expansion.replace(symbol, SYMBOLS[symbol])
+
+        return re.sub(r"\s+", " ", expansion).strip()
+
+    def replace_client_dictionary(
+        self,
+        tracker: AlignmentTracker,
+        protected: List[Verbatim],
+        *,
+        compound: bool,
+    ) -> None:
+        """One client-dictionary pass. Expansions are appended to `protected`
+        (shared by both passes, so placeholder numbers never repeat) and
+        restored by restore_protected_client_dictionary()."""
+
+        pattern = self._client_compound_re if compound else self._client_dictionary_re
 
         if pattern is None:
             return
 
+        dictionary = self.client_dictionary
+
         # Applied against the AlignmentTracker (not a bare pattern.sub())
         # so each substitution keeps its record of which original word(s)
         # it came from -- the browser highlight and the forced-alignment
-        # timings are built from that mapping.
-        dictionary = self.client_dictionary
+        # timings are built from that mapping. The expansion keeps the
+        # union origin of the match, exactly as a plain apply() would give it.
+        def _repl(match, protected=protected):
 
-        tracker.apply(pattern, lambda m: dictionary[m.group(0)])
+            start, end = match.span()
+
+            matched_origins = set()
+            for i in range(start, end):
+                matched_origins.update(tracker.origin[i])
+            origin = tuple(sorted(matched_origins))
+
+            spoken = self._speakable_expansion(dictionary[match.group(0)])
+
+            protected.append(Verbatim(
+                text=spoken,
+                origins=(origin,) * len(spoken),
+            ))
+
+            return [f"\x02CD{len(protected) - 1}\x02"]
+
+        tracker.apply_segments(pattern, _repl)
+
+    def restore_protected_client_dictionary(self, tracker: AlignmentTracker, protected: List[Verbatim]):
+
+        if not protected:
+            return
+
+        tracker.apply_segments(
+            _CLIENT_PLACEHOLDER_RE,
+            lambda m, p=protected: [p[int(m.group(1))]]
+        )
 
     # -------------------------------------------------------
     # Dictionary Fingerprint
@@ -654,6 +860,10 @@ class TextPreprocessor:
                 "units": UNITS,
                 "symbols": SYMBOLS,
                 "parenthetical_rules": PARENTHETICAL_CONFIG_VERSION,
+                # Which bracketed ALL-CAPS words are spelled letter by
+                # letter: editing the word list or the length limit must
+                # not leave stale cached audio behind.
+                "bracket_spelling": [sorted(SPEAK_AS_WORD), SPELL_MAX_LETTERS],
             },
             sort_keys=True
         )
@@ -728,7 +938,21 @@ class TextPreprocessor:
 
     def normalize_standalone_dashes(self, tracker: AlignmentTracker) -> None:
 
+        # The edge rule goes first, so a dash that opens or closes the text
+        # is dropped instead of becoming a stray leading/trailing comma.
+        tracker.apply(_EDGE_DASH_RE, lambda m: (m.group(1) or "") + (m.group(2) or ""))
+
         tracker.apply(_STANDALONE_DASH_RE, lambda m: ", ")
+
+    # -------------------------------------------------------
+    # Unicode spaces -> plain spaces (NBSP and friends), one character for
+    # one character, so every origin stays exactly where it was.
+    # -------------------------------------------------------
+
+    def normalize_unicode_spaces(self, tracker: AlignmentTracker) -> None:
+
+        if _UNICODE_SPACE_RE.search(tracker.text):
+            tracker.apply(_UNICODE_SPACE_RE, lambda m: " ")
 
     # -------------------------------------------------------
     # Strip TTS-only characters (emoji / invisible formatting)
@@ -845,9 +1069,21 @@ class TextPreprocessor:
             body = content.strip()
             body_end = body_start + len(body)
 
+            preceding_text = tracker.text[:match.start()]
+
             decision = classify_parenthetical(
                 content=content,
-                preceding_text=tracker.text[:match.start()],
+                preceding_text=preceding_text,
+            )
+
+            # Which ALL-CAPS words in here are read letter by letter
+            # ("(IADS)" -> "I A D S"): see spell_spans() for the rules.
+            spans = spell_spans(
+                body,
+                decision.kind,
+                preceding_text,
+                self._bracket_expansion,
+                self._keep_spans(body, decision.kind),
             )
 
             if decision.kind in (ParentheticalKind.INITIALISM, ParentheticalKind.CODE):
@@ -859,13 +1095,14 @@ class TextPreprocessor:
                 # itself survives the trip -- see restore_protected_
                 # parentheticals().
                 body_origin = tracker.origin[body_start:body_end]
-                first_origin = body_origin[0] if body_origin else (0,)
-                last_origin = body_origin[-1] if body_origin else (0,)
+                spoken_body, spoken_origin = _spell_in_place(body, body_origin, spans)
+                first_origin = spoken_origin[0] if spoken_origin else (0,)
+                last_origin = spoken_origin[-1] if spoken_origin else (0,)
 
                 index = len(protected)
                 protected.append(Verbatim(
-                    text=f" {body} ",
-                    origins=(first_origin,) + tuple(body_origin) + (last_origin,),
+                    text=f" {spoken_body} ",
+                    origins=(first_origin,) + spoken_origin + (last_origin,),
                 ))
                 return [f" \x02PH{index}\x02 "]
 
@@ -874,14 +1111,73 @@ class TextPreprocessor:
 
             # PROSE: brackets become surrounding commas, but the body
             # itself is kept as a verbatim slice of the CURRENT text so
-            # each of its words retains its own origin.
+            # each of its words retains its own origin. A word to be
+            # spelled is parked behind its own placeholder (restored after
+            # every later pass), so a unit or dictionary rule cannot touch
+            # the spelled letters -- "(see 5 AB)" must not become
+            # "5 amperes B".
             trailing = "" if body[-1] in ".,;:!?" else ","
 
-            return [", ", (body_start, body_end), f"{trailing} "]
+            segments = [", "]
+            cursor = body_start
+
+            for start, end in spans:
+
+                if body_start + start > cursor:
+                    segments.append((cursor, body_start + start))
+
+                spelled, spelled_origin = _spell_in_place(
+                    body[start:end],
+                    tracker.origin[body_start + start:body_start + end],
+                    [(0, end - start)],
+                )
+
+                index = len(protected)
+                protected.append(Verbatim(text=spelled, origins=spelled_origin))
+                segments.append(f"\x02PH{index}\x02")
+
+                cursor = body_start + end
+
+            if cursor < body_end:
+                segments.append((cursor, body_end))
+
+            segments.append(f"{trailing} ")
+
+            return segments
 
         tracker.apply_segments(PARENTHETICAL_RE, _repl)
 
         return protected
+
+    def _keep_spans(self, body: str, kind) -> list:
+        """Spans of a bracket's text that belong to a dictionary key spanning
+        several words, and so must not have any of their words spelled.
+
+        In a PROSE bracket the text goes on through the dictionary passes, so a
+        compound key ("RAM/RADALT") is protected too; in a CODE bracket
+        nothing is expanded, so only multi-word labels ("AIR COND") are.
+        """
+
+        patterns = [p for p in self._phrase_patterns if p is not None]
+
+        if kind is ParentheticalKind.PROSE and self._client_compound_re is not None:
+            patterns.append(self._client_compound_re)
+
+        return [m.span() for p in patterns for m in p.finditer(body)]
+
+    def _bracket_expansion(self, word: str):
+        """What the pipeline's dictionaries would turn `word` into, or None.
+
+        The client dictionary is matched exactly (it is case-sensitive); the
+        others case-insensitively, as they are everywhere else.
+        """
+
+        expansion = self.client_dictionary.get(word)
+
+        if expansion is not None:
+            return expansion
+
+        return self._known_expansions.get(word.casefold())
 
     def restore_protected_parentheticals(self, tracker: AlignmentTracker, protected: List[Verbatim]):
 
@@ -1090,17 +1386,51 @@ class TextPreprocessor:
             Verbatim(text=word, origins=(origin,) * len(word)),
         ]
 
-    def expand_litres(self, tracker: AlignmentTracker) -> None:
+    def expand_litre_compounds(self, tracker: AlignmentTracker) -> None:
+        """Compound litre tokens ("L/100km", "L/h", "L/min"): part of pass 1,
+        right after the compound client-dictionary keys and before any
+        single-letter rule."""
 
         tracker.apply(
             _LITRES_PER_100KM_RE,
             lambda m: "litres per hundred kilometres"
         )
 
+        tracker.apply(
+            _LITRES_RATE_RE,
+            lambda m: f"litres per {_RATE_PERIOD[m.group(1)]}"
+        )
+
+    def expand_litres(self, tracker: AlignmentTracker) -> None:
+        """A number followed by L ("2.0L", "50 L"): pass 2, single-letter rule."""
+
         tracker.apply_segments(
             _LITRE_AMOUNT_RE,
             lambda m: self._litre_segments(tracker, m)
         )
+
+    # -------------------------------------------------------
+    # Compass bearings: "12°N 77°E" -> "12 degrees North 77 degrees East"
+    #
+    # Without this the symbol pass says "12 degrees N". Only an upper-case
+    # N/S/E/W directly after a degree sign counts, so "°C" / "°F" (handled
+    # by the unit tables) and prose are untouched. The number keeps its own
+    # original-word origin; the whole "12°N" is usually ONE original token, in
+    # which case every spoken word simply maps back to it.
+    # -------------------------------------------------------
+
+    def expand_compass_degrees(self, tracker: AlignmentTracker) -> None:
+
+        def _repl(match):
+            word = _COMPASS_WORDS[match.group(2)]
+            origin = tracker.origin[match.start(2)]
+            return [
+                (match.start(1), match.end(1)),
+                " degrees ",
+                Verbatim(text=word, origins=(origin,) * len(word)),
+            ]
+
+        tracker.apply_segments(_DEGREE_COMPASS_RE, _repl)
 
     def expand_bracketed_litres(self, tracker: AlignmentTracker) -> None:
 
@@ -1355,6 +1685,10 @@ class TextPreprocessor:
                 groups=[]
             )
 
+        # Word boundaries must be the browser's, or the highlighter and the
+        # timings drift apart -- see normalize_dom_whitespace().
+        text = normalize_dom_whitespace(text)
+
         tracker = AlignmentTracker(text)
 
         #
@@ -1388,6 +1722,13 @@ class TextPreprocessor:
         self.strip_tts_only_characters(tracker)
 
         #
+        # NBSP and the other Unicode spaces -> ordinary spaces, so Piper is
+        # handed clean text. Same width, same origins: no word moves.
+        #
+
+        self.normalize_unicode_spaces(tracker)
+
+        #
         # "wheelbase (L)" and "(50L)" -- a bracketed L that must be
         # resolved before the parenthetical pass sees it: "(L)" would be
         # read as the bare letter, and a one-token "(50L)" would be
@@ -1414,28 +1755,58 @@ class TextPreprocessor:
 
         protected_reference_codes = self.protect_reference_codes(tracker)
 
+        # ==================================================================
+        # Slash / unit / single-letter handling happens in THREE passes, in
+        # this order. The order is what keeps "L/L" (Latitude/Longitude)
+        # apart from "L" (litre or length), and stops "45 kg/hr" being read
+        # as "45 kilograms slash Hour".
         #
-        # Units FIRST — before any dictionary pass.
+        #   PASS 1  exact compound tokens   ("L/L", "kg/hr", "g/kW.h",
+        #           "L/100km", "L/h") -- matched whole, first of all
+        #   PASS 2  single-character / unit rules  ("2.0 L", "50L",
+        #           "L = 250", "12°N", "25 mm") -- may only see what
+        #           pass 1 left behind
+        #   PASS 3  generic slash fallback  ("task/document" -> "task or
+        #           document"; see normalize_slashes() further down)
+        # ==================================================================
+
         #
-        # Unit compounds ("km/h", "m/s", "ft/min", "220V") are
-        # unambiguous and must be expanded to full spoken names before a
-        # dictionary substitution or the slash-normalizer can get at a
-        # fragment of one. (This is also why the bare "L"/"W"/"H"
-        # dimension keys were removed from ENGINEERING_TERMS.)
+        # PASS 1 -- exact compound tokens.
+        #
+        # Client-dictionary keys containing "/" or "." (case-sensitive,
+        # expansion protected from every later pass), then the compound
+        # litre regexes. Both run before replace_units and the "L" rules,
+        # which would otherwise take the "kg" of "kg/hr", the "g" of
+        # "g/kW.h" or the first "L" of "L/L" and leave the rest to the slash
+        # step. Bare unit keys ("MW", "ms", "hr") are NOT here: they stay
+        # after the unit pass so that "5 MW" is still megawatts.
         #
 
-        # "L" as litres (singular/plural, "L/100km"). Before replace_units
-        # for the reason given at expand_litres().
+        protected_client_dictionary: List[Verbatim] = []
+
+        self.replace_client_dictionary(tracker, protected_client_dictionary, compound=True)
+        self.expand_litre_compounds(tracker)
+
+        #
+        # PASS 2 -- single-character rules and units.
+        #
+        # "L" after a number is litres (singular/plural); a bearing such as
+        # "12°N" is "12 degrees North"; then the unit table ("25mm",
+        # "220V"). ("L =" -> "length equals" belongs here too, but needs
+        # the dictionary passes to have run first -- see
+        # expand_dimension_abbreviations.)
+        #
+
         self.expand_litres(tracker)
-
+        self.expand_compass_degrees(tracker)
         self.replace_units(tracker)
 
         #
-        # Client Dictionary -- case-SENSITIVE (see
-        # replace_client_dictionary), unlike the two passes below.
+        # Client Dictionary, every other key -- case-SENSITIVE, expansion
+        # protected from every pass below (see replace_client_dictionary).
         #
 
-        self.replace_client_dictionary(tracker)
+        self.replace_client_dictionary(tracker, protected_client_dictionary, compound=False)
 
         #
         # Engineering Terms
@@ -1463,8 +1834,9 @@ class TextPreprocessor:
         self.expand_dimension_abbreviations(tracker)
 
         #
-        # slash-joined words -> "word or word" (before the symbol pass
-        # turns a bare "/" into " slash ")
+        # PASS 3 -- generic slash fallback: whatever slash-joined words
+        # passes 1 and 2 left alone -> "word or word" (before the symbol
+        # pass turns a bare "/" into " slash ")
         #
 
         self.normalize_slashes(tracker)
@@ -1491,6 +1863,7 @@ class TextPreprocessor:
 
         self.restore_protected_parentheticals(tracker, protected_parentheticals)
         self.restore_protected_reference_codes(tracker, protected_reference_codes)
+        self.restore_protected_client_dictionary(tracker, protected_client_dictionary)
 
         #
         # "ABS" -> "A B S". Deliberately LAST, after both restores above

@@ -8,9 +8,10 @@ currently being spoken.
 ## Features
 
 - Offline neural TTS with two voices (male / female) and instant voice switching that keeps your reading position
-- Word-level highlighting driven by forced alignment, with an equal-duration fallback if alignment fails
+- Word-level highlighting driven by forced alignment, with an equal-duration fallback if alignment fails. The page's
+  words are matched to the narrated text word for word, so figures, icons, dashes, quotes and glued punctuation cannot shift the highlight
 - Playback speed applied client-side, so changing speed never re-synthesizes
-- Text preprocessing for technical content: abbreviations, units, acronyms, reference codes read digit by digit
+- Text preprocessing for technical content: abbreviations, units, acronyms (spelled letter by letter in brackets), reference codes read digit by digit
 - Content-addressed alignment cache and background prefetch of the other voice
 - Request cancellation so navigating away frees the CPU instead of finishing abandoned jobs
 - Global search, Previous/Next navigation, content zoom, calculators drawer, and a custom video player with captions
@@ -99,10 +100,20 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
 - `client_dictionary.json` holds the project's acronyms. It is matched **case-sensitively** and as whole words,
   so `CBS` (Chip Burning System) and `CBs` (Circuit Breakers), or `MFDS` and `MFDs`, are separate entries; write
   each key exactly as it appears in the manual. The in-app glossary search is case-sensitive on acronyms too.
+  An entry's expansion is **spoken exactly as written**: no later step rewrites it, so spell out anything you want
+  said (write "Latitude and Longitude", not "Latitude/Longitude", and "Revolutions Per Minute", not "RPM").
+  Only `&` and `+` are voiced for you ("and", "plus"). Avoid keys that are ordinary words (`IF`, `SET`, `TOP`):
+  they fire in any ALL-CAPS warning or heading. A key containing `/` or `.` (`kg/hr`, `g/kW.h`, `L/L`, `N.m`) is
+  matched as a whole token before the unit and single-letter rules run, so "45 kg/hr" is "45 kilograms per hour".
 - `engineering.py` and `abbreviations.py` hold general terms and are matched case-insensitively.
 - The letter `L` is ambiguous (litres or length), so it is resolved by context in `preprocess.py` rather than by a
   dictionary: `2.0L`, `1 L` (singular), `(50L)` and `L/100km` are litres; `L x W x H`, `L = 250` and
   `wheelbase (L)` are length. A bare `L` anywhere else is left as the letter.
+- An ALL-CAPS acronym **inside brackets** is read letter by letter: `Integrated Air Defence System (IADS)` is
+  "... I A D S" and `(NATO)` is "N A T O". Outside brackets nothing changes. Left as words: abbreviations the app
+  already expands (`FIG`, `KG`), ordinary words (`NOTE`, `ON`, `OFF`; the list is `SPEAK_AS_WORD` in
+  `parentheticals.py`), long words such as `(BOOSTER)`, and acronyms that sit inside a longer bracketed sentence
+  when the dictionary can already expand them.
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

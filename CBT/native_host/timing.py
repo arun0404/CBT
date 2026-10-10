@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from text_processing.alignment import AlignmentResult
-from text_processing.text_sanitizer import is_pure_emoji_word
+from text_processing.text_sanitizer import is_non_spoken_word
 from config import MIN_WORD_HIGHLIGHT_DURATION
 
 
@@ -140,8 +140,15 @@ class TimingGenerator:
             # jumped onto it off the final spoken letter. A non-alnum
             # token that DID produce spoken output (e.g. "&" -> "and")
             # lands in a normal group and is correctly left un-silenced.
+            #
+            # is_non_spoken_word() makes the same call PER WORD for a token
+            # that is only dashes, quotes, invisible characters or emoji
+            # ("–", '"', NBSP, a zero-width space, "📄"): even if such a
+            # token ends up inside a group that does contain spoken words,
+            # it stays a zero-width, non-target marker and never takes a
+            # share of the spoken word's window.
             silent = [
-                degenerate or is_pure_emoji_word(w)
+                degenerate or is_non_spoken_word(w)
                 for w in words
             ]
             n_spoken = sum(1 for s in silent if not s)

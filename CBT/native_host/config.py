@@ -386,7 +386,78 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               text containing one of those shapes. Changes the audio and
 #               the processed-word count for them, so those entries are no
 #               longer correct.
-ALIGNMENT_CACHE_VERSION = "v23"
+#   v23 -> v24: client_dictionary.json expansions are now FINAL text:
+#               replace_client_dictionary() parks each one behind a
+#               \x02CD<n>\x02 placeholder while the later passes run and
+#               restores it afterwards, so engineering.py / abbreviations.py
+#               / the slash pass can no longer rewrite it ("Turn
+#               Co-ordination" was spoken "Turn Company-ordination", "No
+#               Picture In Picture" "Number Picture In Picture"). "&" and
+#               "+" inside an expansion are still voiced "and" / "plus";
+#               anything else (a slash, "RPM") must now be written out in
+#               the entry. Also: "L/min", "L/h" and "L/hr" are now "litres
+#               per minute/hour" (they were "litres or h"; the unit part is
+#               lower-case only, so "L/H" for Left Hand is untouched). The
+#               dictionary content changed too (so the fingerprint moves),
+#               but this bump covers the logic change, which no fingerprint
+#               sees. Changes the audio for any text that hits a client
+#               entry containing a slash, "No", "Co", "ID" etc., and for
+#               litre rates, so v23 entries for it are no longer correct.
+#   v24 -> v25: slash/unit/single-letter handling now runs in three ordered
+#               passes (see process_with_alignment): (1) exact COMPOUND
+#               tokens first -- client-dictionary keys containing "/" or
+#               "." ("L/L", "kg/hr", "g/kW.h", "N.m") and the litre
+#               compounds ("L/100km", "L/h"); (2) single-character / unit
+#               rules ("2.0 L", "L =", "25 mm"); (3) the generic slash
+#               fallback. Before, the unit pass ran first and took the
+#               "kg" of "45 kg/hr" and the "g" of "210 g/kW.h", leaving
+#               "45 kilograms slash Hour" / "210 grams slash kilowatts.h";
+#               "30 kg/h" and "210 g/kWh" came out as "kilograms or h" /
+#               "grams or kWh". Also new: a bearing such as "12°N" is spoken
+#               "12 degrees North" (was "12 degrees N"). Bare unit keys
+#               ("MW", "ms", "hr") still run AFTER the unit pass so "5 MW" is
+#               megawatts. Changes the audio for any text containing a
+#               compound unit or a bearing, so v24 entries for it are no
+#               longer correct.
+#   v25 -> v26: ALL-CAPS acronyms inside brackets are now read LETTER BY
+#               LETTER ("Integrated Air Defence System (IADS)" -> "... I A D
+#               S", "(NATO)" -> "N A T O"); before, Piper said them as one
+#               word ("eye-ads", "nay-toe"). Decided by spell_spans() in
+#               parentheticals.py and applied in replace_parentheticals():
+#               a bracketed initialism of the words before it is always
+#               spelled; other ALL-CAPS words of 2-6 letters are spelled
+#               unless they are a known abbreviation or unit (FIG, KG), an
+#               ordinary word (SPEAK_AS_WORD: NOTE, ON, OFF ...), part of a
+#               multi-word dictionary key ("AIR COND"), or - in a prose
+#               bracket - something the dictionaries expand. Words outside
+#               brackets are untouched. Also fixed _is_initialism_of(), which
+#               matched greedily and so missed acronyms whose expansion has an
+#               "and" ("Integrated Architecture and Display System" -> IADS).
+#               PARENTHETICAL_CONFIG_VERSION is now "v2" and the word list is
+#               part of dictionary_fingerprint. Changes the audio and the
+#               processed-word count for any text containing a bracketed
+#               acronym, so v25 entries for it are no longer correct.
+#   v26 -> v27: non-spoken structural symbols (dashes, quotes, NBSP,
+#               zero-width characters, document emoji) are now handled so
+#               that Piper is given clean text AND the browser's word list
+#               and the timings cannot drift apart. Measured against the
+#               real voices: none of these is spoken (the 📄 emoji IS, and
+#               was already stripped), so nothing changes audibly except
+#               where noted. (1) Curly double quotes are removed like
+#               straight ones (symbols.py); NBSP and the other Unicode
+#               spaces become plain spaces; a dash at the very start or end
+#               of the text is dropped instead of sent. (2) The backend now
+#               splits words where the browser's /\S+/ does: U+FEFF is a
+#               word boundary (it fused two words into one before, so every
+#               later highlight was off by one), and U+001C-U+001E / U+0085
+#               no longer split a word. (3) timing.py flags a word that is
+#               only dashes/quotes/invisible characters/emoji silent PER
+#               WORD (text_sanitizer.is_non_spoken_word), not only when its
+#               whole group produced nothing. Changes the text sent to Piper,
+#               and the processed-word count for text containing U+FEFF or
+#               those control characters, so v26 entries for such text are no
+#               longer correct.
+ALIGNMENT_CACHE_VERSION = "v27"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

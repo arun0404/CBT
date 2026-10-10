@@ -130,6 +130,51 @@ def strip_invisible_and_emoji(text: str) -> str:
     return TTS_STRIP_PATTERN.sub("", text)
 
 
+# --------------------------------------------------------------------
+# Structural marks nobody speaks: dashes and quotation marks.
+#
+# Measured against the real Piper voices: a quote (straight or curly), an
+# NBSP or a zero-width space adds no audio, and a dash at the edge of the
+# text or glued to a word is ignored. A STANDALONE en/em dash between words
+# adds a pause, which preprocess.py replaces with a comma, so it never
+# reaches Piper as a dash. None of these ever produces a spoken word, which
+# is exactly what "silent" means to the timing code and to highlighter.js.
+#
+# Deliberately NOT here: "°", arrows, "©", "®", "™" and friends. They are
+# in SYMBOLS and ARE spoken ("degrees", "leads to", "copyright").
+# --------------------------------------------------------------------
+_DASH_CHARS = "-‐‑‒–—―−"
+_QUOTE_CHARS = "\"'‘’‚‛“”„‟«»‹›"
+
+NON_SPOKEN_ONLY_PATTERN = re.compile(
+    "(?:"
+    + "|".join(re.escape(c) for c in _INVISIBLE_CHARS + _DASH_CHARS + _QUOTE_CHARS)
+    + "|" + _char_class(ranges=_EMOJI_RANGES)
+    + r"|\s)+"
+)
+
+
+def is_non_spoken_word(word: str) -> bool:
+    """
+    True if `word` -- one \\S+ token of the ORIGINAL text -- contains
+    nothing a TTS engine would say: only dashes, quotation marks,
+    invisible/zero-width characters, emoji and whitespace ("–", '"', "“”",
+    "📄", NBSP, a zero-width space ...).
+
+    A superset of is_pure_emoji_word(). Such a token keeps its place in the
+    word list (so the browser's word indices stay in step with the timings)
+    but is flagged silent: it is never a highlight or seek target.
+
+    A token that MIXES these with real text ("📄Document", '"Replace') is
+    NOT non-spoken; it has a spoken part and gets a normal timing window.
+    """
+
+    if not word:
+        return False
+
+    return NON_SPOKEN_ONLY_PATTERN.fullmatch(word) is not None
+
+
 def is_pure_emoji_word(word: str) -> bool:
     """
     True if `word` — one \\S+ token from the ORIGINAL/authored text,
