@@ -457,7 +457,26 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               and the processed-word count for text containing U+FEFF or
 #               those control characters, so v26 entries for such text are no
 #               longer correct.
-ALIGNMENT_CACHE_VERSION = "v27"
+#   v27 -> v28: Roman-numeral list markers are now recognised in all three
+#               written forms and in upper case (expand_roman_numeral_list_
+#               markers). Before, only a lower-case "i." / "i)" at the start
+#               of a line was spoken as a number; "(i)" came out as the letter
+#               (", i,"), "II." / "(III)" were left alone, and an enumeration
+#               inside a sentence ("(i) clean it; (ii) replace it") was read as
+#               letters. Now "i." "i)" "(i)" are "One." ... "Ten." at the start
+#               of a line (up to "xx"); multi-letter upper case ("II." "IV)"
+#               "(III)") counts too, a single upper-case "I" / "V" / "X" only
+#               as "I)" or "(V)" (as "I." / "V." it is a pronoun or an
+#               initial); inside a sentence a bracketed numeral is spoken as
+#               a number when it starts a clause or belongs to a run, with a
+#               pause after a label ("One, clean it; Two, replace it") and
+#               none after a reference ("Part (IV)" -> "Part Four"). A bare
+#               i, v or x, and "velocity (v)" / "Voltage (V)" / "f(x)", stay
+#               letters. Bracketed Roman numerals are no longer spelled as
+#               acronyms ("(IV)" was "I V"). Changes the audio for any text
+#               containing such a marker, so v27 entries for it are no longer
+#               correct.
+ALIGNMENT_CACHE_VERSION = "v28"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

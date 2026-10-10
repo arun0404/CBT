@@ -114,21 +114,34 @@ REFERENCE_CODE_RE = re.compile(r"(?:(?<=\w)-)?\b\d+(?:-\d+){2,}(?:-?[A-Za-z]{1,3
 # data2.json) -- without this, Piper reads the marker letter-by-letter
 # ("i dot" / "i eye dot"), not as an enumeration.
 #
-# Deliberately case-SENSITIVE (lowercase only, no re.IGNORECASE): "I."
-# is the pronoun "I" ending a sentence ("... as discussed. I. ...") far
-# more often than it is a list marker in real prose, and that
-# capitalized form is never how this manual writes its lists. Restricting
-# to lowercase is what keeps that sentence-final "I." from ever being
-# mistaken for item one of a list.
+# Three written forms are list markers: "i."  "i)"  and "(i)".
 #
-# Scoped to the START of a line (re.MULTILINE "^", i.e. right after a
-# "<br>"-turned-newline or the very start of the text) specifically so an
-# ordinary word or abbreviation elsewhere in a sentence is never touched
-# -- "vs. i." mid-sentence, or "i.e." (excluded separately below, since
-# that already starts a fresh clause after its own preceding period and
-# so CAN land at a line start). The trailing (?=\s|$) requires the
-# marker to be followed by whitespace or end-of-string, which is what
-# actually excludes "i.e." -- there is no space between "i." and "e".
+# Case: lower-case is always a marker. Upper-case is a marker for the
+# multi-letter numerals ("II." "IV)" "(III)"), but a single upper-case
+# "I", "V" or "X" counts only with a closing parenthesis ("I)" "(V)"):
+# followed by a period it is the pronoun "I" or a person's initial ("V.
+# Rao", "X. Ray"), and sentence-final "I." is far more common in real
+# prose than an upper-case list.
+#
+# Position: the dot and closing-paren forms are scoped to the START of a
+# line (re.MULTILINE "^", i.e. right after a "<br>"-turned-newline or the
+# very start of the text) specifically so an ordinary word or letter
+# elsewhere in a sentence is never touched -- a variable at the end of a
+# sentence ("find x."), "vs. i." mid-sentence, or "i.e." (excluded
+# separately below, since that already starts a fresh clause after its own
+# preceding period and so CAN land at a line start). A bare i, v or x with
+# no marker punctuation is never touched anywhere. The trailing (?=\s|$)
+# requires the marker to be followed by whitespace or end-of-string, which
+# is what actually excludes "i.e." -- there is no space between "i." and
+# "e".
+#
+# Inside a sentence only the fully parenthesised form counts, and only at
+# the start of a clause (after ";" ":" "," "." or "and"/"or"): "do: (i)
+# clean it; (ii) replace it". That position is what separates an enumerator
+# from a variable named in brackets ("velocity (v)", "current (i)",
+# "Voltage (V)", "f(x)"), which follows a noun and stays a letter. A mid-
+# sentence "i)" is never touched: it is usually the end of a parenthetical
+# ("(see step v)").
 #
 # Extended a little past the "i-x" the manual actually uses (up to "xx")
 # since a longer procedure list is plausible and the marginal false-
@@ -163,13 +176,42 @@ ROMAN_NUMERAL_LIST_WORDS = {
 # the pattern then fails, so this isn't strictly load-bearing given the
 # trailing [.)] anchor below, but it removes any dependence on that
 # backtracking behavior at all).
-_ROMAN_LIST_ALTERNATION = "|".join(
-    sorted(ROMAN_NUMERAL_LIST_WORDS.keys(), key=len, reverse=True)
+_ROMAN_LOWER = sorted(ROMAN_NUMERAL_LIST_WORDS.keys(), key=len, reverse=True)
+
+_ROMAN_ALT_LOWER = "|".join(_ROMAN_LOWER)
+_ROMAN_ALT_UPPER = _ROMAN_ALT_LOWER.upper()
+_ROMAN_ALT_UPPER_MULTI = "|".join(k.upper() for k in _ROMAN_LOWER if len(k) > 1)
+
+# At the start of a line: "i." / "i)" (any numeral, lower-case, or multi-
+# letter upper-case), "(i)" (any numeral, either case), and "I)" / "V)" /
+# "X)" (the single upper-case letters, closing parenthesis only).
+ROMAN_LIST_MARKER_RE = re.compile(
+    r"(?m)^(?P<indent>[ \t]*)(?:"
+    r"\((?P<paren>" + _ROMAN_ALT_LOWER + "|" + _ROMAN_ALT_UPPER + r")\)"
+    r"|(?P<dot>" + _ROMAN_ALT_LOWER + "|" + _ROMAN_ALT_UPPER_MULTI + r")[.)]"
+    r"|(?P<cap>I|V|X)\)"
+    r")(?=\s|$)"
 )
 
-ROMAN_LIST_MARKER_RE = re.compile(
-    r"(?m)^[ \t]*(" + _ROMAN_LIST_ALTERNATION + r")[.)](?=\s|$)"
+# In the middle of a sentence: a parenthesised numeral, set off from the word
+# before it (so not "f(x)" or "3(i)") and followed by a space or by
+# punctuation ("(i), (ii) and (iii)"). Lower-case, or multi-letter upper-case
+# ("(IV)"); a single upper-case "(V)" / "(X)" is a unit or a label, never here.
+#
+# A multi-letter numeral ("(ii)", "(IV)") is always an enumerator. A single
+# lower-case letter might instead be a variable named in brackets, which is
+# decided in expand_roman_numeral_list_markers() from where it sits on its
+# line.
+ROMAN_INLINE_CANDIDATE_RE = re.compile(
+    r"(?<![\w)\]])\((?P<num>" + _ROMAN_ALT_LOWER + "|" + _ROMAN_ALT_UPPER_MULTI
+    + r")\)(?=[ \t]|[,;:.](?=\s|$)|$)"
 )
+
+# The numerals in order, to recognise a run: "(i) ... (ii) ... (iii)".
+_ROMAN_SEQUENCE = list(ROMAN_NUMERAL_LIST_WORDS)
+
+# What may stand directly before a clause-initial enumerator.
+_CLAUSE_START_BEFORE_RE = re.compile(r"(?:[;:,.]|\b(?i:and|or))$")
 
 # -------------------------------------------------------
 # "ABS" (Anti-Lock Braking System) -> spelled out letter-by-letter
@@ -918,10 +960,77 @@ class TextPreprocessor:
 
     def expand_roman_numeral_list_markers(self, tracker: AlignmentTracker) -> None:
 
-        def _repl(match):
-            return ROMAN_NUMERAL_LIST_WORDS[match.group(1)] + "."
+        # The spoken word takes the origin of the MARKER's own first
+        # character, not of the indentation before it: indentation inherits
+        # the origin of the previous line's last word, and a union with that
+        # would tie the marker's timing to the word before it.
+        def _line_start(match):
+            numeral = match.group("paren") or match.group("dot") or match.group("cap")
+            spoken = ROMAN_NUMERAL_LIST_WORDS[numeral.lower()] + "."
+            origin = tracker.origin[match.end("indent")]
+            return [Verbatim(text=spoken, origins=(origin,) * len(spoken))]
 
-        tracker.apply(ROMAN_LIST_MARKER_RE, _repl)
+        tracker.apply_segments(ROMAN_LIST_MARKER_RE, _line_start)
+
+        # "do: (i) clean it; (ii) replace it" -> "do: One, clean it; Two,
+        # replace it". A comma, not a full stop: a full stop would make each
+        # enumerator its own sentence and Piper adds a half-second silence
+        # after every sentence, which mid-sentence is far too choppy.
+        # A parenthesised numeral in the middle of a line is an enumerator,
+        # not a variable ("velocity (v)", "current (i)"), when EITHER
+        #   * it starts a clause: after ";" ":" "," "." or "and" / "or"; or
+        #   * it belongs to a run: its neighbour in the sequence ((ii) for
+        #     (i), (i) or (iii) for (ii), ...) is also in brackets on the
+        #     same line -- which is what catches the first marker of "are
+        #     (i) visual, (ii) functional and (iii) electrical", where a
+        #     plain word precedes it.
+        # A lone "(v)" after a noun satisfies neither and stays a letter.
+        def _inline(match):
+
+            text = tracker.text
+            numeral = match.group("num").lower()
+
+            line_start = text.rfind("\n", 0, match.start()) + 1
+            line_end = text.find("\n", match.end())
+            line_end = len(text) if line_end == -1 else line_end
+
+            before = text[line_start:match.start()].rstrip(" \t")
+
+            # Is it a LABEL ("(i) clean the filter")? Yes if it starts a
+            # clause, or belongs to a run of numbers on the line.
+            is_label = before == "" or bool(_CLAUSE_START_BEFORE_RE.search(before))
+
+            if not is_label:
+
+                on_line = {
+                    m.group("num").lower()
+                    for m in ROMAN_INLINE_CANDIDATE_RE.finditer(text, line_start, line_end)
+                }
+
+                position = _ROMAN_SEQUENCE.index(numeral)
+                neighbours = {
+                    _ROMAN_SEQUENCE[i]
+                    for i in (position - 1, position + 1)
+                    if 0 <= i < len(_ROMAN_SEQUENCE)
+                }
+
+                is_label = bool(on_line & neighbours)
+
+            # A single letter (i, v, x) could be a variable, so it needs to be
+            # a label; "(ii)" or "(IV)" never is one, and after a noun is a
+            # reference: "Part (IV)" -> "Part Four".
+            if len(numeral) == 1 and not is_label:
+                return [(match.start(), match.end())]              # a letter: leave it
+
+            # Only a label gets the pause, and none if punctuation already
+            # follows the number.
+            followed_by_space = text[match.end():match.end() + 1] in (" ", "\t")
+
+            spoken = ROMAN_NUMERAL_LIST_WORDS[numeral] + ("," if is_label and followed_by_space else "")
+            origin = tracker.origin[match.start()]                  # the "("
+            return [Verbatim(text=spoken, origins=(origin,) * len(spoken))]
+
+        tracker.apply_segments(ROMAN_INLINE_CANDIDATE_RE, _inline)
 
     # -------------------------------------------------------
     # Standalone prose dash -> comma pause

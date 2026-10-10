@@ -114,6 +114,11 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   already expands (`FIG`, `KG`), ordinary words (`NOTE`, `ON`, `OFF`; the list is `SPEAK_AS_WORD` in
   `parentheticals.py`), long words such as `(BOOSTER)`, and acronyms that sit inside a longer bracketed sentence
   when the dictionary can already expand them.
+- Roman-numeral list markers are read as numbers: `i.` `i)` `(i)` at the start of a line are "One." (and so on up to
+  `xx`), and so are the upper-case forms `II.` `IV)` `(III)`. A single capital `I.` / `V.` / `X.` is left alone (a
+  pronoun or an initial). Inside a sentence a bracketed numeral is spoken as a number when it opens a clause or sits in
+  a run: `do: (i) clean it; (ii) replace it` is "One, clean it; Two, replace it". A bare `i`, `v` or `x`, and a
+  variable such as `velocity (v)` or `Voltage (V)`, stays a letter.
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

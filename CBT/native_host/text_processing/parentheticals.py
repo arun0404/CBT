@@ -297,6 +297,10 @@ SPEAK_AS_WORD = frozenset({
     "NOTE", "NOTES", "WARNING", "CAUTION", "DANGER",
     "SEE", "REFER", "TASK", "TABLE", "FIGURE", "CHAPTER", "SECTION", "PARA", "PAGE", "STEP", "ITEM",
     "UP", "DOWN", "LEFT", "RIGHT", "HIGH", "LOW", "OPEN", "CLOSED", "LONG", "SHORT",
+    # Roman numerals are numbers, not acronyms: "Part (IV)", "Fe(III)". (A bracket
+    # that is a list marker is turned into a number before this rule ever runs.)
+    "II", "III", "IV", "VI", "VII", "VIII", "IX",
+    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
 })
 
 # An ALL-CAPS word longer than this that is not a known abbreviation and does
