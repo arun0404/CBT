@@ -110,15 +110,24 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   dictionary: `2.0L`, `1 L` (singular), `(50L)` and `L/100km` are litres; `L x W x H`, `L = 250` and
   `wheelbase (L)` are length. A bare `L` anywhere else is left as the letter.
 - An ALL-CAPS acronym **inside brackets** is read letter by letter: `Integrated Air Defence System (IADS)` is
-  "... I A D S" and `(NATO)` is "N A T O". Outside brackets nothing changes. Left as words: abbreviations the app
-  already expands (`FIG`, `KG`), ordinary words (`NOTE`, `ON`, `OFF`; the list is `SPEAK_AS_WORD` in
-  `parentheticals.py`), long words such as `(BOOSTER)`, and acronyms that sit inside a longer bracketed sentence
-  when the dictionary can already expand them.
+  "... I A D S" and `(NATO)` is "N A T O". This includes an acronym mixed with ordinary words: `(DC Power)` is
+  "D C Power" and `(see AC manual)` is "see A C manual", not "Direct Current Power". Outside brackets nothing changes
+  (`DC power` is still "Direct Current power"). Left as words: abbreviations that are words or units rather than
+  initials (`FIG` is "Figure", `KG` is "kilograms"), ordinary words (`NOTE`, `ON`, `OFF`, `SEE`, `REF`; the list is
+  `SPEAK_AS_WORD` in `parentheticals.py`), and long words such as `(BOOSTER)`.
 - Roman-numeral list markers are read as numbers: `i.` `i)` `(i)` at the start of a line are "One." (and so on up to
   `xx`), and so are the upper-case forms `II.` `IV)` `(III)`. A single capital `I.` / `V.` / `X.` is left alone (a
   pronoun or an initial). Inside a sentence a bracketed numeral is spoken as a number when it opens a clause or sits in
   a run: `do: (i) clean it; (ii) replace it` is "One, clean it; Two, replace it". A bare `i`, `v` or `x`, and a
   variable such as `velocity (v)` or `Voltage (V)`, stays a letter.
+- A minus sign in front of a number is spoken: `-50 °C`, `–50` (en dash), `−50` and `− 50` (true minus sign) are
+  "minus 50 ...", also in brackets (`[-5]`, `(-20 °C)`) and after `=`, `,` or `;`. Bullet dashes (`- Standard
+  practices`, `- 5 mm clearance`), prose dashes (`CAN — 500 kilobits`), ranges and joiners (`10-20 mm`, `F-16`,
+  `2024-10-11`, reference codes) are not signs and are left as they were.
+- A slash with spaces on both sides is an alternative and is read "or": `Inspection / Maintenance` is "Inspection or
+  Maintenance", `12 months / 15,000 km` is "12 months or 15,000 kilometres". Unspaced slashes keep their own reading
+  (`kg/hr` is "kilograms per hour", `L/L` is "Latitude and Longitude", `70-00-00/801` is a reference code), as does a
+  slash with a space on one side only.
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

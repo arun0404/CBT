@@ -83,6 +83,41 @@ function isSpokenWord(element) {
     return text.length > 0 && !NON_SPOKEN_ONLY_RE.test(text);
 }
 
+// A minus sign in front of a number is spoken ("-50" is "minus 50"; see
+// NEGATIVE_NUMBER_RE in preprocess.py). When the number is one text node the
+// sign is simply part of that word. But a sign in an element of its own,
+// glued to the digits ("<b>-</b>0.5°"), is a symbol-only piece that
+// isSpokenWord() rejects, so it would stay unlit while "minus" is being said.
+// Same rule as the backend: a sign piece directly followed by a piece that
+// starts with a digit, where the number is not joined to a word before it
+// ("foo-5" is a hyphen, not a sign).
+const SIGN_PIECE_RE = /^[-–−]$/;
+const NUMBER_OPENER_RE = /[(\[{=,;"'‘“]$/;
+
+/**
+ * Is pieces[i] the minus sign of the number that follows it in the same word?
+ *
+ * @param {Element[]} pieces  the elements one word is made of, in order
+ * @param {number} i
+ * @returns {boolean}
+ */
+function isNegativeSignPiece(pieces, i) {
+
+    if (!SIGN_PIECE_RE.test(pieces[i].textContent || "")) {
+        return false;
+    }
+
+    const next = pieces[i + 1];
+
+    if (!next || !/^\d/.test(next.textContent || "")) {
+        return false;
+    }
+
+    const before = pieces.slice(0, i).map((p) => p.textContent || "").join("");
+
+    return before === "" || NUMBER_OPENER_RE.test(before);
+}
+
 class WordHighlighter {
 
     constructor(containerId) {
@@ -567,15 +602,18 @@ class WordHighlighter {
 
         // Highlight the SPOKEN pieces of the word. A piece that is only
         // dashes, quotes, NBSP or an emoji ("📄" glued to "Replace") is
-        // skipped; and a word with no spoken piece at all highlights
+        // skipped -- except the minus sign of a number ("<b>-</b>50"), which
+        // is voiced; and a word with no spoken piece at all highlights
         // nothing. (The Timeline already keeps such words, flagged silent
         // by the backend, from being chosen; this is the second guard.)
-        for (const piece of this.wordGroups[index] || [element]) {
+        const pieces = this.wordGroups[index] || [element];
 
-            if (isSpokenWord(piece)) {
+        pieces.forEach((piece, i) => {
+
+            if (isSpokenWord(piece) || isNegativeSignPiece(pieces, i)) {
                 piece.classList.add("active-word");
             }
-        }
+        });
 
         if (suppressScroll) {
             return;
@@ -674,5 +712,5 @@ class WordHighlighter {
 WordHighlighter.DEFAULT_AUDIO_LATENCY = 0.11;
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { WordHighlighter, isSpokenWord };
+    module.exports = { WordHighlighter, isSpokenWord, isNegativeSignPiece };
 }

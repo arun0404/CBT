@@ -51,7 +51,11 @@ from typing import Callable, List, Optional, Sequence, Tuple
 # cached audio/timings generated under the previous rules are invalidated.
 #   v2: ALL-CAPS acronyms inside brackets are read letter by letter
 #       ("(IADS)" -> "I A D S"; see spell_spans()).
-PARENTHETICAL_CONFIG_VERSION = "v2"
+#   v3: that also holds inside a PROSE bracket for an acronym the
+#       dictionaries would expand: "(DC Power)" -> "D C Power", not "Direct
+#       Current Power". Word and unit abbreviations (FIG, KG) still expand.
+#       "REF" added to SPEAK_AS_WORD.
+PARENTHETICAL_CONFIG_VERSION = "v3"
 
 
 # Matches a (...) span with no nested parentheses. Content is captured.
@@ -295,7 +299,7 @@ CAPS_WORD_RE = re.compile(r"\b[A-Z]{2,}\b")
 SPEAK_AS_WORD = frozenset({
     "AND", "OR", "NOT", "NO", "YES", "ON", "OFF", "OF", "FOR", "THE", "TO", "WITH", "DO", "IS", "BE",
     "NOTE", "NOTES", "WARNING", "CAUTION", "DANGER",
-    "SEE", "REFER", "TASK", "TABLE", "FIGURE", "CHAPTER", "SECTION", "PARA", "PAGE", "STEP", "ITEM",
+    "SEE", "REF", "REFER", "TASK", "TABLE", "FIGURE", "CHAPTER", "SECTION", "PARA", "PAGE", "STEP", "ITEM",
     "UP", "DOWN", "LEFT", "RIGHT", "HIGH", "LOW", "OPEN", "CLOSED", "LONG", "SHORT",
     # Roman numerals are numbers, not acronyms: "Part (IV)", "Fe(III)". (A bracket
     # that is a list marker is turned into a number before this rule ever runs.)
@@ -337,13 +341,14 @@ def spell_spans(
       2. On SPEAK_AS_WORD, or inside a keep_span -> leave ("NOTE", "ON",
          "OFF", "SEE", the "AIR" of "AIR COND").
       3. A known abbreviation (client dictionary, engineering terms,
-         general abbreviations or units):
-           - in PROSE         -> leave: the dictionary passes that run
-             after this one will say it ("(see FIG 3)" -> "Figure 3",
-             "(see the IADS manual)" -> its full name);
-           - in a CODE bracket -> nothing will expand it, so spell it if it
-             is an initialism of its own expansion (RPM, PSI, IADS) and
-             leave it if it is a word or unit abbreviation (FIG, MAX, KG).
+         general abbreviations or units): spell it if it is an initialism
+         of its own expansion (DC, AC, RPM, PSI, IADS), and leave it if it
+         is a word or unit abbreviation (FIG, MAX, KG), which the dictionary
+         passes that run after this one then say ("(see FIG 3)" ->
+         "Figure 3"). The same in a PROSE bracket as in a CODE one:
+         "(DC Power)" is "D C Power" and "(see AC manual)" is "see A C
+         manual", never "Direct Current Power". Outside brackets the
+         dictionaries still expand them.
       4. Unknown and long (> SPELL_MAX_LETTERS) -> an ordinary word:
          leave it, unless it abbreviates the words before it.
       5. Otherwise            -> spell.
@@ -369,9 +374,6 @@ def spell_spans(
         expansion = expansion_of(word)
 
         if expansion is not None:
-
-            if kind is ParentheticalKind.PROSE:
-                continue
 
             if not _is_initialism_of(word, WORD_RE.findall(expansion)):
                 continue

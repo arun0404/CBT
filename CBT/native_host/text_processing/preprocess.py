@@ -270,6 +270,38 @@ _STANDALONE_DASH_RE = re.compile(r"\s+[-–—]+\s+")
 # receives clean.) The captured whitespace is kept, so no word fuses.
 _EDGE_DASH_RE = re.compile(r"\A(\s*)[-–—]+(?=\s)|(?<=\s)[-–—]+(\s*)\Z")
 
+# A minus sign in front of a number is SPOKEN: "-50 °C" is "minus 50 degrees
+# Celsius". Piper ignores a "-" glued to a number, so without this the sign
+# was silently lost ("-0.5°" was read as "0.5 degrees").
+#
+# The sign has to be attached to the digits and to OPEN the number: at the
+# start of the text, after whitespace, after an opening bracket, "=", "," or
+# ";", or after a quote. (A number that starts with a bare point, "-.5", is
+# left alone: the passes after this one already drop the space before a
+# leading ".", which would read "minus.5" with a break after "minus".) (The look-behind is a
+# negative one, "not preceded by anything but those", because a Python
+# look-behind cannot be the alternation ^|\s -- its branches differ in width
+# -- and a negative one also lets the very start of the text through.) That
+# is what leaves everything else exactly as it was:
+#
+#   "10-20 mm"  "2024-10-11"  "F-16"  "ISO-9001"  reference codes
+#       the hyphen follows a letter or digit: a joiner, never a sign
+#   "Anti-Lock"  "Sub-system 3"
+#       no digit follows
+#   "- Standard practices"  "- 5 mm clearance"  "CAN – 500 kilobits"
+#       a bullet or prose dash has a space after it. The manual really does
+#       write "High-speed CAN — 500 kilobits per second"; reading that
+#       dash as a sign would say "CAN minus 500 kilobits".
+#
+# Hyphen-minus, en dash and the true minus sign are accepted as the sign; the
+# em dash never is (it is always a prose dash). Only the TRUE minus sign
+# (U+2212) may also be followed by spaces ("− 50"): unlike a hyphen or an
+# en dash it is never a bullet or a range dash.
+NEGATIVE_NUMBER_RE = re.compile(
+    r"(?<![^\s(\[{=,;\"'‘“])"
+    r"(?:(?P<attached>[-–−])(?=\d)|−(?P<gap>[ \t]+)(?=\d))"
+)
+
 # Unicode spaces other than the plain one. All of them are whitespace to
 # both the browser's \s and Python's, so they never change where one word
 # ends and the next begins; they are only normalised so the text handed to
@@ -312,6 +344,22 @@ def normalize_dom_whitespace(text: str) -> str:
 # here too and expanded to the spoken unit name instead of "or" -- see
 # normalize_slashes().
 _SLASH_COMPOUND_RE = re.compile(r"\b[A-Za-z0-9]+(?:/[A-Za-z0-9]+)+\b")
+
+# A slash with whitespace on BOTH sides -- "Inspection / Maintenance",
+# "SAFE / ARM", "12 months / 15,000 km" -- is an alternative and is spoken
+# "or". Whitespace means any whitespace, newlines included: the text the
+# browser posts has the words of a block on separate lines ("Primary\n/\n
+# secondary"). Unspaced slashes are a different thing (a unit ratio, an
+# identifier, a "task/document" shorthand) and are not touched here; a
+# slash at the very start or end of the text, or against a word on one side
+# only, has whitespace on one side at most and is left to the passes after.
+#
+# Only the slash is matched, not the spaces around it. Whitespace carries
+# the origin of the word BEFORE it, so matching "\s+/\s+" would fold that
+# word into the group of the "or" and the two could no longer be
+# highlighted separately. The "/" is a word of its own in the text, so
+# it keeps its own origin: the highlighter lights it while "or" is said.
+_SPACED_SLASH_RE = re.compile(r"(?<=\s)/(?=\s)")
 
 # Dimension abbreviations. Only ever expanded inside an explicit
 # dimension pattern -- NOT as standalone dictionary keys (see the note in
@@ -1033,6 +1081,38 @@ class TextPreprocessor:
         tracker.apply_segments(ROMAN_INLINE_CANDIDATE_RE, _inline)
 
     # -------------------------------------------------------
+    # Negative numbers: "-50" -> "minus 50"
+    #
+    # See NEGATIVE_NUMBER_RE for exactly which signs count. Runs before
+    # normalize_standalone_dashes() and the symbol passes, which would
+    # otherwise drop or ignore the sign.
+    #
+    # "-50" is ONE original word, so the spoken "minus" simply belongs to it
+    # along with the digits. "− 50" (a true minus sign, a space, a number) is
+    # TWO original words: the sign word keeps a blank slot of its own, so it
+    # stays a silent, never-highlighted word exactly like any other lone
+    # dash (text_sanitizer.is_non_spoken_word, highlighter.js
+    # isSpokenWord), and "minus" is spoken as part of the number's word.
+    # -------------------------------------------------------
+
+    def expand_negative_numbers(self, tracker: AlignmentTracker) -> None:
+
+        def _repl(match):
+            sign_origin = tracker.origin[match.start()]
+
+            if match.group("gap") is None:
+                return [Verbatim(text="minus ", origins=(sign_origin,) * 6)]
+
+            number_origin = tracker.origin[match.end()]
+            return [
+                Verbatim(text=" ", origins=(sign_origin,)),
+                (match.start("gap"), match.end("gap")),
+                Verbatim(text="minus ", origins=(number_origin,) * 6),
+            ]
+
+        tracker.apply_segments(NEGATIVE_NUMBER_RE, _repl)
+
+    # -------------------------------------------------------
     # Standalone prose dash -> comma pause
     #
     # See the _STANDALONE_DASH_RE comment above for why this is scoped to
@@ -1150,9 +1230,12 @@ class TextPreprocessor:
     # placeholder token here, and only restored to real text after every
     # dictionary/unit/symbol pass has already run. PROSE content is
     # substituted directly (no placeholder) since it's ordinary language
-    # and SHOULD still have abbreviations inside it expanded normally,
-    # e.g. "(after checking the ECU)" -> "(after checking the
-    # Engine Control Unit)".
+    # and SHOULD still have word and unit abbreviations inside it expanded
+    # normally, e.g. "(see FIG 3)" -> "(see Figure 3)". An ACRONYM in it
+    # ("(DC Power)", "(after checking the ECU)") is the exception: it is
+    # spelled, and parked behind a placeholder like the INITIALISM / CODE
+    # output, so it is read "D C Power" and not "Direct Current Power" --
+    # see spell_spans().
     # -------------------------------------------------------
 
     def replace_parentheticals(self, tracker: AlignmentTracker) -> List[Verbatim]:
@@ -1618,6 +1701,24 @@ class TextPreprocessor:
         tracker.apply(_SLASH_COMPOUND_RE, _repl)
 
     # -------------------------------------------------------
+    # Spaced slash -> "or"
+    #
+    # See _SPACED_SLASH_RE. Runs after the compound-token and unit passes,
+    # so a dictionary key that itself contains a spaced slash ("TGT / T45"),
+    # a litre compound ("5 L / min") or a unit has already been expanded
+    # (those expansions are protected placeholders, which hold no slash), and
+    # before normalize_slashes() and replace_symbols(), the latter of which
+    # would say "slash".
+    #
+    # The slash is its own \S+ token in the original text, so apply()'s
+    # union origin is exactly that one original word.
+    # -------------------------------------------------------
+
+    def normalize_spaced_slashes(self, tracker: AlignmentTracker) -> None:
+
+        tracker.apply(_SPACED_SLASH_RE, lambda m: "or")
+
+    # -------------------------------------------------------
     # Replace Symbols
     # -------------------------------------------------------
 
@@ -1816,6 +1917,14 @@ class TextPreprocessor:
         self.expand_roman_numeral_list_markers(tracker)
 
         #
+        # A minus sign in front of a number ("-50 °C") -> the spoken word
+        # "minus". Must run before the dash passes below and before the
+        # symbol / unit passes, none of which would voice the sign.
+        #
+
+        self.expand_negative_numbers(tracker)
+
+        #
         # Standalone prose dashes -> comma pauses, so Piper doesn't read
         # them aloud as the word "dash". Only ever touches a dash with
         # whitespace on both sides, so compound words, hyphenated
@@ -1875,6 +1984,10 @@ class TextPreprocessor:
         #   PASS 2  single-character / unit rules  ("2.0 L", "50L",
         #           "L = 250", "12°N", "25 mm") -- may only see what
         #           pass 1 left behind
+        #   PASS 2b spaced slash  ("SAFE / ARM" -> "SAFE or ARM"; see
+        #           normalize_spaced_slashes()) -- after the compounds and
+        #           units, so "kg/hr" and a key such as "TGT / T45" are
+        #           already expanded, and before the fallback below
         #   PASS 3  generic slash fallback  ("task/document" -> "task or
         #           document"; see normalize_slashes() further down)
         # ==================================================================
@@ -1941,6 +2054,15 @@ class TextPreprocessor:
         #
 
         self.expand_dimension_abbreviations(tracker)
+
+        #
+        # PASS 2b -- a slash with whitespace on both sides is an
+        # alternative: "Inspection / Maintenance" -> "Inspection or
+        # Maintenance". Unspaced slashes (ratios, identifiers) are left for
+        # the pass below.
+        #
+
+        self.normalize_spaced_slashes(tracker)
 
         #
         # PASS 3 -- generic slash fallback: whatever slash-joined words

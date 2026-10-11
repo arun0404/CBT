@@ -476,7 +476,49 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               acronyms ("(IV)" was "I V"). Changes the audio for any text
 #               containing such a marker, so v27 entries for it are no longer
 #               correct.
-ALIGNMENT_CACHE_VERSION = "v28"
+#   v28 -> v29: a minus sign in front of a number is now the spoken word
+#               "minus" in the text handed to Piper AND to the forced aligner
+#               (expand_negative_numbers). Piper's own phonemizer already said
+#               "minus" for a plain "-50" (measured: identical audio length to
+#               "minus 50"), but (1) the aligner's transcript lacked the word,
+#               so the audio and the transcript disagreed; (2) an en dash
+#               ("–50"), a bracketed "[-5]" and the second sign of "(-5,-10)"
+#               were not spoken at all. Now "-50", "–50", "−50" and "− 50" (a
+#               true minus sign may be followed by spaces) are all "minus 50"
+#               when they open a number: at the start of the text, after
+#               whitespace, an opening bracket, "=", "," or ";", or a quote.
+#               Unchanged: bullet and prose dashes ("- 5 mm", "CAN — 500 kb"),
+#               ranges and joiners ("10-20", "F-16", "2024-10-11", reference
+#               codes), and a number starting with a bare point ("-.5"). The
+#               bundled manual changes in section t0036 only (the two camber
+#               values). Changes the audio text for any content containing
+#               such a sign, so v28 entries for it are no longer correct.
+#   v29 -> v30: an ALL-CAPS acronym inside a bracketed phrase that mixes it
+#               with ordinary words is read letter by letter even when a
+#               dictionary would expand it: "(DC Power)" is "D C Power" (was
+#               "Direct Current Power"), "(see AC manual)" is "see A C manual".
+#               Before, only a bracket that was nothing but acronyms ("(DC)",
+#               "(MAX 5 PSI)") spelled them; in a prose bracket the word was
+#               left for the dictionary passes. The test is the one a code
+#               bracket already used: spell it if it is an initialism of its
+#               own expansion (DC, AC, GPS, LED, RPM, IADS: 673 dictionary
+#               keys), expand it if it is a word or unit abbreviation (FIG,
+#               KG, MAX, ID: 349 keys). "REF" added to SPEAK_AS_WORD.
+#               Unbracketed acronyms still expand ("DC power" is "Direct
+#               Current power"). The bundled manual does not change.
+#               PARENTHETICAL_CONFIG_VERSION v2 -> v3.
+#   v30 -> v31: a slash with whitespace on both sides is spoken "or": "SAFE /
+#               ARM" is "SAFE or ARM", "12 months / 15,000 km" is "12 months
+#               or 15,000 kilometres" (was "slash", from the symbol pass).
+#               normalize_spaced_slashes() runs after the compound-token and
+#               unit passes (so "kg/hr", "L/L", "g/kW.h", "5 L / min" and the
+#               dictionary keys "TGT / T45" and "WP / WPTS" are expanded
+#               first) and before the unspaced fallback. Unspaced slashes
+#               ("km/h", "70-00-00/801", "task/document") and a slash with
+#               space on one side only are unchanged. Only the slash is
+#               replaced, so its own word keeps its own highlight. Changes the
+#               bundled manual in sections t0017, t0044, t0111, t0131, t0136.
+ALIGNMENT_CACHE_VERSION = "v31"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before
