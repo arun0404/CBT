@@ -361,6 +361,27 @@ _SLASH_COMPOUND_RE = re.compile(r"\b[A-Za-z0-9]+(?:/[A-Za-z0-9]+)+\b")
 # it keeps its own origin: the highlighter lights it while "or" is said.
 _SPACED_SLASH_RE = re.compile(r"(?<=\s)/(?=\s)")
 
+# "Page 3 / 10": two whole numbers either side of a spaced slash, after a word
+# that numbers things in a series, are "3 out of 10", not "3 or 10".
+#
+# The word before is REQUIRED. A spaced slash between numbers is more often a
+# pair of alternatives -- "Supply 50 / 60 Hz", "Use 110 / 220 V", "Fit 4 / 6
+# bolts" -- and those must stay "or". Without a counter word there is no
+# telling the two apart, so the general rule applies ("or").
+#
+# The numbers must be whole and stand alone: "Page 3.5 / 10", "Page 3 / 10.5",
+# "Page 3 / 10-12" and "Page 3 / ten" are not counters. A closing bracket or
+# sentence punctuation may follow the second number.
+_COUNTER_WORDS = (
+    "page", "pg", "p", "step", "item", "sheet", "slide", "question",
+    "image", "photo", "picture", "chapter",
+)
+_NUMERIC_COUNTER_RE = re.compile(
+    r"(?<![\w.])(?:" + "|".join(_COUNTER_WORDS) + r")\.?\s+\d+\s+(?P<slash>/)\s+\d+"
+    r"(?![A-Za-z0-9/-])(?!\.\d)(?!,\d)",
+    re.IGNORECASE,
+)
+
 # Dimension abbreviations. Only ever expanded inside an explicit
 # dimension pattern -- NOT as standalone dictionary keys (see the note in
 # engineering.py) -- so a lone "L"/"W"/"H" in running text, or the "h" of
@@ -780,6 +801,11 @@ class TextPreprocessor:
             ) if engineering_phrases else None,
         ]
 
+        # The unit ratios the compound passes can already say when they are
+        # written without spaces. A spaced "km / h" is joined back into one of
+        # them (see normalize_spaced_unit_ratios).
+        self._spaced_unit_ratio_re = self._compile_spaced_unit_ratios()
+
         # A short, stable fingerprint of every dictionary this pipeline
         # depends on. Changing ANY abbreviation/unit/symbol entry
         # changes this value, which is used as part of the alignment
@@ -874,6 +900,43 @@ class TextPreprocessor:
         megawatts and not the dictionary's "Master Warning".
         """
         return "/" in key or "." in key
+
+    def _compile_spaced_unit_ratios(self):
+        """The pattern for a unit ratio written with spaces round its slash
+        ("km / h", "kg / hr", "g / kW.h"), or None if there is none.
+
+        Only ratios the compound passes ALREADY expand when written without
+        spaces are listed -- UNITS' own ("km/h", "m/s") and the client
+        dictionary's compound keys whose expansion is a rate ("kg/hr" ->
+        "kilograms per hour") -- so joining one back together always lands on
+        an entry that exists. A blanket "unit / unit" rule would be wrong:
+        "N / A" is not newtons per ampere, and "min / max" is not a rate. A
+        ratio the tables do not hold ("kg / min") is not touched here and is
+        read like any other spaced slash.
+
+        UNITS keys match without regard to case, as they do everywhere else;
+        client keys match exactly, as they do everywhere else.
+        """
+        alternatives = {}
+
+        for key in UNITS:
+            if key.count("/") == 1:
+                left, right = (re.escape(part) for part in key.split("/"))
+                alternatives[f"(?i:{left}\\s+/\\s+{right})"] = len(key)
+
+        for key, value in self.client_dictionary.items():
+            if key.count("/") == 1 and not re.search(r"\s", key) and " per " in value:
+                left, right = (re.escape(part) for part in key.split("/"))
+                alternatives[f"{left}\\s+/\\s+{right}"] = len(key)
+
+        if not alternatives:
+            return None
+
+        ordered = sorted(alternatives, key=lambda pattern: -alternatives[pattern])
+
+        return re.compile(
+            r"(?<![A-Za-z./-])(?:" + "|".join(ordered) + r")(?![A-Za-z0-9/-])(?!\.\w)"
+        )
 
     @staticmethod
     def _speakable_expansion(expansion: str) -> str:
@@ -1719,6 +1782,50 @@ class TextPreprocessor:
         tracker.apply(_SPACED_SLASH_RE, lambda m: "or")
 
     # -------------------------------------------------------
+    # Spaced unit ratio -> the unspaced unit ratio: "50 km / h" -> "50 km/h"
+    #
+    # See _compile_spaced_unit_ratios for exactly which ratios. Runs BEFORE
+    # the compound-token pass, not after it: the point is that the joined
+    # form is then expanded by that pass ("kg/hr" -> "kilograms per hour"),
+    # and a "kg/hr" made afterwards would never meet it and would be read as
+    # "kilograms slash Hour" -- the very reading that pass exists to prevent.
+    #
+    # The three original words ("kg", "/", "hr") become one token, so they
+    # share one group: apply()'s union origin. The browser still has one
+    # word per original word, and each of the three gets its share of the
+    # spoken phrase's time.
+    # -------------------------------------------------------
+
+    def normalize_spaced_unit_ratios(self, tracker: AlignmentTracker) -> None:
+
+        if self._spaced_unit_ratio_re is None:
+            return
+
+        tracker.apply(self._spaced_unit_ratio_re, lambda m: re.sub(r"\s+", "", m.group(0)))
+
+    # -------------------------------------------------------
+    # Counter: "Page 3 / 10" -> "Page 3 out of 10"
+    #
+    # See _NUMERIC_COUNTER_RE. Only the slash is replaced, and it takes the
+    # slash's own origin, so both numbers and the word before keep theirs
+    # (the same reasoning as _SPACED_SLASH_RE: a whole-match replacement
+    # would fold the neighbouring words into the "out of").
+    # -------------------------------------------------------
+
+    def normalize_numeric_counters(self, tracker: AlignmentTracker) -> None:
+
+        def _repl(match):
+            slash = match.start("slash")
+            origin = tracker.origin[slash]
+            return [
+                (match.start(), slash),
+                Verbatim(text="out of", origins=(origin,) * 6),
+                (slash + 1, match.end()),
+            ]
+
+        tracker.apply_segments(_NUMERIC_COUNTER_RE, _repl)
+
+    # -------------------------------------------------------
     # Replace Symbols
     # -------------------------------------------------------
 
@@ -1984,10 +2091,14 @@ class TextPreprocessor:
         #   PASS 2  single-character / unit rules  ("2.0 L", "50L",
         #           "L = 250", "12°N", "25 mm") -- may only see what
         #           pass 1 left behind
-        #   PASS 2b spaced slash  ("SAFE / ARM" -> "SAFE or ARM"; see
+        #   PASS 2b spaced slash  ("Page 3 / 10" -> "Page 3 out of 10",
+        #           "SAFE / ARM" -> "SAFE or ARM"; see
+        #           normalize_numeric_counters() and
         #           normalize_spaced_slashes()) -- after the compounds and
         #           units, so "kg/hr" and a key such as "TGT / T45" are
-        #           already expanded, and before the fallback below
+        #           already expanded, and before the fallback below. A
+        #           spaced unit ratio ("kg / hr") is first joined to
+        #           "kg/hr" ahead of PASS 1, which then expands it.
         #   PASS 3  generic slash fallback  ("task/document" -> "task or
         #           document"; see normalize_slashes() further down)
         # ==================================================================
@@ -2005,6 +2116,10 @@ class TextPreprocessor:
         #
 
         protected_client_dictionary: List[Verbatim] = []
+
+        # A unit ratio written with spaces ("50 km / h", "kg / hr") is joined
+        # first, so the compound pass below can expand it as it does "km/h".
+        self.normalize_spaced_unit_ratios(tracker)
 
         self.replace_client_dictionary(tracker, protected_client_dictionary, compound=True)
         self.expand_litre_compounds(tracker)
@@ -2056,12 +2171,15 @@ class TextPreprocessor:
         self.expand_dimension_abbreviations(tracker)
 
         #
-        # PASS 2b -- a slash with whitespace on both sides is an
-        # alternative: "Inspection / Maintenance" -> "Inspection or
-        # Maintenance". Unspaced slashes (ratios, identifiers) are left for
-        # the pass below.
+        # PASS 2b -- spaced slashes, in this order:
+        #   a counter    "Page 3 / 10"                  -> "Page 3 out of 10"
+        #   the rest     "Inspection / Maintenance"     -> "Inspection or
+        #                Maintenance"
+        # (A spaced UNIT ratio, "kg / hr", was joined up before PASS 1.)
+        # Unspaced slashes (ratios, identifiers) are left for the pass below.
         #
 
+        self.normalize_numeric_counters(tracker)
         self.normalize_spaced_slashes(tracker)
 
         #

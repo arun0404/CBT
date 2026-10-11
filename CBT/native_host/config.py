@@ -518,7 +518,21 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               space on one side only are unchanged. Only the slash is
 #               replaced, so its own word keeps its own highlight. Changes the
 #               bundled manual in sections t0017, t0044, t0111, t0131, t0136.
-ALIGNMENT_CACHE_VERSION = "v31"
+#   v31 -> v32: two cases of a spaced slash get their own reading instead of
+#               "or". (1) A unit ratio the compound tables know, written with
+#               spaces, is joined first and then expanded by the compound
+#               pass: "50 km / h" is "50 kilometres per hour", "kg / hr"
+#               "kilograms per hour", "210 g / kW.h" "210 grams per kilowatt
+#               hour" (was "or h", "or Hour", "or kilowatts.h"). Only ratios
+#               in UNITS or in the client dictionary with a "per" expansion
+#               qualify, so "N / A", "min / max" and "A / C" are untouched, as
+#               are ratios the tables lack ("kg / min"). (2) "Page 3 / 10" is
+#               "Page 3 out of 10": two whole numbers either side of the
+#               slash AFTER a counter word (page, pg, step, item, sheet,
+#               slide, question, image, photo, picture, chapter). Without that
+#               word a number pair stays "or" -- "Supply 50 / 60 Hz", "Use 110
+#               / 220 V". The bundled manual does not change.
+ALIGNMENT_CACHE_VERSION = "v32"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

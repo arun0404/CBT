@@ -127,7 +127,10 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
 - A slash with spaces on both sides is an alternative and is read "or": `Inspection / Maintenance` is "Inspection or
   Maintenance", `12 months / 15,000 km` is "12 months or 15,000 kilometres". Unspaced slashes keep their own reading
   (`kg/hr` is "kilograms per hour", `L/L` is "Latitude and Longitude", `70-00-00/801` is a reference code), as does a
-  slash with a space on one side only.
+  slash with a space on one side only. Two spaced cases are not "or": a unit ratio the app already knows is read as
+  that ratio (`50 km / h` is "50 kilometres per hour", `kg / hr` is "kilograms per hour"), and a counter after
+  `Page`, `Step`, `Item`, `Slide` and similar is "out of" (`Page 3 / 10` is "Page 3 out of 10"). Other number pairs
+  stay "or" (`Supply 50 / 60 Hz`), as do ratios the tables do not hold (`kg / min`).
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.
