@@ -51,9 +51,19 @@
 // Deliberately NOT matched, because the backend SPEAKS them: "°", arrows
 // ("→", "↔"), "©", "®", "™", "&", "%" ... so no broad emoji class such as
 // \p{Extended_Pictographic} is used here.
+//
+// A non-breaking space written out as TEXT ("&nbsp;", "&nbsp", "&#160;",
+// "&#xA0;") counts too: the backend turns it into a space before Piper (see
+// NBSP_ENTITY_PATTERN in text_sanitizer.py), so a word that is only that is
+// silent there. A real entity never shows up here: the browser has already
+// made it U+00A0, which is whitespace. The words are NOT cleaned or split by
+// this: where a word begins and ends has to stay what the posted text says,
+// or every later highlight drifts.
 // --------------------------------------------------------------------
+const NBSP_ENTITY = "&(?:amp;)*(?:nbsp|#0*160(?![0-9])|#[xX]0*[aA]0(?![0-9a-fA-F]));?";
+
 const NON_SPOKEN_ONLY_RE = new RegExp(
-    "^[" +
+    "^(?:[" +
     "\\s" +                                                  // incl. NBSP
     "\\u00AD\\u180E\\u200B-\\u200F\\u2060\\uFEFF" +          // invisible / zero-width
     "\\-\\u2010-\\u2015\\u2212" +                            // hyphen-minus, hyphens, dashes, minus
@@ -61,7 +71,7 @@ const NON_SPOKEN_ONLY_RE = new RegExp(
     "\\u2600-\\u27BF\\u2B00-\\u2BFF\\uFE0F" +                // misc symbols, dingbats
     "\\u{1F1E6}-\\u{1F1FF}\\u{1F300}-\\u{1F64F}" +           // flags, pictographs, emoticons
     "\\u{1F680}-\\u{1F8FF}\\u{1F900}-\\u{1FAFF}" +           // transport .. extended pictographs
-    "]*$",
+    "]|" + NBSP_ENTITY + ")*$",
     "u"
 );
 

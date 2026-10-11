@@ -146,10 +146,28 @@ def strip_invisible_and_emoji(text: str) -> str:
 _DASH_CHARS = "-‐‑‒–—―−"
 _QUOTE_CHARS = "\"'‘’‚‛“”„‟«»‹›"
 
+# A non-breaking space written out as TEXT: "&nbsp;", "&nbsp", "&#160;",
+# "&#xA0;" (the semicolon is optional, as it is to a browser), also with the
+# extra "&amp;" a double-escaped source leaves ("&amp;nbsp;").
+#
+# A browser turns a real entity into U+00A0 before the text is ever read, and
+# U+00A0 is plain whitespace to both sides, so only entity text that arrives
+# AS text -- shown on the page literally, or inserted with textContent --
+# gets here. Piper would read it aloud ("and n b s p"). The numeric forms
+# refuse a further digit ("&#1600;" is another character), and the name is
+# lower-case only, as HTML requires.
+#
+# preprocess.py replaces it with a space in the SPOKEN text only: where a
+# word starts and ends in the original text is not touched, so the browser's
+# word list and the timings stay in step. This is also why highlighter.js
+# mirrors the pattern below and does not "clean" the text it splits.
+NBSP_ENTITY_PATTERN = r"&(?:amp;)*(?:nbsp|#0*160(?![0-9])|#[xX]0*[aA]0(?![0-9a-fA-F]));?"
+
 NON_SPOKEN_ONLY_PATTERN = re.compile(
     "(?:"
     + "|".join(re.escape(c) for c in _INVISIBLE_CHARS + _DASH_CHARS + _QUOTE_CHARS)
     + "|" + _char_class(ranges=_EMOJI_RANGES)
+    + "|" + NBSP_ENTITY_PATTERN
     + r"|\s)+"
 )
 

@@ -17,7 +17,7 @@ from .abbreviations import ABBREVIATIONS
 from .symbols import SYMBOLS
 from .units import UNITS
 from .alignment import AlignmentTracker, AlignmentResult, Verbatim
-from .text_sanitizer import TTS_STRIP_PATTERN
+from .text_sanitizer import NBSP_ENTITY_PATTERN, TTS_STRIP_PATTERN
 from .parentheticals import (
     PARENTHETICAL_RE,
     PARENTHETICAL_CONFIG_VERSION,
@@ -301,6 +301,10 @@ NEGATIVE_NUMBER_RE = re.compile(
     r"(?<![^\s(\[{=,;\"'‘“])"
     r"(?:(?P<attached>[-–−])(?=\d)|−(?P<gap>[ \t]+)(?=\d))"
 )
+
+# A non-breaking space written as TEXT ("&nbsp;", "&nbsp", "&#160;"): see
+# NBSP_ENTITY_PATTERN in text_sanitizer.py for exactly what matches and why.
+_NBSP_ENTITY_RE = re.compile(NBSP_ENTITY_PATTERN)
 
 # Unicode spaces other than the plain one. All of them are whitespace to
 # both the browser's \s and Python's, so they never change where one word
@@ -806,6 +810,13 @@ class TextPreprocessor:
         # them (see normalize_spaced_unit_ratios).
         self._spaced_unit_ratio_re = self._compile_spaced_unit_ratios()
 
+        # UNITS' own ratios ("km/h", "kg/min", "°/s"), expanded as whole
+        # tokens at the start of pass 1 (see expand_unit_ratios).
+        self._unit_ratio_re = self._compile_unit_ratios()
+        self._unit_ratio_expansions = {
+            key.lower(): value for key, value in UNITS.items() if key.count("/") == 1
+        }
+
         # A short, stable fingerprint of every dictionary this pipeline
         # depends on. Changing ANY abbreviation/unit/symbol entry
         # changes this value, which is used as part of the alignment
@@ -911,8 +922,8 @@ class TextPreprocessor:
         "kilograms per hour") -- so joining one back together always lands on
         an entry that exists. A blanket "unit / unit" rule would be wrong:
         "N / A" is not newtons per ampere, and "min / max" is not a rate. A
-        ratio the tables do not hold ("kg / min") is not touched here and is
-        read like any other spaced slash.
+        ratio the tables do not hold is not touched here and is read like any
+        other spaced slash; add it to UNITS to give it a reading.
 
         UNITS keys match without regard to case, as they do everywhere else;
         client keys match exactly, as they do everywhere else.
@@ -937,6 +948,66 @@ class TextPreprocessor:
         return re.compile(
             r"(?<![A-Za-z./-])(?:" + "|".join(ordered) + r")(?![A-Za-z0-9/-])(?!\.\w)"
         )
+
+    def _compile_unit_ratios(self):
+        """The pattern for one of UNITS' ratio keys ("km/h", "kg/min", "°/s")
+        written without spaces, or None if there are none.
+
+        Matched without regard to case, as every UNITS key is, and only as a
+        whole token: not inside a longer word, path or ratio ("dir/deg/s",
+        "kg/min/m"). A digit directly before is allowed ("5kg/min").
+        """
+        keys = sorted(
+            (key for key in UNITS if key.count("/") == 1),
+            key=lambda key: (-len(key), key),
+        )
+
+        if not keys:
+            return None
+
+        return re.compile(
+            r"(?<![A-Za-z./-])(?:" + "|".join(re.escape(key) for key in keys) + r")(?![A-Za-z0-9/-])(?!\.\w)",
+            re.IGNORECASE,
+        )
+
+    def expand_unit_ratios(self, tracker: AlignmentTracker, protected: List[Verbatim]) -> None:
+        """UNITS' ratios ("km/h", "kg/min", "°/s") -> "kilometres per hour",
+        ... , in pass 1 right after the client compound keys.
+
+        This is the pass that makes a ratio work when NO number precedes it,
+        which replace_units (it needs "<number><unit>") cannot. Without it,
+        "Climb rate (ft/min)" was read "Feet slash Minimum": the dictionary
+        passes rewrote "ft" and "min" separately before the slash step saw
+        the ratio. The expansion is parked behind the same placeholder as a
+        client compound key, so no later pass can touch it, and is restored
+        with them.
+        """
+
+        if self._unit_ratio_re is None:
+            return
+
+        def _repl(match):
+
+            start, end = match.span()
+
+            matched_origins = set()
+            for i in range(start, end):
+                matched_origins.update(tracker.origin[i])
+            origin = tuple(sorted(matched_origins))
+
+            spoken = self._speakable_expansion(self._unit_ratio_expansions[match.group(0).lower()])
+
+            protected.append(Verbatim(
+                text=spoken,
+                origins=(origin,) * len(spoken),
+            ))
+
+            # "5kg/min": keep the number from fusing onto the first word.
+            gap = " " if start > 0 and match.string[start - 1].isdigit() else ""
+
+            return [f"{gap}\x02CD{len(protected) - 1}\x02"]
+
+        tracker.apply_segments(self._unit_ratio_re, _repl)
 
     @staticmethod
     def _speakable_expansion(expansion: str) -> str:
@@ -1195,6 +1266,32 @@ class TextPreprocessor:
         tracker.apply(_EDGE_DASH_RE, lambda m: (m.group(1) or "") + (m.group(2) or ""))
 
         tracker.apply(_STANDALONE_DASH_RE, lambda m: ", ")
+
+    # -------------------------------------------------------
+    # "&nbsp;" written as text -> a space
+    #
+    # A real entity never gets here: the browser has already turned it into
+    # U+00A0 (handled below). This is for entity text that arrives AS text --
+    # shown literally on the page, or inserted with textContent -- which
+    # Piper would otherwise read aloud ("Engine System and nbsp;").
+    #
+    # It changes the SPOKEN text only. Original words are fixed before any
+    # pass runs, so "10&nbspscrews" stays one word to the browser and to the
+    # timings, and the two spoken words ("10 screws") simply share its group;
+    # "Engine System&nbsp;" loses its tail; a word that was nothing but the
+    # entity has no spoken word left and is a silent, never-highlighted one.
+    # Splitting the word in the browser as well would put the two sides out of
+    # step -- which is why highlighter.js leaves the words alone.
+    #
+    # Runs first, so no other pass ever sees the entity (the symbol pass would
+    # voice its "&" as "and"). The surrounding spaces it leaves are collapsed
+    # by cleanup().
+    # -------------------------------------------------------
+
+    def decode_nbsp_entities(self, tracker: AlignmentTracker) -> None:
+
+        if "&" in tracker.text:
+            tracker.apply(_NBSP_ENTITY_RE, lambda m: " ")
 
     # -------------------------------------------------------
     # Unicode spaces -> plain spaces (NBSP and friends), one character for
@@ -2009,6 +2106,13 @@ class TextPreprocessor:
         tracker = AlignmentTracker(text)
 
         #
+        # "&nbsp;" and its variants written as text -> a space, before any
+        # other pass can see (and voice) the entity.
+        #
+
+        self.decode_nbsp_entities(tracker)
+
+        #
         # Heading pause markers (see currentChapterText() in app.js) ->
         # real sentence-ending punctuation.
         #
@@ -2107,8 +2211,10 @@ class TextPreprocessor:
         # PASS 1 -- exact compound tokens.
         #
         # Client-dictionary keys containing "/" or "." (case-sensitive,
-        # expansion protected from every later pass), then the compound
-        # litre regexes. Both run before replace_units and the "L" rules,
+        # expansion protected from every later pass), then UNITS' own ratios
+        # ("km/h", "kg/min", "°/s": case-insensitive, protected the same
+        # way), then the compound litre regexes. All run before
+        # replace_units and the "L" rules,
         # which would otherwise take the "kg" of "kg/hr", the "g" of
         # "g/kW.h" or the first "L" of "L/L" and leave the rest to the slash
         # step. Bare unit keys ("MW", "ms", "hr") are NOT here: they stay
@@ -2122,6 +2228,7 @@ class TextPreprocessor:
         self.normalize_spaced_unit_ratios(tracker)
 
         self.replace_client_dictionary(tracker, protected_client_dictionary, compound=True)
+        self.expand_unit_ratios(tracker, protected_client_dictionary)
         self.expand_litre_compounds(tracker)
 
         #

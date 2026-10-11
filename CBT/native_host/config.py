@@ -532,7 +532,34 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               slide, question, image, photo, picture, chapter). Without that
 #               word a number pair stays "or" -- "Supply 50 / 60 Hz", "Use 110
 #               / 220 V". The bundled manual does not change.
-ALIGNMENT_CACHE_VERSION = "v32"
+#   v32 -> v33: more unit ratios, and every UNITS ratio now works with no
+#               number in front. New in UNITS: kg/min, g/L, ml/min, gal/min,
+#               psi/min, deg/s, °/s, nm/s ("5 kg/min", "5kg/min", "5 kg / min"
+#               and a bare "(kg/min)" are all "kilograms per minute"). A new
+#               step at the start of pass 1 (expand_unit_ratios) expands UNITS'
+#               slash keys as whole, protected tokens, case-insensitively;
+#               until now only a ratio right after a number was expanded, so a
+#               bare "Climb rate (ft/min)" was read "Feet slash Minimum" (also
+#               fixed for ft/min and ft/s). The spaced form follows
+#               automatically (the spaced-ratio join is built from the same
+#               keys). Fractions and other number pairs ("1 / 2 turn", "3/4
+#               inch", "Ratio 3 / 4") are not reachable by these rules and are
+#               unchanged. The bundled manual does not change.
+#   v33 -> v34: "&nbsp;" and its variants ("&nbsp", "&#160;", "&#xA0;", also
+#               double-escaped "&amp;nbsp;") that arrive as TEXT are a space in
+#               the spoken text (decode_nbsp_entities, the first pass). Before,
+#               Piper read them aloud: "Engine System&nbsp;" was "Engine System
+#               and nbsp;", "10&nbspscrews" "10 and nbspscrews" (0.9-3 s of
+#               noise per occurrence). A real entity never gets here -- the
+#               browser has already made it U+00A0, plain whitespace to both
+#               sides, already handled. Only the spoken text changes: original
+#               words are untouched, so "10&nbspscrews" is still one word to
+#               the browser and the timings and "10 screws" shares its group;
+#               a word that was only the entity is silent. A lone entity word
+#               is also "never spoken" to text_sanitizer.is_non_spoken_word and
+#               highlighter.js isSpokenWord (kept in step). The bundled manual
+#               has no such text and does not change.
+ALIGNMENT_CACHE_VERSION = "v34"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

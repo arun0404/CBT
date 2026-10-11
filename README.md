@@ -130,7 +130,14 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   slash with a space on one side only. Two spaced cases are not "or": a unit ratio the app already knows is read as
   that ratio (`50 km / h` is "50 kilometres per hour", `kg / hr` is "kilograms per hour"), and a counter after
   `Page`, `Step`, `Item`, `Slide` and similar is "out of" (`Page 3 / 10` is "Page 3 out of 10"). Other number pairs
-  stay "or" (`Supply 50 / 60 Hz`), as do ratios the tables do not hold (`kg / min`).
+  stay "or" (`Supply 50 / 60 Hz`), and so do fractions (`1 / 2 turn`), as do ratios the tables do not hold.
+- Rate units are listed in `units.py` (`km/h`, `kg/min`, `g/L`, `ml/min`, `gal/min`, `psi/min`, `deg/s`, `°/s`, `nm/s`
+  ...) and read as "<unit> per <unit>" however they are written: `5 kg/min`, `5kg/min`, `5 kg / min`, or bare as in a
+  table header `Flow (kg/min)`. To add one, add a key containing a single `/` to `UNITS`.
+- Non-breaking spaces never reach the voice. A real `&nbsp;` (or `&nbsp`, `&#160;`, a raw U+00A0) is turned into a
+  space by the browser and handled as whitespace on both sides. Entity text that shows up literally on the page
+  (for example `Engine System&nbsp;` or `10&nbspscrews` from a double-escaped source) is dropped from the spoken text
+  ("Engine System", "10 screws") instead of being read aloud, and the word highlighting is unaffected.
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

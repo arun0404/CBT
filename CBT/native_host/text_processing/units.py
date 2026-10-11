@@ -91,6 +91,23 @@ UNITS = {
     "ft/s": "feet per second",
 
     # ===============================
+    # Rates: flow, density, pressure, angle, length
+    #
+    # A key with a "/" is a whole ratio, matched as one token whether it is
+    # written "5 kg/min", "5kg/min", "5 kg / min" or bare ("Flow (kg/min)").
+    # Litres per minute / hour ("L/min", "L/h") are handled in preprocess.py.
+    # ===============================
+
+    "kg/min": "kilograms per minute",
+    "g/L": "grams per litre",
+    "ml/min": "millilitres per minute",
+    "gal/min": "gallons per minute",
+    "psi/min": "pounds per square inch per minute",
+    "deg/s": "degrees per second",
+    "°/s": "degrees per second",
+    "nm/s": "nanometres per second",
+
+    # ===============================
     # Pressure
     # ===============================
 
