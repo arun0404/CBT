@@ -559,7 +559,79 @@ EPHEMERAL_URL_PREFIX = "/audio/" + EPHEMERAL_DIR.relative_to(OUTPUT_DIR).as_posi
 #               is also "never spoken" to text_sanitizer.is_non_spoken_word and
 #               highlighter.js isSpokenWord (kept in step). The bundled manual
 #               has no such text and does not change.
-ALIGNMENT_CACHE_VERSION = "v34"
+#   v34 -> v35: more ordinary English words on the SPEAK_AS_WORD whitelist
+#               (GAS, IT, OUT, TRADE, WISE, ENGINE, SYSTEM, PHASE, CO-PILOT and
+#               the plurals GASES, TRADES, PHASES), and the whitelist now does
+#               what it says. Before, "(GAS)" was spelled "G A S", "(ENGINE OUT)"
+#               "E N G I N E O U T", "(CO-PILOT)" "C O-P I L O T". Now (1) such a
+#               word is never spelled, whatever the bracket, (2) a hyphenated
+#               entry ("CO-PILOT") counts as one word, in any case, and is
+#               protected from the abbreviation table, which read the "Co" of
+#               "co-pilot" as "Company"; (3) every whitelisted word written in
+#               capitals is SPOKEN IN LOWER CASE (speak_whitelisted_words),
+#               because leaving it unspaced is not enough: Piper itself spells
+#               some capitalised words (measured: OUT, OFF and LOW take the time
+#               of the spelled word in a sentence; GAS, IT and REF often do).
+#               Roman numerals stay as they are. The step runs before the client
+#               dictionary is restored, so a dictionary expansion is untouched.
+#               A bracket that abbreviates the words before it ("Information
+#               Technology (IT)", "Gas Analysis System (GAS)") is still spelled.
+#               Plain-text spelling (expand_initialisms) also respects the list.
+#               In the bundled manual 25 sections change, only in the case of
+#               whitelisted words in capitalised headings ("THE", "AND", "HIGH").
+#               PARENTHETICAL_CONFIG_VERSION v3 -> v4.
+#   v35 -> v36: no more 0.7 s hole after a heading's section number. In "4.
+#               INSPECTION PROCEDURES" Piper's sentence splitter ended a sentence
+#               at "4." (period, space, capital) and rendered the whole
+#               SENTENCE_SILENCE_SECONDS (0.5) after it: measured, a 0.62-0.74 s
+#               silence right after "four" in 44 of the manual's 46 numbered
+#               headings. soften_heading_numbers() makes the period a comma on
+#               a line the frontend marked as a heading ("4, INSPECTION
+#               PROCEDURES"), leaving the short natural pause of a comma
+#               (0.20-0.29 s). The pause at the END of the heading, which the
+#               heading-pause feature exists for, is unchanged (0.67-0.81 s,
+#               all 46). Not touched: numbered steps and sentences that merely
+#               start with a number, "1.4 SYSTEM COMPONENTS" (no period), lettered
+#               or Roman headings ("A.", "I.") and Roman list markers ("One."),
+#               which have the same gap. Mean saving 0.52 s per heading, 24 s
+#               over the manual; the two headings whose first word the v35
+#               whitelist had already lower-cased gain the comma's pause (+0.34 s,
+#               +0.21 s), like every other heading. Original words unchanged.
+#   v36 -> v37: the same fix for lettered / Roman / written headings and for
+#               list markers. A period before anything but a lower-case letter
+#               is a sentence break to Piper, so "A. INTRODUCTION", "I.
+#               PROCEDURES", "One. Steering Gear", "First. Check", and also "A.
+#               12 volts" and "One. (ECU) check", each had a 0.62-0.78 s silence
+#               right after the label. Now (1) on a marked heading line the
+#               label is followed by a comma whatever it is -- number, single
+#               capital, written number or ordinal; (2) the Roman pass emits
+#               "One," instead of "One." for a line-start marker, which is what
+#               the manual's 15 lists use (16 lines now, with the new fifth
+#               point: gap in 16 of 16 before, none after, mean 0.64 s saved);
+#               (3) a single capital or written number at the start of an
+#               unmarked line is softened only when the neighbouring line
+#               carries the NEXT marker in sequence (A. then B.; I. then II.;
+#               One. then Two.), so "I. Smith", "J. Smith visited", "One. Two.
+#               Three. Go", "First. Remove the cover." and every mid-line
+#               "A." are untouched. Multi-letter capital Roman headings still
+#               go through the Roman pass ("II." is "Two,"). Lower case is not
+#               a label here. The manual changes only in the three sections
+#               with lists (t0019, t0026, t0033). Original words unchanged.
+#   v37 -> v38: a single capital I, V or X that is a Roman numeral is spoken as
+#               one: "One," "Five," "Ten,". Until now the Roman pass left these
+#               three alone (they are also the pronoun, initials and volts), so
+#               "I. Inlet / II. Outlet / III. Pump" was read "I, Inlet. Two,
+#               Outlet. Three, Pump." and "IV. / V. / VI." "Four, / V, / Six,".
+#               Now (1) on a marked heading line, "I. PROCEDURES" is "One,
+#               PROCEDURES"; (2) at the start of an unmarked line, only when the
+#               neighbouring line carries a NUMERAL next to it in sequence
+#               (I. then II./Two, ; Four, then V.). The same capital in a run of
+#               LETTERS (H. I. J.) or of initials (I. Smith / J. Jones) stays the
+#               letter, with a comma. A lone "I. Smith", "V. Rao", "X. Ray",
+#               "So did I.", "14.6 V." and a mid-line "I." are untouched. The
+#               bundled manual has no upper-case Roman marker and does not
+#               change.
+ALIGNMENT_CACHE_VERSION = "v38"
 
 # How long a request will wait for another in-flight request that's
 # already generating the exact same (text, voice, speed, ...) before

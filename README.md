@@ -113,11 +113,18 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   "... I A D S" and `(NATO)` is "N A T O". This includes an acronym mixed with ordinary words: `(DC Power)` is
   "D C Power" and `(see AC manual)` is "see A C manual", not "Direct Current Power". Outside brackets nothing changes
   (`DC power` is still "Direct Current power"). Left as words: abbreviations that are words or units rather than
-  initials (`FIG` is "Figure", `KG` is "kilograms"), ordinary words (`NOTE`, `ON`, `OFF`, `SEE`, `REF`; the list is
-  `SPEAK_AS_WORD` in `parentheticals.py`), and long words such as `(BOOSTER)`.
-- Roman-numeral list markers are read as numbers: `i.` `i)` `(i)` at the start of a line are "One." (and so on up to
-  `xx`), and so are the upper-case forms `II.` `IV)` `(III)`. A single capital `I.` / `V.` / `X.` is left alone (a
-  pronoun or an initial). Inside a sentence a bracketed numeral is spoken as a number when it opens a clause or sits in
+  initials (`FIG` is "Figure", `KG` is "kilograms"), ordinary words, and long words such as `(BOOSTER)`. The ordinary
+  words are the list `SPEAK_AS_WORD` in `parentheticals.py` (`NOTE`, `ON`, `OFF`, `SEE`, `GAS`, `IT`, `OUT`, `TRADE`,
+  `WISE`, `ENGINE`, `SYSTEM`, `PHASE`, `CO-PILOT` ...). They are never spelled, in any case and in any bracket, and they
+  are spoken in lower case, because Piper itself spells some capitalised words (`OUT`, `OFF`, `LOW`). So `(GAS)` is
+  "gas", `(ENGINE OUT)` is "engine out" and `CO-PILOT` is "co-pilot". To keep a word from being spelled, add it to that
+  list. A bracket that abbreviates the words before it is still spelled (`Information Technology (IT)` is "I T").
+- Roman-numeral list markers are read as numbers: `i.` `i)` `(i)` at the start of a line are "One," (and so on up to
+  `xx`), and so are the upper-case forms `II.` `IV)` `(III)`. A single capital `I.` / `V.` / `X.` is also a Roman
+  numeral ("One," "Five," "Ten,") on a heading (`I. PROCEDURES`) and in a list that runs with other numerals
+  (`I.` `II.` `III.`; `IV.` `V.` `VI.`), but it is also a pronoun, an initial and volts, so it is left exactly as
+  written everywhere else: `I. Smith`, `V. Rao`, `So did I.`, `14.6 V.`, and a run of letters (`H.` `I.` `J.`) or of
+  initials (`I. Smith` / `J. Jones`). Inside a sentence a bracketed numeral is spoken as a number when it opens a clause or sits in
   a run: `do: (i) clean it; (ii) replace it` is "One, clean it; Two, replace it". A bare `i`, `v` or `x`, and a
   variable such as `velocity (v)` or `Voltage (V)`, stays a letter.
 - A minus sign in front of a number is spoken: `-50 °C`, `–50` (en dash), `−50` and `− 50` (true minus sign) are
@@ -138,6 +145,16 @@ Text is expanded before it reaches Piper using dictionaries in `CBT/native_host/
   space by the browser and handled as whitespace on both sides. Entity text that shows up literally on the page
   (for example `Engine System&nbsp;` or `10&nbspscrews` from a double-escaped source) is dropped from the spoken text
   ("Engine System", "10 screws") instead of being read aloud, and the word highlighting is unaffected.
+- Headings are paced on purpose: the end of each heading gets a pause (the frontend marks it, the backend makes it a
+  period, and Piper adds `SENTENCE_SILENCE_SECONDS` after it). The label that opens a heading must not get one too.
+  `4. INSPECTION PROCEDURES` is spoken "four, inspection procedures", and likewise `A. INTRODUCTION`, `I. PROCEDURES`,
+  `One. STEERING GEAR`, `First. SETUP`: the period after the label becomes a comma, because Piper treats a period
+  followed by anything but a lower-case word as a sentence end and would leave a 0.7 s silence after it. Only marked
+  headings are changed this way; `1.4 SYSTEM COMPONENTS` has no period to change.
+- The same goes for list items: `i. Open` is "One, Open" (no silence after "One"), and a lettered or written list
+  (`A.` `B.` `C.`, `I.` `II.`, `One.` `Two.`, `First.` `Second.`) gets commas. Outside headings a marker is only
+  changed when the next or previous line carries the next marker in the sequence, so names and sentences are left
+  exactly as written (`J. Smith visited`, `I. Smith`, `One. Two. Three. Go`, `Part A. Then B.`).
 
 Editing a dictionary re-generates the cached audio for affected text automatically. Changing how matching
 *works* (code, not entries) needs a bump of `ALIGNMENT_CACHE_VERSION` in `CBT/native_host/config.py`.

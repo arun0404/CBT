@@ -55,7 +55,11 @@ from typing import Callable, List, Optional, Sequence, Tuple
 #       dictionaries would expand: "(DC Power)" -> "D C Power", not "Direct
 #       Current Power". Word and unit abbreviations (FIG, KG) still expand.
 #       "REF" added to SPEAK_AS_WORD.
-PARENTHETICAL_CONFIG_VERSION = "v3"
+#   v4: more ordinary words on SPEAK_AS_WORD (GAS, IT, OUT, TRADE, WISE,
+#       ENGINE, SYSTEM, PHASE, CO-PILOT ...); matched without regard to case;
+#       a hyphenated entry is matched whole. Whitelisted words are spoken in
+#       lower case (SPEAK_LOWERCASE).
+PARENTHETICAL_CONFIG_VERSION = "v4"
 
 
 # Matches a (...) span with no nested parentheses. Content is captured.
@@ -292,20 +296,41 @@ def classify(content: str, preceding_text: str) -> ParentheticalDecision:
 # An ALL-CAPS word of two or more letters ("IADS", "NATO", "RPM").
 CAPS_WORD_RE = re.compile(r"\b[A-Z]{2,}\b")
 
+# Roman numerals are numbers, not acronyms: "Part (IV)", "Fe(III)". (A bracket
+# that is a list marker is turned into a number before this rule ever runs.)
+ROMAN_NUMERAL_WORDS = frozenset({
+    "II", "III", "IV", "VI", "VII", "VIII", "IX",
+    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
+})
+
 # Ordinary words that are sometimes written in capitals inside brackets
-# ("(NOTE)", "(ON/OFF)", "(SEE TABLE 2)") and must stay words. Editing this
-# set changes the spoken output, so it is part of the cache fingerprint (see
+# ("(NOTE)", "(ON/OFF)", "(GAS ENGINE)", "(SEE TABLE 2)") and must be spoken as
+# words, never letter by letter. Matched without regard to case, and a
+# hyphenated entry ("CO-PILOT") is matched as one word. Editing this set
+# changes the spoken output, so it is part of the cache fingerprint (see
 # TextPreprocessor._compute_dictionary_fingerprint).
+#
+# Not spelling a word is not always enough: Piper's own phonemizer spells
+# some capitalised words itself ("OUT", "OFF", "LOW", and often "GAS", "IT",
+# "REF"). So every word here, Roman numerals aside, is also SPOKEN IN LOWER
+# CASE -- see SPEAK_LOWERCASE and TextPreprocessor.speak_whitelisted_words.
 SPEAK_AS_WORD = frozenset({
     "AND", "OR", "NOT", "NO", "YES", "ON", "OFF", "OF", "FOR", "THE", "TO", "WITH", "DO", "IS", "BE",
     "NOTE", "NOTES", "WARNING", "CAUTION", "DANGER",
     "SEE", "REF", "REFER", "TASK", "TABLE", "FIGURE", "CHAPTER", "SECTION", "PARA", "PAGE", "STEP", "ITEM",
     "UP", "DOWN", "LEFT", "RIGHT", "HIGH", "LOW", "OPEN", "CLOSED", "LONG", "SHORT",
-    # Roman numerals are numbers, not acronyms: "Part (IV)", "Fe(III)". (A bracket
-    # that is a list marker is turned into a number before this rule ever runs.)
-    "II", "III", "IV", "VI", "VII", "VIII", "IX",
-    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
-})
+    "GAS", "GASES", "IT", "OUT", "TRADE", "TRADES", "WISE", "ENGINE", "SYSTEM", "PHASE", "PHASES",
+    "CO-PILOT",
+}) | ROMAN_NUMERAL_WORDS
+
+# The words of SPEAK_AS_WORD that are spoken in lower case. Roman numerals are
+# the exception: "xi" is not how "XI" is said.
+SPEAK_LOWERCASE = SPEAK_AS_WORD - ROMAN_NUMERAL_WORDS
+
+# A hyphenated run of letters ("CO-PILOT", "TRADE-WISE"). CAPS_WORD_RE sees the
+# parts as separate words ("CO", "PILOT"), so a hyphenated whitelist entry has
+# to be recognised as a whole first.
+HYPHENATED_WORD_RE = re.compile(r"[A-Za-z]+(?:-[A-Za-z]+)+")
 
 # An ALL-CAPS word longer than this that is not a known abbreviation and does
 # not abbreviate the words before it is an ordinary word, not an acronym:
@@ -338,8 +363,11 @@ def spell_spans(
       1. INITIALISM bracket  -> spell. It is, by construction, the initials
          of the words just before it ("Time Between Overhaul (TBO)"), so
          it is an acronym whatever it looks like. Nothing below applies.
-      2. On SPEAK_AS_WORD, or inside a keep_span -> leave ("NOTE", "ON",
-         "OFF", "SEE", the "AIR" of "AIR COND").
+      2. On SPEAK_AS_WORD (matched without regard to case; a hyphenated
+         entry such as "CO-PILOT" covers both its parts), or inside a
+         keep_span -> leave ("NOTE", "ON", "OFF", "SEE", "GAS", "ENGINE",
+         the "AIR" of "AIR COND"). TextPreprocessor then speaks it in lower
+         case.
       3. A known abbreviation (client dictionary, engineering terms,
          general abbreviations or units): spell it if it is an initialism
          of its own expansion (DC, AC, RPM, PSI, IADS), and leave it if it
@@ -357,6 +385,13 @@ def spell_spans(
     spans: List[Tuple[int, int]] = []
     preceding_words: Optional[List[str]] = None
 
+    # "CO-PILOT" is one whitelisted word, but the loop below meets "CO" and
+    # "PILOT" separately, so its span is worked out first.
+    whitelisted_compounds = [
+        m.span() for m in HYPHENATED_WORD_RE.finditer(body)
+        if m.group(0).upper() in SPEAK_AS_WORD
+    ]
+
     for match in CAPS_WORD_RE.finditer(body):
 
         word = match.group(0)
@@ -365,7 +400,10 @@ def spell_spans(
             spans.append(match.span())
             continue
 
-        if word in SPEAK_AS_WORD:
+        if word.upper() in SPEAK_AS_WORD:
+            continue
+
+        if any(match.start() >= c_start and match.end() <= c_end for c_start, c_end in whitelisted_compounds):
             continue
 
         if any(match.start() < k_end and match.end() > k_start for k_start, k_end in keep_spans):

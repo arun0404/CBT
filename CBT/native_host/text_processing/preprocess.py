@@ -22,6 +22,7 @@ from .parentheticals import (
     PARENTHETICAL_RE,
     PARENTHETICAL_CONFIG_VERSION,
     SPEAK_AS_WORD,
+    SPEAK_LOWERCASE,
     SPELL_MAX_LETTERS,
     ParentheticalKind,
     classify as classify_parenthetical,
@@ -85,6 +86,10 @@ _CLIENT_PLACEHOLDER_RE = re.compile(r"\x02CD(\d+)\x02")
 # appears in the DOM itself, only in the string extracted from #content.
 _HEADING_PAUSE_MARKER = "\x1f"
 _HEADING_PAUSE_MARKER_RE = re.compile(_HEADING_PAUSE_MARKER)
+
+# (The heading and list-marker patterns that use this marker are defined
+# below, after the Roman-numeral tables they are built from: see
+# _HEADING_LABEL_RE and _LIST_MARKER_RE.)
 
 # A multi-segment hyphenated reference/task code -- e.g. an ATA task
 # number "79-24-00-870-7A" -- at least 3 numeric segments, with any
@@ -209,6 +214,82 @@ ROMAN_INLINE_CANDIDATE_RE = re.compile(
 
 # The numerals in order, to recognise a run: "(i) ... (ii) ... (iii)".
 _ROMAN_SEQUENCE = list(ROMAN_NUMERAL_LIST_WORDS)
+
+# ---------------------------------------------------------------------------
+# Headings and list items that open with a label: "4." "A." "I." "One." "First."
+#
+# Piper's sentence splitter ends a sentence at a period unless the next word
+# is lower case. So the label is a sentence of its own, and Piper renders the
+# whole SENTENCE_SILENCE_SECONDS (0.5) after it. Measured, a silence of
+# 0.62-0.75 s right after the label in "4. INSPECTION", "A. INTRODUCTION",
+# "I. PROCEDURES", "One. Steering Gear", "First. Check", and also in "A. 12
+# volts" and "One. (ECU) check": a digit, a bracket or a quote after it splits
+# too. Only "4. inspection" (lower case) and "4, INSPECTION" (a comma) have
+# no such hole. The comma keeps the short pause a spoken label needs.
+#
+# Two rules, because the risk is different:
+#
+#   HEADING (_HEADING_LABEL_RE). A line the frontend marked as a heading (it
+#   carries _HEADING_PAUSE_MARKER) is structure, so its label is changed
+#   whatever it is: a number ("4." "2.1."), a single capital ("A." "I."), or
+#   a written number or ordinal ("One." "First."). Multi-letter capital Roman
+#   numerals ("II.") are left to the Roman pass, which turns them into
+#   "Two,"; changing them here would leave a spoken "II".
+#
+#   LIST ITEM (_LIST_MARKER_RE). An unmarked line is ordinary prose unless
+#   there is evidence, and "J. Smith visited" has the same hole as "A. Inlet".
+#   So a single capital or written number at the start of a line is changed
+#   only when the neighbouring line carries the NEXT marker in sequence (A. then
+#   B.; I. then II.; One. then Two.): see soften_list_markers(). A lone "I.",
+#   a name with an initial, "One. Two. Three. Go" are never touched.
+#
+# A label is only ever read at the start of a line; "...done. I. Next" and
+# "Part A. Then B." are never candidates. Lower case ("a." "i.") is not a
+# label here (the Roman pass owns "i." and makes it "One,").
+# ---------------------------------------------------------------------------
+_CARDINAL_WORDS = list(ROMAN_NUMERAL_LIST_WORDS.values())          # One .. Twenty
+_ORDINAL_WORDS = [
+    "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+]
+
+# label -> the (family, value) pairs it can stand for. "N" is the numeric
+# family (Roman numeral, cardinal or ordinal: 1..20), "L" the alphabet
+# (A=1 .. Z=26). "I", "V" and "X" are in both: only a neighbour tells which.
+_LABEL_VALUES: dict = {}
+for _n, _word in enumerate(_CARDINAL_WORDS + _ORDINAL_WORDS, 1):
+    _n = _n if _n <= len(_CARDINAL_WORDS) else _n - len(_CARDINAL_WORDS)
+    for _form in (_word, _word.upper()):
+        _LABEL_VALUES.setdefault(_form, set()).add(("N", _n))
+for _n, _key in enumerate(ROMAN_NUMERAL_LIST_WORDS, 1):
+    _LABEL_VALUES.setdefault(_key.upper(), set()).add(("N", _n))
+for _n in range(26):
+    _LABEL_VALUES.setdefault(chr(65 + _n), set()).add(("L", _n + 1))
+
+_WRITTEN_NUMBER_ALT = "|".join(sorted(
+    (form for word in _CARDINAL_WORDS[:10] + _ORDINAL_WORDS for form in (word, word.upper())),
+    key=len, reverse=True,
+))
+
+_HEADING_LABEL_RE = re.compile(
+    r"(?m)^([ \t]*(?:\d+(?:\.\d+)*|[A-Z]|" + _WRITTEN_NUMBER_ALT + r"))\.(?=[ \t]+[^\n"
+    + _HEADING_PAUSE_MARKER + r"]*" + _HEADING_PAUSE_MARKER + r")"
+)
+
+# A candidate list marker: a single capital or a written number, a period, and
+# then a space and anything but a lower-case letter. What follows a neighbour
+# marker is read by _NEIGHBOUR_MARKER_RE (a comma too: the Roman pass has
+# already turned "II." into "Two,").
+_LIST_MARKER_RE = re.compile(
+    r"(?m)^(?P<indent>[ \t]*)(?P<label>[A-Z]|" + _WRITTEN_NUMBER_ALT + r")\.(?=[ \t]+[^a-z\s])"
+)
+_NEIGHBOUR_MARKER_RE = re.compile(r"[ \t]*([A-Za-z]{1,9})[.,)]")
+
+# The three capitals that are both a letter and a Roman numeral and that the
+# Roman pass therefore never converts on its own ("I." is also the pronoun and
+# an initial; "V." and "X." are initials and volts). They become "One," "Five,"
+# "Ten," only where the context says numeral: a marked heading, or a run with
+# numerals (see soften_list_markers).
+_SINGLE_CAPITAL_ROMANS = ("I", "V", "X")
 
 # What may stand directly before a clause-initial enumerator.
 _CLAUSE_START_BEFORE_RE = re.compile(r"(?:[;:,.]|\b(?i:and|or))$")
@@ -810,6 +891,24 @@ class TextPreprocessor:
         # them (see normalize_spaced_unit_ratios).
         self._spaced_unit_ratio_re = self._compile_spaced_unit_ratios()
 
+        # The whitelist of ordinary words (SPEAK_AS_WORD): every one that is
+        # written in capitals is spoken in lower case, at the very end (see
+        # speak_whitelisted_words). Longest entries first, so "CO-PILOT" is
+        # taken whole. The apostrophe is a word character here, so "IT'S"
+        # is left as it is.
+        _edge = r"(?<![A-Za-z0-9'’])(?:{})(?![A-Za-z0-9'’])"
+        _entries = sorted(SPEAK_LOWERCASE, key=lambda word: (-len(word), word))
+        self._speak_lowercase_re = re.compile(_edge.format("|".join(re.escape(w) for w in _entries)))
+
+        # The hyphenated entries alone ("CO-PILOT"), in any case: the
+        # abbreviation table would otherwise turn the "Co" of "co-pilot" into
+        # "Company" (see protect_whitelisted_compounds).
+        _compounds = [w for w in _entries if "-" in w]
+        self._speak_compound_re = re.compile(
+            r"(?<![\w-])(?:" + "|".join(re.escape(w) for w in _compounds) + r")(?!\w)",
+            re.IGNORECASE,
+        ) if _compounds else None
+
         # UNITS' own ratios ("km/h", "kg/min", "°/s"), expanded as whole
         # tokens at the start of pass 1 (see expand_unit_ratios).
         self._unit_ratio_re = self._compile_unit_ratios()
@@ -1095,6 +1194,123 @@ class TextPreprocessor:
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
     # -------------------------------------------------------
+    # A heading's label: "4." "A." "I." "One." -> "4," "A," "I," "One,"
+    #
+    # See the block above _HEADING_LABEL_RE for the cause and the measured
+    # gap (0.62-0.75 s of silence right after the label) and for why a
+    # heading is changed whatever its label is. The pause at the END of the
+    # heading, the one the heading-pause feature exists for, is unchanged.
+    #
+    # The label and its period are one original word ("4."), so no word is
+    # added, dropped or moved. Only the period is replaced, and it takes its
+    # own origin; the indentation in front of the label (whitespace carries
+    # the origin of the PREVIOUS line's last word) keeps whatever origin it
+    # had instead of being folded into the label's group.
+    #
+    # Runs before insert_heading_pauses(), which turns the marker this
+    # looks for into text.
+    # -------------------------------------------------------
+
+    def soften_heading_numbers(self, tracker: AlignmentTracker) -> None:
+
+        if _HEADING_PAUSE_MARKER not in tracker.text:
+            return
+
+        def _repl(match):
+            period = match.end(1)
+            label_start = match.start() + len(match.group(1)) - len(match.group(1).lstrip(" \t"))
+
+            # A heading that opens with a single capital I, V or X is an
+            # outline: "I. PROCEDURES" is "One, PROCEDURES". A lettered scheme
+            # that reaches the ninth letter on a HEADING is far rarer than a
+            # Roman one, and a marked heading is never prose.
+            if match.group(1)[label_start - match.start():] in _SINGLE_CAPITAL_ROMANS:
+                spoken = ROMAN_NUMERAL_LIST_WORDS[tracker.text[label_start].lower()] + ","
+                return [
+                    (match.start(), label_start),
+                    Verbatim(text=spoken, origins=(tracker.origin[label_start],) * len(spoken)),
+                ]
+
+            return [
+                (match.start(), period),
+                Verbatim(text=",", origins=(tracker.origin[period],)),
+            ]
+
+        tracker.apply_segments(_HEADING_LABEL_RE, _repl)
+
+    # -------------------------------------------------------
+    # A list item's marker: "A." "I." "One." "First." -> "A," "I," ...
+    #
+    # See the block above _HEADING_LABEL_RE. Nothing marks a list item the
+    # way the frontend marks a heading, and "J. Smith visited" has exactly the
+    # same hole as "A. Inlet valve" -- so a marker is changed only when the
+    # next non-blank line before or after it carries the neighbouring marker
+    # in sequence (the line before has A and this is B; the line after has
+    # II and this is I). A single line is never enough.
+    #
+    # "I", "V" and "X" are both letters and Roman numerals, so each marker
+    # stands for a set of (family, value) pairs and any one of them may make
+    # the run. A neighbour already softened ("Two,") still counts, which is
+    # why the pattern for it accepts a comma: the Roman pass runs first and
+    # has already turned "II." into "Two,". This pass runs after it, so the
+    # one capital the Roman pass deliberately leaves alone ("I.", the pronoun
+    # or an initial) can still join a run ("I." then "II.").
+    #
+    # Only the period is replaced, with its own origin (see above).
+    # -------------------------------------------------------
+
+    def soften_list_markers(self, tracker: AlignmentTracker) -> None:
+
+        def _opening_values(line):
+            m = _NEIGHBOUR_MARKER_RE.match(line)
+            return _LABEL_VALUES.get(m.group(1), set()) if m else set()
+
+        def _repl(match):
+
+            text = tracker.text
+            period = match.end("label")
+
+            before = [ln for ln in text[:match.start()].split("\n") if ln.strip()]
+            after = [ln for ln in text[match.end():].split("\n")[1:] if ln.strip()]
+
+            previous = _opening_values(before[-1]) if before else set()
+            following = _opening_values(after[0]) if after else set()
+
+            label = match.group("label")
+            own = _LABEL_VALUES.get(label, set())
+
+            def _evidence(family):
+                return any(
+                    fam == family and ((fam, value - 1) in previous or (fam, value + 1) in following)
+                    for fam, value in own
+                )
+
+            numeric, alphabetic = _evidence("N"), _evidence("L")
+
+            # A single capital I, V or X that runs with NUMERALS ("I." then
+            # "Two,"; "Four," then "V.") is a Roman numeral and is spoken as
+            # one: "One," "Five," "Ten,". The same capital in a run of LETTERS
+            # (H. I. J.; the initials of "I. Smith" and "J. Jones") stays the
+            # letter, with a comma.
+            if numeric and label in _SINGLE_CAPITAL_ROMANS:
+                spoken = ROMAN_NUMERAL_LIST_WORDS[label.lower()] + ","
+                origin = tracker.origin[match.end("indent")]
+                return [
+                    (match.start(), match.end("indent")),
+                    Verbatim(text=spoken, origins=(origin,) * len(spoken)),
+                ]
+
+            if numeric or alphabetic:
+                return [
+                    (match.start(), period),
+                    Verbatim(text=",", origins=(tracker.origin[period],)),
+                ]
+
+            return [(match.start(), match.end())]
+
+        tracker.apply_segments(_LIST_MARKER_RE, _repl)
+
+    # -------------------------------------------------------
     # Heading pause markers -> real sentence-ending punctuation
     #
     # There is no SSML/break-tag support anywhere in this pipeline --
@@ -1148,7 +1364,11 @@ class TextPreprocessor:
         # would tie the marker's timing to the word before it.
         def _line_start(match):
             numeral = match.group("paren") or match.group("dot") or match.group("cap")
-            spoken = ROMAN_NUMERAL_LIST_WORDS[numeral.lower()] + "."
+            # A comma, not a full stop: a period before a capital is a
+            # sentence break to Piper, and its half-second sentence silence
+            # left a 0.65 s hole after "One" (see the block above
+            # _HEADING_LABEL_RE). The comma keeps a short pause.
+            spoken = ROMAN_NUMERAL_LIST_WORDS[numeral.lower()] + ","
             origin = tracker.origin[match.end("indent")]
             return [Verbatim(text=spoken, origins=(origin,) * len(spoken))]
 
@@ -2006,10 +2226,77 @@ class TextPreprocessor:
             _INITIALISM_RE,
             lambda m: (
                 f" {' '.join(m.group(1))} "
-                if _is_unpronounceable(m.group(1))
+                # An ordinary word on the whitelist is never spelled, whatever
+                # the vowel test says.
+                if _is_unpronounceable(m.group(1)) and m.group(1).upper() not in SPEAK_AS_WORD
                 else m.group(1)
             ),
         )
+
+    # -------------------------------------------------------
+    # Whitelisted words that are hyphenated ("CO-PILOT")
+    #
+    # The abbreviation table holds "Co" (Company) and matches it
+    # case-insensitively, hyphen or no hyphen, so "CO-PILOT" -- and
+    # "co-pilot" -- was read "Company-PILOT". A whitelist entry like that is
+    # one word: it is parked behind the same placeholder as a client
+    # dictionary expansion, so no dictionary pass can rewrite its parts, and
+    # comes back as written, in lower case.
+    #
+    # Original words are unaffected (it is one \S+ token), and the match is
+    # inside it, so apply_segments()'s union origin is that one word.
+    # -------------------------------------------------------
+
+    def protect_whitelisted_compounds(self, tracker: AlignmentTracker, protected: List[Verbatim]) -> None:
+
+        if self._speak_compound_re is None:
+            return
+
+        def _repl(match):
+
+            start, end = match.span()
+
+            matched_origins = set()
+            for i in range(start, end):
+                matched_origins.update(tracker.origin[i])
+            origin = tuple(sorted(matched_origins))
+
+            spoken = match.group(0).lower()
+
+            protected.append(Verbatim(text=spoken, origins=(origin,) * len(spoken)))
+
+            return [f"\x02CD{len(protected) - 1}\x02"]
+
+        tracker.apply_segments(self._speak_compound_re, _repl)
+
+    # -------------------------------------------------------
+    # Whitelisted words are spoken in lower case
+    #
+    # Leaving a word like "OUT" unspaced is not enough: Piper's own
+    # phonemizer spells some capitalised words (measured: OUT, OFF and LOW in
+    # a sentence take the time of the spelled word, GAS, IT and REF often
+    # do), and reads the same word in lower case as a word. Lower case is
+    # also what the author meant. Longer words (ENGINE, SYSTEM, TRADE) read
+    # the same either way; they are lowered too, so the rule is one rule.
+    #
+    # Runs at the end, after the bracket restore but before the client
+    # dictionary's: by then no dictionary pass is left to be put off by the
+    # case (the client dictionary is case-sensitive), the text parked behind
+    # bracket placeholders is back in the text, and a client expansion --
+    # final text -- is still behind its placeholder and so is left exactly as
+    # written. Roman numerals are not lowered (SPEAK_LOWERCASE).
+    #
+    # A case change keeps the length and the match lies inside one original
+    # word, so every origin stays where it was.
+    #
+    # A word that abbreviates the words before it in brackets
+    # ("Information Technology (IT)") was spelled "I T" earlier and is no
+    # longer the letters I and T, so it is not touched here.
+    # -------------------------------------------------------
+
+    def speak_whitelisted_words(self, tracker: AlignmentTracker) -> None:
+
+        tracker.apply(self._speak_lowercase_re, lambda m: m.group(0).lower())
 
     # -------------------------------------------------------
     # "ABS" -> "A B S"
@@ -2113,6 +2400,15 @@ class TextPreprocessor:
         self.decode_nbsp_entities(tracker)
 
         #
+        # A heading's label ("4. INSPECTION ...", "A. INTRODUCTION", "One.
+        # ...") must not be a sentence of its own: "4." -> "4,". Before the
+        # marker below is turned into text, since the marker is what
+        # identifies a heading.
+        #
+
+        self.soften_heading_numbers(tracker)
+
+        #
         # Heading pause markers (see currentChapterText() in app.js) ->
         # real sentence-ending punctuation.
         #
@@ -2126,6 +2422,15 @@ class TextPreprocessor:
         #
 
         self.expand_roman_numeral_list_markers(tracker)
+
+        #
+        # The other list markers ("A." "B."; the "I." the Roman pass leaves;
+        # "One." "Two."): "A." -> "A,", but only inside a run, so a name such
+        # as "J. Smith" is left alone. After the Roman pass, whose "Two,"
+        # counts as a neighbour.
+        #
+
+        self.soften_list_markers(tracker)
 
         #
         # A minus sign in front of a number ("-50 °C") -> the spoken word
@@ -2223,6 +2528,10 @@ class TextPreprocessor:
 
         protected_client_dictionary: List[Verbatim] = []
 
+        # A hyphenated whitelist word ("CO-PILOT") is parked first, so the
+        # "Co" of it is not read as "Company".
+        self.protect_whitelisted_compounds(tracker, protected_client_dictionary)
+
         # A unit ratio written with spaces ("50 km / h", "kg / hr") is joined
         # first, so the compound pass below can expand it as it does "km/h".
         self.normalize_spaced_unit_ratios(tracker)
@@ -2319,6 +2628,17 @@ class TextPreprocessor:
 
         self.restore_protected_parentheticals(tracker, protected_parentheticals)
         self.restore_protected_reference_codes(tracker, protected_reference_codes)
+
+        #
+        # Ordinary words that are written in capitals ("GAS", "OUT", "ENGINE":
+        # SPEAK_AS_WORD) are spoken in lower case, so Piper says them as words.
+        # After the bracket restore, so bracketed text is back in the text, and
+        # BEFORE the client dictionary is restored: an expansion there is final
+        # text ("Run Down Time LOW") that no later pass may rewrite.
+        #
+
+        self.speak_whitelisted_words(tracker)
+
         self.restore_protected_client_dictionary(tracker, protected_client_dictionary)
 
         #
